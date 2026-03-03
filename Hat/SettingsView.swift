@@ -12,8 +12,11 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             // Header Minimalista
             HStack {
-                Text(">_")
-                    .font(Theme.Typography.heading)
+                Image("sunglasses-2-svgrepo-com")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
                     .foregroundStyle(Theme.Colors.textPrimary)
             }
             .padding(.horizontal, 20)

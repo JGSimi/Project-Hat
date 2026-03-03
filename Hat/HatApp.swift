@@ -84,18 +84,31 @@ private struct MenuBarIconView: View {
     @State private var popScale: CGFloat = 1.0
     @State private var iconOpacity: Double = 1.0
     
+    private var iconSide: CGFloat {
+        // Usa a espessura real da menubar (em pontos) para escalar em qualquer resolução.
+        max(13, NSStatusBar.system.thickness * 0.74)
+    }
+    
     var body: some View {
-        Image(isProcessing ? "sunglasses-2-svgrepo-com" : "hat-svgrepo-com")
-            .renderingMode(.template)
-            .resizable()
-            .scaledToFit()
-            .frame(width: 16, height: 16)
+        Image(nsImage: statusBarImage)
+            .interpolation(.high)
+            .antialiased(true)
+            .frame(width: iconSide, height: iconSide)
             .scaleEffect(popScale)
             .opacity(iconOpacity)
             .onAppear(perform: animateIconSwap)
             .onChange(of: isProcessing) { _ in
                 animateIconSwap()
             }
+    }
+    
+    private var statusBarImage: NSImage {
+        let imageName = isProcessing ? "sunglasses-2-svgrepo-com" : "hat-svgrepo-com"
+        let name = NSImage.Name(imageName)
+        let image = (NSImage(named: name)?.copy() as? NSImage) ?? NSImage(size: NSSize(width: iconSide, height: iconSide))
+        image.size = NSSize(width: iconSide, height: iconSide)
+        image.isTemplate = true
+        return image
     }
     
     private func animateIconSwap() {

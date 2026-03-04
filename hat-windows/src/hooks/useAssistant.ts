@@ -3,7 +3,7 @@ import { readText, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { register, unregisterAll, isRegistered } from '@tauri-apps/plugin-global-shortcut';
 import { sendNotification, isPermissionGranted, requestPermission } from '@tauri-apps/plugin-notification';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { executeAIRequest } from '../utils/api';
+import { executeAIRequest, ChatTurn } from '../utils/api';
 
 export type Attachment = {
     name: string;
@@ -50,8 +50,15 @@ export function useAssistant() {
                 }
             }
 
+            // Build history from current messages (before the new user message was added via setState)
+            // React state updates are async, so `messages` here is the state BEFORE the new userMsg
+            const history: ChatTurn[] = messages.map(msg => ({
+                role: msg.isUser ? 'user' : 'assistant',
+                content: msg.text
+            }));
+
             try {
-                response = await executeAIRequest(finalPrompt, imagesBase64);
+                response = await executeAIRequest(finalPrompt, imagesBase64, history);
             } catch (err) {
                 console.warn("Local API returned error, returning fallback simulate.", err);
                 // Fallback simulate to show the UI works even without local ollama running

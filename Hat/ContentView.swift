@@ -118,11 +118,9 @@ class AssistantViewModel: ObservableObject {
     @Published var analysisImage: NSImage? = nil
     
     private let pasteboard: PasteboardClient
-    private let session: URLSession
-    
-    init(pasteboard: PasteboardClient = NSPasteboard.general, session: URLSession = .shared) {
+
+    init(pasteboard: PasteboardClient = NSPasteboard.general) {
         self.pasteboard = pasteboard
-        self.session = session
     }
 
     func attachment(from url: URL) async -> ChatAttachment? {
@@ -244,25 +242,24 @@ class AssistantViewModel: ObservableObject {
             self.isAnalyzingScreen = false
         }
 
-        let inferenceMode = SettingsManager.inferenceMode
         let systemPrompt = SettingsManager.systemPrompt
         let base64Images = rawImages?.compactMap { $0.resizedAndCompressedBase64() }
-        
+
         do {
-            let finalResponse: String
-            if inferenceMode == .local {
-                finalResponse = try await executeLocalRequest(prompt: systemPrompt + prompt, images: base64Images)
-            } else {
-                finalResponse = try await executeAPIRequest(prompt: systemPrompt + prompt, images: base64Images)
-            }
+            let finalResponse = try await AIAPIService.shared.executeRequest(
+                prompt: prompt,
+                images: base64Images,
+                history: [],
+                systemPrompt: systemPrompt
+            )
 
             self.analysisResult = finalResponse
-            
+
             if SettingsManager.playNotifications {
                 await sendNotification(text: "Análise de tela concluída!")
                 NSSound(named: "Glass")?.play()
             }
-            
+
         } catch {
             self.analysisResult = "Erro: \(error.localizedDescription)"
             print("Error processing AI: \(error)")
@@ -337,24 +334,27 @@ class AssistantViewModel: ObservableObject {
         isProcessing = true
         defer { isProcessing = false }
 
-        let inferenceMode = SettingsManager.inferenceMode
         let systemPrompt = SettingsManager.systemPrompt
-        
+
         // Convert to Base64 for processing but store the raw `NSImage` locally
         let base64Images = rawImages?.compactMap { $0.resizedAndCompressedBase64() }
-        
+
+        // Build history from all existing messages BEFORE appending current user message
+        let history = messages.map { msg in
+            ConversationTurn(role: msg.isUser ? "user" : "assistant", textContent: msg.content)
+        }
+
         // Adiciona a pergunta ao histórico
         let userMsg = ChatMessage(content: prompt, images: rawImages, attachments: attachments, isUser: true)
         messages.append(userMsg)
 
         do {
-            let finalResponse: String
-            
-            if inferenceMode == .local {
-                finalResponse = try await executeLocalRequest(prompt: systemPrompt + prompt, images: base64Images)
-            } else {
-                finalResponse = try await executeAPIRequest(prompt: systemPrompt + prompt, images: base64Images)
-            }
+            let finalResponse = try await AIAPIService.shared.executeRequest(
+                prompt: prompt,
+                images: base64Images,
+                history: history,
+                systemPrompt: systemPrompt
+            )
 
             // Adiciona a resposta ao histórico
             let assistantMsg = ChatMessage(content: finalResponse, images: nil, isUser: false)
@@ -363,12 +363,12 @@ class AssistantViewModel: ObservableObject {
             // Update Clipboard and Notify
             pasteboard.clearContents()
             pasteboard.copyString(finalResponse, forType: .string)
-            
+
             if SettingsManager.playNotifications {
                 await sendNotification(text: finalResponse)
                 NSSound(named: "Glass")?.play()
             }
-            
+
         } catch {
             let errorMsg = ChatMessage(content: "Erro: \(error.localizedDescription)", images: nil, isUser: false)
             messages.append(errorMsg)
@@ -376,129 +376,6 @@ class AssistantViewModel: ObservableObject {
         }
     }
     
-    private func executeLocalRequest(prompt: String, images: [String]?) async throws -> String {
-        let payload = OllamaRequest(
-            model: SettingsManager.localModelName,
-            prompt: prompt,
-            stream: false,
-            images: images,
-            options: ["temperature": 0.0]
-        )
-
-        guard let url = URL(string: "http://localhost:11434/api/generate") else { throw URLError(.badURL) }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONEncoder().encode(payload)
-        request.timeoutInterval = 60
-        
-        let (data, response) = try await session.data(for: request)
-        if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-            let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-            throw NSError(domain: "AssistantLocalAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "Local API Error: \(errorStr)"])
-        }
-        let result = try JSONDecoder().decode(OllamaResponse.self, from: data)
-        return result.response.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-    
-    private func executeAPIRequest(prompt: String, images: [String]?) async throws -> String {
-        guard let url = URL(string: SettingsManager.apiEndpoint),
-              let scheme = url.scheme?.lowercased(),
-              (scheme == "http" || scheme == "https"),
-              url.host != nil else {
-            throw URLError(.badURL)
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 60
-        
-        let apiKey = SettingsManager.apiKey
-        let isAnthropic = SettingsManager.selectedProvider == .anthropic
-        
-        if !apiKey.isEmpty {
-            switch SettingsManager.selectedProvider {
-            case .google, .openai, .custom:
-                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            case .anthropic:
-                request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-                request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
-            }
-        }
-        
-        if isAnthropic {
-            var content: [AnthropicContent] = [AnthropicContent(type: "text", text: prompt, source: nil)]
-            if let images = images {
-                for img in images {
-                    content.append(AnthropicContent(
-                        type: "image",
-                        text: nil,
-                        source: AnthropicImageSource(type: "base64", media_type: "image/jpeg", data: img)
-                    ))
-                }
-            }
-            
-            let payload = AnthropicRequest(
-                model: SettingsManager.apiModelName,
-                max_tokens: 4096,
-                system: nil,
-                messages: [AnthropicMessage(role: "user", content: content)],
-                temperature: 0.0
-            )
-            
-            request.httpBody = try JSONEncoder().encode(payload)
-            
-            let (data, response) = try await session.data(for: request)
-            if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-                let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-                throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
-            }
-            
-            let result = try JSONDecoder().decode(AnthropicResponse.self, from: data)
-            if let firstText = result.content.first(where: { $0.type == "text" }) {
-                return firstText.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            } else {
-                throw NSError(domain: "AssistantError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response from API."])
-            }
-        } else {
-            var content: [MessageContent] = [.text(prompt)]
-            if let images = images {
-                for img in images {
-                    content.append(.image(base64: img))
-                }
-            }
-            
-            let userMessage = APIMessage(role: "user", content: content)
-            
-            let modelName = SettingsManager.apiModelName
-            let isOModel = modelName.hasPrefix("o1") || modelName.hasPrefix("o3")
-            
-            let payload = APIRequest(
-                model: modelName,
-                messages: [userMessage],
-                temperature: isOModel ? nil : 0.0,
-                max_tokens: 4096,
-                stream: false
-            )
-            
-            request.httpBody = try JSONEncoder().encode(payload)
-            
-            let (data, response) = try await session.data(for: request)
-            if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-                let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-                throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
-            }
-            
-            let result = try JSONDecoder().decode(APIResponse.self, from: data)
-            
-            if let firstChoice = result.choices.first {
-                return firstChoice.message.content.trimmingCharacters(in: .whitespacesAndNewlines)
-            } else {
-                throw NSError(domain: "AssistantError", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response from API."])
-            }
-        }
-    }
-
     private func sendNotification(text: String) async {
         let content = UNMutableNotificationContent()
         content.title = "Hat"

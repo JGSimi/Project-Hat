@@ -1,6 +1,12 @@
 import Foundation
 
-// MARK: - Ollama Models
+// MARK: - Conversation History (shared across providers)
+struct ConversationTurn {
+    let role: String        // "user" or "assistant"
+    let textContent: String
+}
+
+// MARK: - Ollama Models (legacy single-turn)
 struct OllamaRequest: Codable {
     let model: String
     let prompt: String
@@ -11,6 +17,48 @@ struct OllamaRequest: Codable {
 
 struct OllamaResponse: Decodable {
     let response: String
+}
+
+// MARK: - Ollama Chat Models (multi-turn)
+struct OllamaChatRequest: Codable {
+    let model: String
+    let messages: [OllamaChatMessage]
+    let stream: Bool
+    let options: [String: Double]
+}
+
+struct OllamaChatMessage: Codable {
+    let role: String
+    let content: String
+    let images: [String]?
+
+    init(role: String, content: String, images: [String]? = nil) {
+        self.role = role
+        self.content = content
+        self.images = images
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(role, forKey: .role)
+        try container.encode(content, forKey: .content)
+        if let images = images, !images.isEmpty {
+            try container.encode(images, forKey: .images)
+        }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case role, content, images
+    }
+}
+
+struct OllamaChatResponse: Decodable {
+    let message: OllamaChatResponseMessage
+}
+
+struct OllamaChatResponseMessage: Decodable {
+    let role: String
+    let content: String
 }
 
 // MARK: - API Models (OpenAI Compatible)

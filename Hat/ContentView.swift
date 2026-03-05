@@ -485,7 +485,7 @@ struct ContentView: View {
                     .zIndex(2)
             }
         }
-        .frame(width: liveWidth, height: liveHeight)
+        .frame(minWidth: 350, idealWidth: liveWidth, maxWidth: 700, minHeight: 400, idealHeight: liveHeight, maxHeight: 900)
         .background(WindowAccessor { window in
             guard let window = window else { return }
             if self.hostWindow !== window {
@@ -515,14 +515,6 @@ struct ContentView: View {
                         self.windowWidth = Double(size.width)
                         self.windowHeight = Double(size.height)
                     }
-                }
-            }
-            // Always apply/restore size when accessor runs (e.g. when popover is shown again)
-            DispatchQueue.main.async {
-                let targetSize = NSSize(width: liveWidth, height: liveHeight)
-                if abs(window.frame.size.width - targetSize.width) > 1 ||
-                   abs(window.frame.size.height - targetSize.height) > 1 {
-                    window.setContentSize(targetSize)
                 }
             }
         })

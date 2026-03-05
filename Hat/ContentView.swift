@@ -13,6 +13,13 @@ import KeyboardShortcuts
 import UniformTypeIdentifiers
 import PDFKit
 
+private extension Double {
+    func clamped(to range: ClosedRange<Double>, fallback: Double) -> Double {
+        let value = self == 0 ? fallback : self
+        return min(max(value, range.lowerBound), range.upperBound)
+    }
+}
+
 // MARK: - Shortcut Name definition
 extension KeyboardShortcuts.Name {
     static let processClipboard = Self("processClipboard", default: .init(.x, modifiers: [.command, .shift]))
@@ -400,13 +407,43 @@ class AssistantViewModel: ObservableObject {
 /// Captures the hosting NSWindow reference from SwiftUI.
 struct WindowAccessor: NSViewRepresentable {
     var onChange: (NSWindow?) -> Void
+
+    final class Coordinator {
+        var observer: NSObjectProtocol?
+        var resizeObserver: NSObjectProtocol?
+        var resizeEndObserver: NSObjectProtocol?
+        var configuredWindow: NSWindow?
+
+        deinit {
+            if let observer { NotificationCenter.default.removeObserver(observer) }
+            if let resizeObserver { NotificationCenter.default.removeObserver(resizeObserver) }
+            if let resizeEndObserver { NotificationCenter.default.removeObserver(resizeEndObserver) }
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
-        DispatchQueue.main.async { onChange(view.window) }
+        // Use viewDidMoveToWindow via KVO-like approach: observe once view is in window hierarchy
+        DispatchQueue.main.async {
+            guard let window = view.window else { return }
+            configureIfNeeded(window: window, coordinator: context.coordinator)
+        }
         return view
     }
+
     func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async { onChange(nsView.window) }
+        DispatchQueue.main.async {
+            guard let window = nsView.window else { return }
+            configureIfNeeded(window: window, coordinator: context.coordinator)
+        }
+    }
+
+    private func configureIfNeeded(window: NSWindow, coordinator: Coordinator) {
+        guard coordinator.configuredWindow !== window else { return }
+        coordinator.configuredWindow = window
+        onChange(window)
     }
 }
 
@@ -417,6 +454,8 @@ struct ContentView: View {
     @State private var showSettings = false
     @State private var showOpacitySlider = false
     @State private var hostWindow: NSWindow?
+    @State private var liveWidth: CGFloat = CGFloat(UserDefaults.standard.double(forKey: "windowWidth").clamped(to: 350...700, fallback: 450))
+    @State private var liveHeight: CGFloat = CGFloat(UserDefaults.standard.double(forKey: "windowHeight").clamped(to: 400...900, fallback: 650))
     @AppStorage("windowOpacity") private var windowOpacity: Double = 1.0
     @AppStorage("windowWidth") private var windowWidth: Double = 450
     @AppStorage("windowHeight") private var windowHeight: Double = 650
@@ -446,30 +485,40 @@ struct ContentView: View {
                     .zIndex(2)
             }
         }
-        .frame(
-            minWidth: 350, idealWidth: CGFloat(windowWidth), maxWidth: 700,
-            minHeight: 400, idealHeight: CGFloat(windowHeight), maxHeight: 900
-        )
+        .frame(width: liveWidth, height: liveHeight)
         .background(WindowAccessor { window in
-            if let window = window, self.hostWindow !== window {
-                self.hostWindow = window
-                window.alphaValue = windowOpacity
-                // Enable resizing on the menubar panel
-                window.styleMask.insert(.resizable)
-                window.minSize = NSSize(width: 350, height: 400)
-                window.maxSize = NSSize(width: 700, height: 900)
-                window.setContentSize(NSSize(width: windowWidth, height: windowHeight))
-                // Observe resize to persist dimensions
-                NotificationCenter.default.addObserver(
-                    forName: NSWindow.didResizeNotification,
-                    object: window,
-                    queue: .main
-                ) { _ in
-                    let size = window.frame.size
-                    if size.width >= 350 && size.height >= 400 {
-                        self.windowWidth = Double(size.width)
-                        self.windowHeight = Double(size.height)
-                    }
+            guard let window = window else { return }
+            self.hostWindow = window
+            window.alphaValue = windowOpacity
+            // Enable resizing on the menubar panel
+            window.styleMask.insert(.resizable)
+            window.minSize = NSSize(width: 350, height: 400)
+            window.maxSize = NSSize(width: 700, height: 900)
+            // Apply persisted size
+            window.setContentSize(NSSize(width: liveWidth, height: liveHeight))
+
+            // Track live resize without writing to AppStorage (avoids layout thrashing)
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didResizeNotification,
+                object: window,
+                queue: .main
+            ) { _ in
+                let size = window.frame.size
+                if size.width >= 350 && size.height >= 400 {
+                    self.liveWidth = size.width
+                    self.liveHeight = size.height
+                }
+            }
+            // Persist size only when resize ends
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didEndLiveResizeNotification,
+                object: window,
+                queue: .main
+            ) { _ in
+                let size = window.frame.size
+                if size.width >= 350 && size.height >= 400 {
+                    self.windowWidth = Double(size.width)
+                    self.windowHeight = Double(size.height)
                 }
             }
         })

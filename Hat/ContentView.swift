@@ -396,11 +396,28 @@ class AssistantViewModel: ObservableObject {
     }
 }
 
+// MARK: - Window Accessor
+/// Captures the hosting NSWindow reference from SwiftUI.
+struct WindowAccessor: NSViewRepresentable {
+    var onChange: (NSWindow?) -> Void
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async { onChange(view.window) }
+        return view
+    }
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async { onChange(nsView.window) }
+    }
+}
+
 @MainActor
 struct ContentView: View {
     @ObservedObject private var viewModel: AssistantViewModel
     @Namespace private var bottomID
     @State private var showSettings = false
+    @State private var showOpacitySlider = false
+    @State private var hostWindow: NSWindow?
+    @AppStorage("windowOpacity") private var windowOpacity: Double = 1.0
     @FocusState private var isInputFocused: Bool
 
     init(viewModel: AssistantViewModel) {
@@ -428,9 +445,19 @@ struct ContentView: View {
             }
         }
         .frame(width: 450, height: 650)
+        .background(WindowAccessor { window in
+            if let window = window, self.hostWindow !== window {
+                self.hostWindow = window
+                window.alphaValue = windowOpacity
+            }
+        })
         .maeAppearAnimation(animation: Theme.Animation.expressive, scale: 0.92)
         .onAppear {
             isInputFocused = true
+            hostWindow?.alphaValue = windowOpacity
+        }
+        .onChange(of: windowOpacity) { _, newValue in
+            hostWindow?.alphaValue = newValue
         }
         .onChange(of: showSettings) { _, newValue in
             if !newValue {
@@ -464,6 +491,22 @@ struct ContentView: View {
                     }
                     MaeIconButton(icon: "trash", helpText: "Limpar histórico") {
                         withAnimation { viewModel.clearHistory() }
+                    }
+                    MaeIconButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
+                        withAnimation(Theme.Animation.smooth) {
+                            showOpacitySlider.toggle()
+                        }
+                    }
+                    .popover(isPresented: $showOpacitySlider) {
+                        VStack(spacing: 8) {
+                            Text("Opacidade")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
+                                .frame(width: 160)
+                        }
+                        .padding(12)
+                        .frame(width: 200)
                     }
                     MaeIconButton(icon: "gearshape", helpText: "Configurações") {
                         withAnimation(Theme.Animation.smooth) {

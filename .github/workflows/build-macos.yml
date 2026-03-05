@@ -7,7 +7,6 @@ on:
     paths-ignore:
       - 'README.md'
       - '.gitignore'
-      - 'hat-windows/**'
   workflow_dispatch:
 
 permissions:

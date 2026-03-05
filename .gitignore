@@ -191,10 +191,6 @@ appcast.xml
 sparkle-keys.txt
 sparkle_private_key.txt
 
-# Tauri specifics (if any used via Hat-Windows)
-src-tauri/target/
-src-tauri/Cargo.lock
-
 # Test files
 test_attr.swift
 test_capture.swift

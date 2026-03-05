@@ -1,23 +1,42 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, Settings, Trash2, ArrowUp, ImageIcon, X, Loader2, FileIcon, XCircle } from "lucide-react";
+import { MessageSquare, Settings, Trash2, ArrowUp, ImageIcon, X, Loader2, FileIcon, XCircle, SunDim } from "lucide-react";
 import { useAssistant, Attachment } from "./hooks/useAssistant";
+import { useOpacity } from "./hooks/useOpacity";
 import "./App.css";
 
 // TBD: Models and API integrations
 
 export default function App() {
   const [showSettings, setShowSettings] = useState(false);
+  const [showOpacity, setShowOpacity] = useState(false);
   const [inputText, setInputText] = useState("");
   const [pendingAttachments, setPendingAttachments] = useState<File[]>([]);
   const { messages, setMessages, processPrompt, isProcessing } = useAssistant();
+  const { opacity, setOpacity } = useOpacity();
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const opacityRef = useRef<HTMLDivElement>(null);
+  const opacityBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!showOpacity) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        opacityRef.current && !opacityRef.current.contains(e.target as Node) &&
+        opacityBtnRef.current && !opacityBtnRef.current.contains(e.target as Node)
+      ) {
+        setShowOpacity(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showOpacity]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -93,16 +112,44 @@ export default function App() {
             <button onClick={() => setMessages([])} title="Limpar histórico">
               <Trash2 size={18} />
             </button>
+            <button
+              ref={opacityBtnRef}
+              onClick={() => setShowOpacity(!showOpacity)}
+              title="Opacidade"
+              className={`icon-btn ${showOpacity ? "active-toggle" : ""}`}
+            >
+              <SunDim size={18} />
+            </button>
             <button onClick={() => setShowSettings(true)} title="Configurações">
               <Settings size={18} />
             </button>
           </div>
         </header>
 
+        {showOpacity && (
+          <div className="opacity-popover" ref={opacityRef}>
+            <input
+              type="range"
+              min="0.15"
+              max="1"
+              step="0.01"
+              value={opacity}
+              onChange={(e) => setOpacity(parseFloat(e.target.value))}
+              className="opacity-slider"
+            />
+          </div>
+        )}
+
         {/* Chat List */}
         <div className="chat-list" ref={scrollRef}>
           {messages.length === 0 ? (
-            <div className="empty-state">Sem Mensagens.</div>
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <MessageSquare size={32} strokeWidth={1.2} />
+              </div>
+              <span className="empty-state-title">Hat</span>
+              <span className="empty-state-subtitle">Envie uma mensagem para começar.</span>
+            </div>
           ) : (
             messages.map((m) => (
               <div key={m.id} className={`chat-bubble-container ${m.isUser ? "user" : "assistant"}`}>

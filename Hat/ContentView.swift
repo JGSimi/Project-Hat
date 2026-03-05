@@ -507,7 +507,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 14) {
+                HStack(spacing: 8) {
                     MaeIconButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
                         AnalysisWindowManager.shared.showWindow()
                     }
@@ -537,8 +537,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 14)
+            .padding(.horizontal, Theme.Metrics.spacingDefault)
+            .padding(.vertical, 12)
             .background(.regularMaterial)
             .overlay(MaeGradientDivider(), alignment: .bottom)
             .zIndex(1)
@@ -640,7 +640,7 @@ struct ContentView: View {
                                 .maeStaggered(index: index, baseDelay: 0.06)
                             }
                         }
-                        .padding(.horizontal, Theme.Metrics.spacingLarge)
+                        .padding(.horizontal, Theme.Metrics.spacingDefault)
                         .padding(.top, 10)
                         .padding(.bottom, 6)
                     }
@@ -701,8 +701,8 @@ struct ContentView: View {
                         .transition(.maeScaleFade)
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 14)
+                .padding(.horizontal, Theme.Metrics.spacingDefault)
+                .padding(.vertical, 12)
                 .background(.regularMaterial)
             }
             .zIndex(1)

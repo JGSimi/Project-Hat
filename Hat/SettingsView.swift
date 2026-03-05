@@ -19,68 +19,68 @@ struct SettingsView: View {
                     .frame(width: 20, height: 20)
                     .foregroundStyle(Theme.Colors.textPrimary)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.top, 20)
             .padding(.bottom, 12)
-            
+
             VStack(spacing: 12) {
                 // Cartão Único Integrado
                 VStack(spacing: 0) {
                     // Row de Seleção de Modo
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Processamento")
-                                .font(Theme.Typography.caption)
-                                .foregroundStyle(Theme.Colors.textSecondary)
-                            
-                            Picker("", selection: $inferenceMode) {
-                                ForEach(InferenceMode.allCases) { mode in
-                                    Text(mode.rawValue).tag(mode)
-                                }
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Processamento")
+                            .font(Theme.Typography.caption)
+                            .foregroundStyle(Theme.Colors.textSecondary)
+
+                        Picker("", selection: $inferenceMode) {
+                            ForEach(InferenceMode.allCases) { mode in
+                                Text(mode.rawValue).tag(mode)
                             }
-                            .pickerStyle(.segmented)
-                            .labelsHidden()
-                            .colorScheme(.dark) // Forçar tint dark para o picker
                         }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .colorScheme(.dark)
                     }
-                    .padding(16)
-                    
+                    .padding(Theme.Metrics.spacingDefault)
+
                     Divider().background(Theme.Colors.border)
-                    
+
                     // Row do Modelo Ativo
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Modelo Ativo")
                                 .font(Theme.Typography.caption)
                                 .foregroundStyle(Theme.Colors.textSecondary)
-                            
+
                             HStack(spacing: 6) {
                                 Circle()
                                     .fill(Theme.Colors.accent)
                                     .frame(width: 8, height: 8)
                                     .shadow(color: Theme.Colors.accent.opacity(0.4), radius: 3)
                                     .maePulse(duration: 2.0)
-                                
+
                                 Text(inferenceMode == .local ? localModelName : "\(selectedProvider.rawValue) • \(apiModelName)")
                                     .font(Theme.Typography.bodyBold)
                                     .foregroundStyle(Theme.Colors.textPrimary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
                             }
                         }
-                        Spacer()
+                        Spacer(minLength: 0)
                     }
-                    .padding(16)
+                    .padding(Theme.Metrics.spacingDefault)
                 }
                 .background(Theme.Colors.surfaceSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
-                        .stroke(Theme.Colors.border, lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                 )
                 .maeStaggered(index: 0, baseDelay: 0.06)
-                
-                Spacer()
-                
-                // Botão de Atualização Sleek
+
+                Spacer(minLength: 0)
+
+                // Botão de Atualização
                 Button {
                     UpdaterController.shared.checkForUpdates()
                 } label: {
@@ -91,30 +91,29 @@ struct SettingsView: View {
                             .symbolEffect(.rotate, options: .nonRepeating)
                         Text("Verificar Atualizações")
                             .font(Theme.Typography.bodyBold)
-                        Spacer()
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, Theme.Metrics.spacingDefault)
+                    .padding(.vertical, 12)
                     .background(Theme.Colors.surfaceSecondary)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 1)
+                            .stroke(Theme.Colors.border, lineWidth: 0.5)
                     )
                 }
                 .buttonStyle(.plain)
                 .padding(.bottom, 4)
                 .maePressEffect()
                 .maeStaggered(index: 1, baseDelay: 0.06)
-                
-                // Botão Avançado Sleek
+
+                // Botão Avançado
                 Button {
                     withAnimation {
                         isPresented = false
                     }
-                    // Close the MenuBarExtra window
                     NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
-                    // Show advanced settings window
                     AdvancedSettingsWindowManager.shared.showWindow()
                 } label: {
                     HStack {
@@ -123,19 +122,20 @@ struct SettingsView: View {
                             .symbolEffect(.rotate, options: .nonRepeating)
                         Text("Configurações Avançadas")
                             .font(Theme.Typography.bodyBold)
-                        Spacer()
+                            .lineLimit(1)
+                        Spacer(minLength: 0)
                         Image(systemName: "chevron.right")
                             .font(Theme.Typography.caption)
                             .foregroundStyle(Theme.Colors.textSecondary)
                             .symbolEffect(.bounce, options: .nonRepeating)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, Theme.Metrics.spacingDefault)
+                    .padding(.vertical, 12)
                     .background(Theme.Colors.surfaceSecondary)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 1)
+                            .stroke(Theme.Colors.border, lineWidth: 0.5)
                     )
                 }
                 .buttonStyle(.plain)
@@ -143,7 +143,7 @@ struct SettingsView: View {
                 .maePressEffect()
                 .maeStaggered(index: 2, baseDelay: 0.06)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Theme.Metrics.spacingLarge)
         }
         .background(MaePageBackground())
         .overlay(alignment: .topTrailing) {
@@ -154,7 +154,7 @@ struct SettingsView: View {
             }
             .keyboardShortcut(.escape, modifiers: []) // ESC shortcut
             .padding(.top, 12)
-            .padding(.trailing, Theme.Metrics.spacingLarge)
+            .padding(.trailing, Theme.Metrics.spacingDefault)
         }
         .preferredColorScheme(.dark)
     }

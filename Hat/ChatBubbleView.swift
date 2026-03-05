@@ -6,7 +6,7 @@ struct ChatBubble: View {
 
     var body: some View {
         HStack {
-            if message.isUser { Spacer(minLength: 40) }
+            if message.isUser { Spacer(minLength: 24) }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
                 if message.source == .screenAnalysis && message.isUser {
@@ -87,9 +87,9 @@ struct ChatBubble: View {
             }
             .maeHover()
 
-            if !message.isUser { Spacer(minLength: 40) }
+            if !message.isUser { Spacer(minLength: 24) }
         }
-        .padding(.horizontal, Theme.Metrics.spacingLarge)
+        .padding(.horizontal, Theme.Metrics.spacingDefault)
         .padding(.vertical, 4)
         .maeStaggered(index: animationIndex, baseDelay: 0.05)
     }

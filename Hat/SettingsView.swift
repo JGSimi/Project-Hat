@@ -10,27 +10,32 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header Minimalista
-            HStack {
+            // Header
+            HStack(spacing: 8) {
                 Image("sunglasses-2-svgrepo-com")
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .frame(width: 18, height: 18)
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                Text("Configurações")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                Spacer()
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.top, 20)
-            .padding(.bottom, 12)
+            .padding(.bottom, 16)
 
-            VStack(spacing: 12) {
-                // Cartão Único Integrado
+            VStack(spacing: 10) {
+                // Model Card
                 VStack(spacing: 0) {
-                    // Row de Seleção de Modo
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Processamento")
-                            .font(Theme.Typography.caption)
-                            .foregroundStyle(Theme.Colors.textSecondary)
+                    // Mode Picker
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("PROCESSAMENTO")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .foregroundStyle(Theme.Colors.textMuted)
+                            .tracking(0.5)
 
                         Picker("", selection: $inferenceMode) {
                             ForEach(InferenceMode.allCases) { mode in
@@ -41,25 +46,26 @@ struct SettingsView: View {
                         .labelsHidden()
                         .colorScheme(.dark)
                     }
-                    .padding(Theme.Metrics.spacingDefault)
+                    .padding(14)
 
-                    Divider().background(Theme.Colors.border)
+                    MaeGradientDivider()
 
-                    // Row do Modelo Ativo
+                    // Active Model
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Modelo Ativo")
-                                .font(Theme.Typography.caption)
-                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Text("MODELO ATIVO")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                                .tracking(0.5)
 
                             HStack(spacing: 6) {
                                 Circle()
-                                    .fill(Theme.Colors.accent)
-                                    .frame(width: 8, height: 8)
-                                    .shadow(color: Theme.Colors.accent.opacity(0.4), radius: 3)
+                                    .fill(Color.green.opacity(0.8))
+                                    .frame(width: 6, height: 6)
+                                    .shadow(color: Color.green.opacity(0.4), radius: 3)
                                     .maePulse(duration: 2.0)
 
-                                Text(inferenceMode == .local ? localModelName : "\(selectedProvider.rawValue) • \(apiModelName)")
+                                Text(inferenceMode == .local ? localModelName : "\(selectedProvider.rawValue) · \(apiModelName)")
                                     .font(Theme.Typography.bodyBold)
                                     .foregroundStyle(Theme.Colors.textPrimary)
                                     .lineLimit(1)
@@ -68,91 +74,89 @@ struct SettingsView: View {
                         }
                         Spacer(minLength: 0)
                     }
-                    .padding(Theme.Metrics.spacingDefault)
+                    .padding(14)
                 }
                 .background(Theme.Colors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(Theme.Colors.border, lineWidth: 0.5)
                 )
                 .maeStaggered(index: 0, baseDelay: 0.06)
 
                 Spacer(minLength: 0)
 
-                // Botão de Atualização
-                Button {
-                    UpdaterController.shared.checkForUpdates()
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(Theme.Typography.bodySmall)
-                            .foregroundStyle(Theme.Colors.accent.opacity(0.8))
-                            .symbolEffect(.rotate, options: .nonRepeating)
-                        Text("Verificar Atualizações")
-                            .font(Theme.Typography.bodyBold)
-                            .lineLimit(1)
-                        Spacer(minLength: 0)
+                // Action Buttons
+                VStack(spacing: 6) {
+                    Button {
+                        UpdaterController.shared.checkForUpdates()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Text("Verificar Atualizações")
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                        )
                     }
-                    .padding(.horizontal, Theme.Metrics.spacingDefault)
-                    .padding(.vertical, 12)
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 0.5)
-                    )
-                }
-                .buttonStyle(.plain)
-                .padding(.bottom, 4)
-                .maePressEffect()
-                .maeStaggered(index: 1, baseDelay: 0.06)
+                    .buttonStyle(.plain)
+                    .maePressEffect()
+                    .maeStaggered(index: 1, baseDelay: 0.06)
 
-                // Botão Avançado
-                Button {
-                    withAnimation {
-                        isPresented = false
+                    Button {
+                        withAnimation {
+                            isPresented = false
+                        }
+                        NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
+                        AdvancedSettingsWindowManager.shared.showWindow()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Text("Configurações Avançadas")
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                        )
                     }
-                    NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
-                    AdvancedSettingsWindowManager.shared.showWindow()
-                } label: {
-                    HStack {
-                        Image(systemName: "gearshape.fill")
-                            .font(Theme.Typography.bodySmall)
-                            .symbolEffect(.rotate, options: .nonRepeating)
-                        Text("Configurações Avançadas")
-                            .font(Theme.Typography.bodyBold)
-                            .lineLimit(1)
-                        Spacer(minLength: 0)
-                        Image(systemName: "chevron.right")
-                            .font(Theme.Typography.caption)
-                            .foregroundStyle(Theme.Colors.textSecondary)
-                            .symbolEffect(.bounce, options: .nonRepeating)
-                    }
-                    .padding(.horizontal, Theme.Metrics.spacingDefault)
-                    .padding(.vertical, 12)
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 0.5)
-                    )
+                    .buttonStyle(.plain)
+                    .maePressEffect()
+                    .maeStaggered(index: 2, baseDelay: 0.06)
                 }
-                .buttonStyle(.plain)
-                .padding(.bottom, 12)
-                .maePressEffect()
-                .maeStaggered(index: 2, baseDelay: 0.06)
+                .padding(.bottom, 14)
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
         }
         .background(MaePageBackground())
         .overlay(alignment: .topTrailing) {
-            MaeIconButton(icon: "xmark.circle.fill", size: 18, color: Theme.Colors.textSecondary, bgColor: .clear, helpText: "Fechar Configurações") {
+            MaeIconButton(icon: "xmark", size: 12, color: Theme.Colors.textMuted, bgColor: .clear, helpText: "Fechar Configurações") {
                 withAnimation(Theme.Animation.smooth) {
                     isPresented = false
                 }
             }
-            .keyboardShortcut(.escape, modifiers: []) // ESC shortcut
+            .keyboardShortcut(.escape, modifiers: [])
             .padding(.top, 12)
             .padding(.trailing, Theme.Metrics.spacingDefault)
         }

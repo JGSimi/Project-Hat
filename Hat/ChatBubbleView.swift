@@ -4,23 +4,46 @@ struct ChatBubble: View {
     let message: ChatMessage
     var animationIndex: Int = 0
 
-    var body: some View {
-        HStack {
-            if message.isUser { Spacer(minLength: 24) }
+    private var timeString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: message.timestamp)
+    }
 
-            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 6) {
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            if message.isUser { Spacer(minLength: 40) }
+
+            // Assistant avatar
+            if !message.isUser {
+                Image("hat-svgrepo-com")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                    .padding(6)
+                    .background(Theme.Colors.surfaceSecondary)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(Theme.Colors.border, lineWidth: 0.5)
+                    )
+                    .padding(.top, 2)
+            }
+
+            VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                 if message.source == .screenAnalysis && message.isUser {
                     HStack(spacing: 4) {
                         Image(systemName: "camera.viewfinder")
-                            .font(Theme.Typography.caption)
+                            .font(.system(size: 10))
                             .symbolEffect(.pulse)
                         Text("Análise de Tela")
-                            .font(Theme.Typography.caption)
+                            .font(.system(size: 10, weight: .medium, design: .rounded))
                     }
-                    .foregroundStyle(Theme.Colors.accent)
-                    .padding(.horizontal, 10)
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.8))
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentSubtle)
+                    .background(Theme.Colors.accentSubtle.opacity(0.6))
                     .clipShape(Capsule())
                 }
 
@@ -30,14 +53,18 @@ struct ChatBubble: View {
                             Image(nsImage: img)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(maxHeight: 250)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-                                .maeMediumShadow()
+                                .frame(maxHeight: 220)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                )
+                                .maeSoftShadow()
                         } else if !attachment.isImage {
                             HStack(spacing: 8) {
                                 Image(systemName: "doc.text.fill")
-                                    .foregroundStyle(Theme.Colors.accent)
-                                    .symbolEffect(.bounce, options: .nonRepeating)
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Theme.Colors.accent.opacity(0.7))
                                 Text(attachment.name)
                                     .font(Theme.Typography.caption)
                                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -47,8 +74,11 @@ struct ChatBubble: View {
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
                             .background(Theme.Colors.surfaceSecondary)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
-                            .maeSoftShadow()
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            )
                         }
                     }
                 }
@@ -59,9 +89,13 @@ struct ChatBubble: View {
                         Image(nsImage: images[index])
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(maxHeight: 250)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-                            .maeMediumShadow()
+                            .frame(maxHeight: 220)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            )
+                            .maeSoftShadow()
                     }
                 }
 
@@ -72,25 +106,30 @@ struct ChatBubble: View {
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
                             .foregroundStyle(Theme.Colors.textPrimary)
-                            .maeGlassBackground(cornerRadius: Theme.Metrics.radiusMedium)
+                            .maeGlassBackground(cornerRadius: 14)
                             .maeSoftShadow()
                             .textSelection(.enabled)
                     } else {
                         HatMarkdownView(markdown: message.content)
                             .font(Theme.Typography.bodySmall)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .maeSurfaceBackground(cornerRadius: Theme.Metrics.radiusMedium)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .maeSurfaceBackground(cornerRadius: 14)
                             .maeSoftShadow()
                     }
                 }
-            }
-            .maeHover()
 
-            if !message.isUser { Spacer(minLength: 24) }
+                // Timestamp
+                Text(timeString)
+                    .font(.system(size: 9, weight: .regular, design: .rounded))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                    .padding(.horizontal, 4)
+            }
+
+            if !message.isUser { Spacer(minLength: 40) }
         }
         .padding(.horizontal, Theme.Metrics.spacingDefault)
-        .padding(.vertical, 4)
+        .padding(.vertical, 3)
         .maeStaggered(index: animationIndex, baseDelay: 0.05)
     }
 }

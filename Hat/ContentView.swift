@@ -495,26 +495,28 @@ struct ContentView: View {
         VStack(spacing: 0) {
             // ... (keeping previous header content)
             // Header
-            HStack {
-                HStack(spacing: 6) {
-                    Image("hat-svgrepo-com")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20)
-                        .foregroundStyle(Theme.Colors.textPrimary)
-                }
-                
+            HStack(spacing: 10) {
+                Image("hat-svgrepo-com")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.8))
+
+                Text("Hat")
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+
                 Spacer()
-                
-                HStack(spacing: 8) {
-                    MaeIconButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
+
+                HStack(spacing: 2) {
+                    MaeIconButton(icon: "macwindow.badge.plus", size: 13, helpText: "Abrir Janela de Análise") {
                         AnalysisWindowManager.shared.showWindow()
                     }
-                    MaeIconButton(icon: "trash", helpText: "Limpar histórico") {
+                    MaeIconButton(icon: "trash", size: 13, helpText: "Limpar histórico") {
                         withAnimation { viewModel.clearHistory() }
                     }
-                    MaeIconButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
+                    MaeIconButton(icon: "circle.lefthalf.filled", size: 13, helpText: "Opacidade") {
                         withAnimation(Theme.Animation.smooth) {
                             showOpacitySlider.toggle()
                         }
@@ -530,15 +532,15 @@ struct ContentView: View {
                         .padding(12)
                         .frame(width: 200)
                     }
-                    MaeIconButton(icon: "gearshape", helpText: "Configurações") {
+                    MaeIconButton(icon: "gearshape", size: 13, helpText: "Configurações") {
                         withAnimation(Theme.Animation.smooth) {
                             showSettings = true
                         }
                     }
                 }
             }
-            .padding(.horizontal, Theme.Metrics.spacingDefault)
-            .padding(.vertical, 12)
+            .padding(.horizontal, Theme.Metrics.spacingLarge)
+            .padding(.vertical, 10)
             .background(.regularMaterial)
             .overlay(MaeGradientDivider(), alignment: .bottom)
             .zIndex(1)
@@ -548,23 +550,57 @@ struct ContentView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         if viewModel.messages.isEmpty {
-                            VStack(spacing: Theme.Metrics.spacingDefault) {
-                                Image("sunglasses-2-svgrepo-com")
-                                    .renderingMode(.template)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 32, height: 32)
-                                    .foregroundStyle(Theme.Colors.accent.opacity(0.4))
-                                Text("Comece uma conversa")
-                                    .font(Theme.Typography.bodyBold)
-                                    .foregroundStyle(Theme.Colors.textMuted)
-                                    .maeStaggered(index: 1, baseDelay: 0.12)
-                                Text("Pergunte qualquer coisa.")
-                                    .font(Theme.Typography.caption)
-                                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
-                                    .maeStaggered(index: 2, baseDelay: 0.12)
+                            VStack(spacing: 24) {
+                                Spacer().frame(height: 40)
+
+                                // Icon with subtle glow
+                                ZStack {
+                                    Circle()
+                                        .fill(Theme.Colors.accent.opacity(0.04))
+                                        .frame(width: 80, height: 80)
+                                    Circle()
+                                        .fill(Theme.Colors.accent.opacity(0.06))
+                                        .frame(width: 56, height: 56)
+                                    Image("sunglasses-2-svgrepo-com")
+                                        .renderingMode(.template)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 28, height: 28)
+                                        .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                                }
+                                .maeFloating(amplitude: 4, duration: 4.0)
+
+                                VStack(spacing: 6) {
+                                    Text("Como posso ajudar?")
+                                        .font(Theme.Typography.heading)
+                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
+                                        .maeStaggered(index: 1, baseDelay: 0.12)
+                                    Text("Pergunte qualquer coisa ou use os atalhos abaixo.")
+                                        .font(Theme.Typography.caption)
+                                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
+                                        .maeStaggered(index: 2, baseDelay: 0.12)
+                                }
+
+                                // Quick action suggestions
+                                VStack(spacing: 8) {
+                                    EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
+                                        Task { await viewModel.processarIA() }
+                                    }
+                                    .maeStaggered(index: 3, baseDelay: 0.10)
+
+                                    EmptyStateSuggestion(icon: "camera.viewfinder", label: "Analisar tela", shortcut: "⌘⇧Z") {
+                                        Task { await viewModel.processarScreen() }
+                                    }
+                                    .maeStaggered(index: 4, baseDelay: 0.10)
+
+                                    EmptyStateSuggestion(icon: "bolt.fill", label: "Entrada rápida", shortcut: "⌘⇧Space") {
+                                        QuickInputWindowManager.shared.toggleWindow()
+                                    }
+                                    .maeStaggered(index: 5, baseDelay: 0.10)
+                                }
+                                .padding(.horizontal, 40)
+                                .padding(.top, 8)
                             }
-                            .padding(.top, 120)
                             .frame(maxWidth: .infinity)
                             .maeAppearAnimation(animation: Theme.Animation.expressive)
                         } else {
@@ -648,9 +684,9 @@ struct ContentView: View {
                 }
 
                 MaeGradientDivider()
-                
-                HStack(alignment: .center, spacing: Theme.Metrics.spacingDefault) {
-                    MaeIconButton(icon: "plus.circle.fill", size: 18, color: Theme.Colors.textSecondary, helpText: "Anexar arquivo/imagem") {
+
+                HStack(alignment: .bottom, spacing: 10) {
+                    MaeIconButton(icon: "plus.circle.fill", size: 16, color: Theme.Colors.textSecondary.opacity(0.8), helpText: "Anexar arquivo/imagem") {
                         let panel = NSOpenPanel()
                         panel.allowedContentTypes = [UTType.image, UTType.plainText, UTType.pdf, UTType.json, UTType.sourceCode, UTType.data]
                         panel.allowsMultipleSelection = true
@@ -667,32 +703,31 @@ struct ContentView: View {
                         }
                     }
 
-                    TextField("Pergunte à Hat...", text: $viewModel.inputText, axis: .vertical)
-                        .maeInputStyle(cornerRadius: Theme.Metrics.radiusLarge)
+                    TextField("Mensagem...", text: $viewModel.inputText, axis: .vertical)
+                        .maeInputStyle(cornerRadius: 18)
                         .lineLimit(1...6)
                         .focused($isInputFocused)
                         .onSubmit {
                             Task { await viewModel.sendManualMessage() }
                         }
                         .disabled(viewModel.isProcessing)
-                    
+
                     if viewModel.isProcessing {
                         MaeTypingDots()
-                            .frame(width: 32, height: 32)
+                            .frame(width: 30, height: 30)
                             .transition(.maeScaleFade)
                     } else {
                         Button {
                             Task { await viewModel.sendManualMessage() }
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
-                                .font(.system(size: 32))
+                                .font(.system(size: 28))
                                 .foregroundStyle(
                                     (viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
-                                    ? Theme.Colors.textMuted : Theme.Colors.accent
+                                    ? Theme.Colors.textMuted.opacity(0.5) : Theme.Colors.accent
                                 )
-                                .symbolEffect(.bounce, options: .nonRepeating)
                                 .background(Theme.Colors.background.clipShape(Circle()))
-                                .frame(width: 40, height: 40)
+                                .frame(width: 30, height: 30)
                         }
                         .buttonStyle(.plain)
                         .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
@@ -701,8 +736,8 @@ struct ContentView: View {
                         .transition(.maeScaleFade)
                     }
                 }
-                .padding(.horizontal, Theme.Metrics.spacingDefault)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
                 .background(.regularMaterial)
             }
             .zIndex(1)
@@ -758,6 +793,49 @@ struct ContentView: View {
             return URL(string: urlString)
         }
         return nil
+    }
+}
+
+// MARK: - Empty State Suggestion Button
+struct EmptyStateSuggestion: View {
+    let icon: String
+    let label: String
+    let shortcut: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                    .frame(width: 20)
+
+                Text(label)
+                    .font(Theme.Typography.bodySmall)
+                    .foregroundStyle(Theme.Colors.textSecondary)
+
+                Spacer()
+
+                Text(shortcut)
+                    .font(.system(size: 10, weight: .medium, design: .rounded))
+                    .foregroundStyle(Theme.Colors.textMuted)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Theme.Colors.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Theme.Colors.surfaceSecondary.opacity(0.6))
+            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+            )
+        }
+        .buttonStyle(.plain)
+        .maePressEffect()
     }
 }
 

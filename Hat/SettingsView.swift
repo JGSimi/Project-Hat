@@ -87,6 +87,66 @@ struct SettingsView: View {
                 )
                 .maeStaggered(index: 0, baseDelay: 0.06)
 
+                // Provider Quick Switch (only in API mode, only providers with saved keys)
+                if inferenceMode == .api {
+                    let providersWithKeys = CloudProvider.allCases.filter {
+                        !(KeychainManager.shared.loadKey(for: $0) ?? "").isEmpty
+                    }
+
+                    if providersWithKeys.count > 1 {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("TROCAR PROVEDOR")
+                                .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                                .tracking(0.5)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(providersWithKeys) { provider in
+                                        Button {
+                                            selectedProvider = provider
+                                        } label: {
+                                            Text(provider.shortName)
+                                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                .foregroundStyle(
+                                                    selectedProvider == provider
+                                                        ? Color.black
+                                                        : Theme.Colors.textPrimary.opacity(0.9)
+                                                )
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(
+                                                    selectedProvider == provider
+                                                        ? Theme.Colors.accent
+                                                        : Theme.Colors.surfaceSecondary
+                                                )
+                                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                        .stroke(
+                                                            selectedProvider == provider
+                                                                ? Theme.Colors.accent.opacity(0.5)
+                                                                : Theme.Colors.border,
+                                                            lineWidth: 0.5
+                                                        )
+                                                )
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(14)
+                        .background(Theme.Colors.surfaceSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                        )
+                        .maeStaggered(index: 1, baseDelay: 0.06)
+                    }
+                }
+
                 // Token Usage Card
                 if globalTotalTokens > 0 {
                     VStack(spacing: 0) {
@@ -144,7 +204,7 @@ struct SettingsView: View {
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
                             .stroke(Theme.Colors.border, lineWidth: 0.5)
                     )
-                    .maeStaggered(index: 1, baseDelay: 0.06)
+                    .maeStaggered(index: 2, baseDelay: 0.06)
                 }
 
                 Spacer(minLength: 0)
@@ -174,7 +234,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .maePressEffect()
-                    .maeStaggered(index: 2, baseDelay: 0.06)
+                    .maeStaggered(index: 3, baseDelay: 0.06)
 
                     Button {
                         withAnimation {
@@ -206,7 +266,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .maePressEffect()
-                    .maeStaggered(index: 3, baseDelay: 0.06)
+                    .maeStaggered(index: 4, baseDelay: 0.06)
                 }
                 .padding(.bottom, 14)
             }

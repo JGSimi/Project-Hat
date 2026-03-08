@@ -46,6 +46,16 @@ enum CloudProvider: String, CaseIterable, Identifiable {
         }
     }
 
+    var shortName: String {
+        switch self {
+        case .google:    return "Gemini"
+        case .openai:    return "OpenAI"
+        case .anthropic: return "Claude"
+        case .inception: return "Mercury"
+        case .custom:    return "Custom"
+        }
+    }
+
     var keychainAccount: String {
         switch self {
         case .google:    return "apiKey_google"

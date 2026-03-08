@@ -75,7 +75,7 @@ struct AdvancedSettingsView: View {
     @AppStorage("playNotifications") var playNotifications: Bool = true
     
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
-    @State private var apiKey: String = KeychainManager.shared.loadKey() ?? ""
+    @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
     @State private var fetchedModels: [String] = []
     @State private var isFetchingModels: Bool = false
     @State private var apiKeyTask: Task<Void, Never>? = nil
@@ -277,6 +277,7 @@ struct AdvancedSettingsView: View {
                             }
                             .padding(Theme.Metrics.spacingLarge)
                             .onChange(of: selectedProvider) { _, newValue in
+                                apiKey = KeychainManager.shared.loadKey(for: newValue) ?? ""
                                 fetchModelsTask?.cancel()
                                 fetchModelsTask = Task {
                                     try? await Task.sleep(nanoseconds: 300_000_000)
@@ -347,7 +348,7 @@ struct AdvancedSettingsView: View {
                                         apiKeyTask = Task {
                                             try? await Task.sleep(nanoseconds: 500_000_000)
                                             guard !Task.isCancelled else { return }
-                                            KeychainManager.shared.saveKey(newValue)
+                                            KeychainManager.shared.saveKey(newValue, for: selectedProvider)
                                             await reloadModels()
                                         }
                                     }

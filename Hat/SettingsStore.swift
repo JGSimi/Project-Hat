@@ -46,6 +46,16 @@ enum CloudProvider: String, CaseIterable, Identifiable {
         }
     }
 
+    var keychainAccount: String {
+        switch self {
+        case .google:    return "apiKey_google"
+        case .openai:    return "apiKey_openai"
+        case .anthropic: return "apiKey_anthropic"
+        case .inception: return "apiKey_inception"
+        case .custom:    return "apiKey_custom"
+        }
+    }
+
     var availableModels: [String] {
         switch self {
         case .google:
@@ -74,7 +84,7 @@ struct SettingsManager {
     static var localModelName: String { UserDefaults.standard.string(forKey: "localModelName") ?? "gemma3:4b" }
     static var apiEndpoint: String { UserDefaults.standard.string(forKey: "apiEndpoint") ?? "https://api.openai.com/v1/chat/completions" }
     static var apiModelName: String { UserDefaults.standard.string(forKey: "apiModelName") ?? "gpt-4o-mini" }
-    static var apiKey: String { KeychainManager.shared.loadKey() ?? "" }
+    static var apiKey: String { KeychainManager.shared.loadKey(for: selectedProvider) ?? "" }
     static var systemPrompt: String { UserDefaults.standard.string(forKey: "systemPrompt") ?? "Resposta direta. Pergunta: " }
     static var playNotifications: Bool { UserDefaults.standard.object(forKey: "playNotifications") as? Bool ?? true }
 

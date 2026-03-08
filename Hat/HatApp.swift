@@ -51,6 +51,9 @@ struct HatApp: App {
     @StateObject private var viewModel = AssistantViewModel.shared
 
     init() {
+        // Migra chave de API única para chaves por provedor (one-time)
+        KeychainManager.migrateIfNeeded()
+
         // Registramos o listener global para o atalho quando o app inicia
         KeyboardShortcuts.onKeyDown(for: .processClipboard) {
             Task {

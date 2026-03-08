@@ -11,10 +11,11 @@ enum CloudProvider: String, CaseIterable, Identifiable {
     case google = "Google Gemini"
     case openai = "OpenAI ChatGPT"
     case anthropic = "Anthropic Claude"
+    case inception = "Inception Mercury"
     case custom = "Personalizado (Outros)"
-    
+
     var id: String { self.rawValue }
-    
+
     var defaultEndpoint: String {
         switch self {
         case .google:
@@ -23,11 +24,13 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return "https://api.openai.com/v1/chat/completions"
         case .anthropic:
             return "https://api.anthropic.com/v1/messages" // Note: Anthropics format is different natively, but proxy endpoints exist. The user requested Anthropic so we add it conceptually.
+        case .inception:
+            return "https://api.inceptionlabs.ai/v1/chat/completions"
         case .custom:
             return ""
         }
     }
-    
+
     var modelsEndpoint: String? {
         switch self {
         case .google:
@@ -36,11 +39,13 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return "https://api.openai.com/v1/models"
         case .anthropic:
             return "https://api.anthropic.com/v1/models"
+        case .inception:
+            return "https://api.inceptionlabs.ai/v1/models"
         case .custom:
             return nil
         }
     }
-    
+
     var availableModels: [String] {
         switch self {
         case .google:
@@ -49,6 +54,8 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return ["API não disponível"]
         case .anthropic:
             return ["API não disponível"]
+        case .inception:
+            return ["mercury-2"]
         case .custom:
             return ["API não disponível"]
         }

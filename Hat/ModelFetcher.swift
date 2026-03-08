@@ -25,7 +25,7 @@ class ModelFetcher {
         
         if !apiKey.isEmpty {
             switch provider {
-            case .google, .openai, .custom:
+            case .google, .openai, .inception, .custom:
                 request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
             case .anthropic:
                 request.setValue(apiKey, forHTTPHeaderField: "x-api-key")

@@ -96,7 +96,7 @@ class AIAPIService {
 
         if !apiKey.isEmpty {
             switch SettingsManager.selectedProvider {
-            case .google, .openai, .custom:
+            case .google, .openai, .inception, .custom:
                 request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
             case .anthropic:
                 request.setValue(apiKey, forHTTPHeaderField: "x-api-key")

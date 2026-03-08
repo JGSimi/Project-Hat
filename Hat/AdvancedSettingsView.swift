@@ -276,7 +276,8 @@ struct AdvancedSettingsView: View {
                                 .accessibilityLabel("Provedor Cloud")
                             }
                             .padding(Theme.Metrics.spacingLarge)
-                            .onChange(of: selectedProvider) { _, newValue in
+                            .onChange(of: selectedProvider) { oldValue, newValue in
+                                oldValue.saveLastModel(apiModelName)
                                 apiKey = KeychainManager.shared.loadKey(for: newValue) ?? ""
                                 fetchModelsTask?.cancel()
                                 fetchModelsTask = Task {
@@ -284,7 +285,9 @@ struct AdvancedSettingsView: View {
                                     guard !Task.isCancelled else { return }
                                     apiEndpoint = newValue.defaultEndpoint
                                     fetchedModels = []
-                                    if let firstModel = newValue.availableModels.first {
+                                    if let savedModel = newValue.loadLastModel() {
+                                        apiModelName = savedModel
+                                    } else if let firstModel = newValue.availableModels.first {
                                         apiModelName = firstModel
                                     }
                                     await reloadModels()
@@ -331,6 +334,9 @@ struct AdvancedSettingsView: View {
                                     .labelsHidden()
                                     .frame(width: 160)
                                     .accessibilityLabel("Modelo Cloud")
+                                    .onChange(of: apiModelName) { _, newModel in
+                                        selectedProvider.saveLastModel(newModel)
+                                    }
                                 }
                                 .padding(Theme.Metrics.spacingLarge)
                             }

@@ -66,6 +66,18 @@ enum CloudProvider: String, CaseIterable, Identifiable {
         }
     }
 
+    var lastModelKey: String {
+        return "lastModel_\(keychainAccount)"
+    }
+
+    func saveLastModel(_ model: String) {
+        UserDefaults.standard.set(model, forKey: lastModelKey)
+    }
+
+    func loadLastModel() -> String? {
+        UserDefaults.standard.string(forKey: lastModelKey)
+    }
+
     var availableModels: [String] {
         switch self {
         case .google:

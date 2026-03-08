@@ -104,7 +104,11 @@ struct SettingsView: View {
                                 HStack(spacing: 6) {
                                     ForEach(providersWithKeys) { provider in
                                         Button {
+                                            selectedProvider.saveLastModel(apiModelName)
                                             selectedProvider = provider
+                                            if let savedModel = provider.loadLastModel() {
+                                                apiModelName = savedModel
+                                            }
                                         } label: {
                                             Text(provider.shortName)
                                                 .font(.system(size: 11, weight: .medium, design: .rounded))

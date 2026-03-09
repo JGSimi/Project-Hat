@@ -11,6 +11,10 @@ struct SettingsView: View {
     @AppStorage("globalInputTokens") var globalInputTokens: Int = 0
     @AppStorage("globalOutputTokens") var globalOutputTokens: Int = 0
 
+    @State private var quickModels: [String] = []
+    @State private var isFetchingQuickModels = false
+    @State private var quickModelTask: Task<Void, Never>? = nil
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -94,49 +98,113 @@ struct SettingsView: View {
                     }
 
                     if providersWithKeys.count > 1 {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("TROCAR PROVEDOR")
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundStyle(Theme.Colors.textMuted)
-                                .tracking(0.5)
+                        VStack(alignment: .leading, spacing: 10) {
+                            // Provider chips
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("TROCAR PROVEDOR")
+                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Theme.Colors.textMuted)
+                                    .tracking(0.5)
 
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 6) {
-                                    ForEach(providersWithKeys) { provider in
-                                        Button {
-                                            selectedProvider.saveLastModel(apiModelName)
-                                            selectedProvider = provider
-                                            if let savedModel = provider.loadLastModel() {
-                                                apiModelName = savedModel
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 6) {
+                                        ForEach(providersWithKeys) { provider in
+                                            Button {
+                                                selectedProvider.saveLastModel(apiModelName)
+                                                selectedProvider = provider
+                                                if let savedModel = provider.loadLastModel() {
+                                                    apiModelName = savedModel
+                                                }
+                                                loadQuickModels()
+                                            } label: {
+                                                Text(provider.shortName)
+                                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                    .foregroundStyle(
+                                                        selectedProvider == provider
+                                                            ? Color.black
+                                                            : Theme.Colors.textPrimary.opacity(0.9)
+                                                    )
+                                                    .padding(.horizontal, 10)
+                                                    .padding(.vertical, 6)
+                                                    .background(
+                                                        selectedProvider == provider
+                                                            ? Theme.Colors.accent
+                                                            : Theme.Colors.surfaceSecondary
+                                                    )
+                                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                                    .overlay(
+                                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                            .stroke(
+                                                                selectedProvider == provider
+                                                                    ? Theme.Colors.accent.opacity(0.5)
+                                                                    : Theme.Colors.border,
+                                                                lineWidth: 0.5
+                                                            )
+                                                    )
                                             }
-                                        } label: {
-                                            Text(provider.shortName)
-                                                .font(.system(size: 11, weight: .medium, design: .rounded))
-                                                .foregroundStyle(
-                                                    selectedProvider == provider
-                                                        ? Color.black
-                                                        : Theme.Colors.textPrimary.opacity(0.9)
-                                                )
-                                                .padding(.horizontal, 10)
-                                                .padding(.vertical, 6)
-                                                .background(
-                                                    selectedProvider == provider
-                                                        ? Theme.Colors.accent
-                                                        : Theme.Colors.surfaceSecondary
-                                                )
-                                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                        .stroke(
-                                                            selectedProvider == provider
-                                                                ? Theme.Colors.accent.opacity(0.5)
-                                                                : Theme.Colors.border,
-                                                            lineWidth: 0.5
-                                                        )
-                                                )
+                                            .buttonStyle(.plain)
                                         }
-                                        .buttonStyle(.plain)
                                     }
+                                }
+                            }
+
+                            MaeGradientDivider()
+
+                            // Model quick selector
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    Text("MODELO")
+                                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(Theme.Colors.textMuted)
+                                        .tracking(0.5)
+                                    if isFetchingQuickModels {
+                                        ProgressView()
+                                            .controlSize(.mini)
+                                    }
+                                }
+
+                                if !quickModels.isEmpty {
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 6) {
+                                            ForEach(quickModels, id: \.self) { model in
+                                                Button {
+                                                    apiModelName = model
+                                                    selectedProvider.saveLastModel(model)
+                                                } label: {
+                                                    Text(model)
+                                                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                                        .foregroundStyle(
+                                                            apiModelName == model
+                                                                ? Color.black
+                                                                : Theme.Colors.textPrimary.opacity(0.9)
+                                                        )
+                                                        .lineLimit(1)
+                                                        .padding(.horizontal, 8)
+                                                        .padding(.vertical, 5)
+                                                        .background(
+                                                            apiModelName == model
+                                                                ? Theme.Colors.accent
+                                                                : Theme.Colors.background.opacity(0.6)
+                                                        )
+                                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                                        .overlay(
+                                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                                .stroke(
+                                                                    apiModelName == model
+                                                                        ? Theme.Colors.accent.opacity(0.5)
+                                                                        : Theme.Colors.border,
+                                                                    lineWidth: 0.5
+                                                                )
+                                                        )
+                                                }
+                                                .buttonStyle(.plain)
+                                            }
+                                        }
+                                    }
+                                } else if !isFetchingQuickModels {
+                                    Text(apiModelName)
+                                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                        .foregroundStyle(Theme.Colors.textSecondary)
                                 }
                             }
                         }
@@ -148,6 +216,7 @@ struct SettingsView: View {
                                 .stroke(Theme.Colors.border, lineWidth: 0.5)
                         )
                         .maeStaggered(index: 1, baseDelay: 0.06)
+                        .onAppear { loadQuickModels() }
                     }
                 }
 
@@ -288,6 +357,29 @@ struct SettingsView: View {
             .padding(.trailing, Theme.Metrics.spacingDefault)
         }
         .preferredColorScheme(.dark)
+    }
+
+    private func loadQuickModels() {
+        quickModelTask?.cancel()
+        quickModelTask = Task {
+            let apiKey = KeychainManager.shared.loadKey(for: selectedProvider) ?? ""
+            guard !apiKey.isEmpty, selectedProvider.modelsEndpoint != nil else {
+                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponível" }
+                return
+            }
+            isFetchingQuickModels = true
+            defer { isFetchingQuickModels = false }
+            do {
+                let models = try await ModelFetcher.shared.fetchModels(for: selectedProvider, apiKey: apiKey)
+                guard !Task.isCancelled else { return }
+                if !models.isEmpty {
+                    quickModels = models
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponível" }
+            }
+        }
     }
 
     private func formatTokenCount(_ count: Int) -> String {

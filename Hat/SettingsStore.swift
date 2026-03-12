@@ -12,6 +12,7 @@ enum CloudProvider: String, CaseIterable, Identifiable {
     case openai = "OpenAI ChatGPT"
     case anthropic = "Anthropic Claude"
     case inception = "Inception Mercury"
+    case openrouter = "OpenRouter"
     case custom = "Personalizado (Outros)"
 
     var id: String { self.rawValue }
@@ -26,6 +27,8 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return "https://api.anthropic.com/v1/messages" // Note: Anthropics format is different natively, but proxy endpoints exist. The user requested Anthropic so we add it conceptually.
         case .inception:
             return "https://api.inceptionlabs.ai/v1/chat/completions"
+        case .openrouter:
+            return "https://openrouter.ai/api/v1/chat/completions"
         case .custom:
             return ""
         }
@@ -41,6 +44,8 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return "https://api.anthropic.com/v1/models"
         case .inception:
             return "https://api.inceptionlabs.ai/v1/models"
+        case .openrouter:
+            return "https://openrouter.ai/api/v1/models"
         case .custom:
             return nil
         }
@@ -51,8 +56,9 @@ enum CloudProvider: String, CaseIterable, Identifiable {
         case .google:    return "Gemini"
         case .openai:    return "OpenAI"
         case .anthropic: return "Claude"
-        case .inception: return "Mercury"
-        case .custom:    return "Custom"
+        case .inception:  return "Mercury"
+        case .openrouter: return "OpenRouter"
+        case .custom:     return "Custom"
         }
     }
 
@@ -61,8 +67,9 @@ enum CloudProvider: String, CaseIterable, Identifiable {
         case .google:    return "apiKey_google"
         case .openai:    return "apiKey_openai"
         case .anthropic: return "apiKey_anthropic"
-        case .inception: return "apiKey_inception"
-        case .custom:    return "apiKey_custom"
+        case .inception:  return "apiKey_inception"
+        case .openrouter: return "apiKey_openrouter"
+        case .custom:     return "apiKey_custom"
         }
     }
 
@@ -88,6 +95,8 @@ enum CloudProvider: String, CaseIterable, Identifiable {
             return ["API não disponível"]
         case .inception:
             return ["mercury-2"]
+        case .openrouter:
+            return ["API não disponível"]
         case .custom:
             return ["API não disponível"]
         }

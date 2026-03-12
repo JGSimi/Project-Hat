@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Hat</title>
+        <item>
+            <title>1.1.1.127</title>
+            <pubDate>Thu, 12 Mar 2026 17:04:54 +0000</pubDate>
+            <sparkle:version>127</sparkle:version>
+            <sparkle:shortVersionString>1.1.1.127</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.2</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <enclosure url="https://github.com/JGSimi/Project-Hat/releases/download/mac-app-v127/Hat-macOS.zip" length="6148682" type="application/octet-stream" sparkle:edSignature="u7xuNHQmVyINGeoOoguGt7J0qkJPSeQa4SzbFkbwwzLkIIny4z5L8QPcW2poioRRzpMg6fYu3notZc3vhTiJAg=="/>
+        </item>
+    </channel>
+</rss>

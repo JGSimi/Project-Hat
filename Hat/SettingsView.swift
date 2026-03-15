@@ -14,6 +14,12 @@ struct SettingsView: View {
     @State private var quickModels: [String] = []
     @State private var isFetchingQuickModels = false
     @State private var quickModelTask: Task<Void, Never>? = nil
+    @State private var quickModelSearchText = ""
+
+    private var filteredQuickModels: [String] {
+        if quickModelSearchText.isEmpty { return quickModels }
+        return quickModels.filter { $0.localizedCaseInsensitiveContains(quickModelSearchText) }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -112,6 +118,7 @@ struct SettingsView: View {
                                             Button {
                                                 selectedProvider.saveLastModel(apiModelName)
                                                 selectedProvider = provider
+                                                quickModelSearchText = ""
                                                 if let savedModel = provider.loadLastModel() {
                                                     apiModelName = savedModel
                                                 }
@@ -163,10 +170,17 @@ struct SettingsView: View {
                                     }
                                 }
 
-                                if !quickModels.isEmpty {
+                                if quickModels.count > 5 {
+                                    TextField("Buscar modelo...", text: $quickModelSearchText)
+                                        .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
+                                        .font(.system(size: 10, weight: .regular, design: .monospaced))
+                                        .accessibilityLabel("Filtrar modelos")
+                                }
+
+                                if !filteredQuickModels.isEmpty {
                                     ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 6) {
-                                            ForEach(quickModels, id: \.self) { model in
+                                            ForEach(filteredQuickModels, id: \.self) { model in
                                                 Button {
                                                     apiModelName = model
                                                     selectedProvider.saveLastModel(model)
@@ -201,6 +215,10 @@ struct SettingsView: View {
                                             }
                                         }
                                     }
+                                } else if !quickModelSearchText.isEmpty {
+                                    Text("Nenhum resultado")
+                                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                        .foregroundStyle(Theme.Colors.textMuted)
                                 } else if !isFetchingQuickModels {
                                     Text(apiModelName)
                                         .font(.system(size: 10, weight: .medium, design: .monospaced))

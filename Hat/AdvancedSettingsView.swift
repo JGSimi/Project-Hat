@@ -80,6 +80,13 @@ struct AdvancedSettingsView: View {
     @State private var isFetchingModels: Bool = false
     @State private var apiKeyTask: Task<Void, Never>? = nil
     @State private var fetchModelsTask: Task<Void, Never>? = nil
+    @State private var modelSearchText = ""
+
+    private var filteredDisplayModels: [String] {
+        let source = !fetchedModels.isEmpty ? fetchedModels : selectedProvider.availableModels
+        if modelSearchText.isEmpty { return source }
+        return source.filter { $0.localizedCaseInsensitiveContains(modelSearchText) }
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -285,6 +292,7 @@ struct AdvancedSettingsView: View {
                                     guard !Task.isCancelled else { return }
                                     apiEndpoint = newValue.defaultEndpoint
                                     fetchedModels = []
+                                    modelSearchText = ""
                                     if let savedModel = newValue.loadLastModel() {
                                         apiModelName = savedModel
                                     } else if let firstModel = newValue.availableModels.first {
@@ -326,8 +334,7 @@ struct AdvancedSettingsView: View {
                                     }
                                     
                                     Picker("", selection: $apiModelName) {
-                                        let displayModels = !fetchedModels.isEmpty ? fetchedModels : selectedProvider.availableModels
-                                        ForEach(displayModels, id: \.self) { model in
+                                        ForEach(filteredDisplayModels, id: \.self) { model in
                                             Text(model).tag(model)
                                         }
                                     }
@@ -339,6 +346,19 @@ struct AdvancedSettingsView: View {
                                     }
                                 }
                                 .padding(Theme.Metrics.spacingLarge)
+
+                                if (!fetchedModels.isEmpty ? fetchedModels : selectedProvider.availableModels).count > 5 {
+                                    HStack {
+                                        Spacer()
+                                        TextField("Filtrar modelos...", text: $modelSearchText)
+                                            .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
+                                            .font(.system(size: 11, weight: .regular, design: .monospaced))
+                                            .frame(width: 160)
+                                            .accessibilityLabel("Filtrar modelos")
+                                    }
+                                    .padding(.horizontal, Theme.Metrics.spacingLarge)
+                                    .padding(.bottom, Theme.Metrics.spacingDefault)
+                                }
                             }
                             
                             MaeDivider()

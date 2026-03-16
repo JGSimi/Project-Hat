@@ -195,6 +195,8 @@ sparkle_private_key.txt
 test_attr.swift
 test_capture.swift
 test*.swift
+*test*.sh
+claudetest.sh
 
 # Build output
 build_output/

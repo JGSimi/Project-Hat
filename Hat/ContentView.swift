@@ -461,7 +461,12 @@ struct ContentView: View {
     @State private var hostWindow: NSWindow?
     @AppStorage("windowOpacity") private var windowOpacity: Double = 1.0
     @AppStorage("globalTotalTokens") private var globalTotalTokens: Int = 0
+    @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
+    @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
+    @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
     @FocusState private var isInputFocused: Bool
+    @State private var placeholderIndex: Int = 0
+    private let placeholders = ["Mensagem...", "Resuma este texto...", "Explique como...", "Me ajude com..."]
 
     init(viewModel: AssistantViewModel) {
         self.viewModel = viewModel
@@ -529,14 +534,12 @@ struct ContentView: View {
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
 
-                if globalTotalTokens > 0 {
-                    Text("·")
-                        .foregroundStyle(Theme.Colors.textMuted)
-                    Text(formatTokenCount(globalTotalTokens) + " tokens")
-                        .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
-                        .help("Total de tokens usados no app")
-                }
+                MaeStatusBadge(
+                    label: inferenceMode == .local ? localModelName : apiModelName,
+                    color: Theme.Colors.success,
+                    isActive: true
+                )
+                .help("Modelo ativo")
 
                 Spacer()
 
@@ -654,6 +657,11 @@ struct ContentView: View {
                             .maeAppearAnimation(animation: Theme.Animation.expressive)
                         } else {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
+                                // Date separator when day changes
+                                if index == 0 || !Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp) {
+                                    MaeDateSeparator(date: viewModel.messages[index].timestamp)
+                                        .transition(.opacity)
+                                }
                                 ChatBubble(message: viewModel.messages[index], animationIndex: index)
                                     .id(viewModel.messages[index].id)
                                     .transition(.maePopIn)
@@ -675,6 +683,11 @@ struct ContentView: View {
 
             // Footer / Input Area
             VStack(spacing: 0) {
+                // Drop shadow separator
+                Rectangle()
+                    .fill(.clear)
+                    .frame(height: 0)
+                    .shadow(color: Color.black.opacity(0.18), radius: 8, y: -4)
                 // Attached Images and Files Preview
                 if !viewModel.pendingAttachments.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -767,7 +780,7 @@ struct ContentView: View {
                         }
                     }
 
-                    TextField("Mensagem...", text: $viewModel.inputText, axis: .vertical)
+                    TextField(placeholders[placeholderIndex], text: $viewModel.inputText, axis: .vertical)
                         .maeInputStyle(cornerRadius: 18)
                         .lineLimit(1...6)
                         .focused($isInputFocused)
@@ -775,6 +788,13 @@ struct ContentView: View {
                             Task { await viewModel.sendManualMessage() }
                         }
                         .disabled(viewModel.isProcessing)
+                        .onReceive(Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()) { _ in
+                            if viewModel.inputText.isEmpty {
+                                withAnimation(Theme.Animation.fade) {
+                                    placeholderIndex = (placeholderIndex + 1) % placeholders.count
+                                }
+                            }
+                        }
 
                     if viewModel.isProcessing {
                         MaeTypingDots()

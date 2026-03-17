@@ -63,6 +63,11 @@ enum Theme {
         // Gradient helpers
         static let gradientStart       = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
         static let gradientEnd         = Color(NSColor(red: 0.65, green: 0.40, blue: 1.0, alpha: 1.0))
+        static let gradientSubtle      = LinearGradient(
+            colors: [gradientStart.opacity(0.04), gradientEnd.opacity(0.02)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
     // MARK: Typography — SF Pro Rounded (Apple native)
@@ -755,6 +760,113 @@ struct MaeEmptyState: View {
                 }
             }
         }
+    }
+}
+
+// MARK: MaeDateSeparator
+/// Centered date pill for chat conversation separators.
+struct MaeDateSeparator: View {
+    let date: Date
+
+    private var label: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Hoje" }
+        if calendar.isDateInYesterday(date) { return "Ontem" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "d MMM"
+        return formatter.string(from: date)
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            capsuleLine
+            Text(label)
+                .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Colors.textMuted)
+            capsuleLine
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 24)
+    }
+
+    private var capsuleLine: some View {
+        Rectangle()
+            .fill(Theme.Colors.border)
+            .frame(height: 0.5)
+    }
+}
+
+// MARK: MaeActionButton
+/// Standardized primary CTA button (white bg, black text, glow hover).
+struct MaeActionButton: View {
+    let label: String
+    var icon: String? = nil
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .medium))
+                }
+                Text(label)
+                    .font(Theme.Typography.bodyBold)
+            }
+            .foregroundColor(.black)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 24)
+            .background(
+                RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
+                    .fill(Theme.Colors.accent.opacity(0.9))
+            )
+        }
+        .buttonStyle(.plain)
+        .maeGlowHover()
+        .maePressEffect()
+    }
+}
+
+// MARK: MaeGradientBorder
+/// Animated gradient border modifier for focused inputs and highlighted cards.
+struct MaeGradientBorderModifier: ViewModifier {
+    var cornerRadius: CGFloat = Theme.Metrics.radiusMedium
+    var lineWidth: CGFloat = 1.0
+    @State private var rotation: Double = 0
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(
+                        AngularGradient(
+                            colors: [
+                                Theme.Colors.gradientStart.opacity(0.4),
+                                Theme.Colors.gradientEnd.opacity(0.2),
+                                Theme.Colors.gradientStart.opacity(0.1),
+                                Theme.Colors.gradientEnd.opacity(0.4),
+                                Theme.Colors.gradientStart.opacity(0.4)
+                            ],
+                            center: .center,
+                            startAngle: .degrees(rotation),
+                            endAngle: .degrees(rotation + 360)
+                        ),
+                        lineWidth: lineWidth
+                    )
+            )
+            .onAppear {
+                withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
+                    rotation = 360
+                }
+            }
+    }
+}
+
+extension View {
+    /// Animated gradient border — focused inputs, highlighted cards
+    func maeGradientBorder(cornerRadius: CGFloat = Theme.Metrics.radiusMedium, lineWidth: CGFloat = 1.0) -> some View {
+        self.modifier(MaeGradientBorderModifier(cornerRadius: cornerRadius, lineWidth: lineWidth))
     }
 }
 

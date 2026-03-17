@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var isFetchingQuickModels = false
     @State private var quickModelTask: Task<Void, Never>? = nil
     @State private var quickModelSearchText = ""
+    @State private var tokenBarAppeared = false
 
     private var filteredQuickModels: [String] {
         if quickModelSearchText.isEmpty { return quickModels }
@@ -40,6 +41,7 @@ struct SettingsView: View {
             .padding(.top, 20)
             .padding(.bottom, 16)
 
+            ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 10) {
                 // Model Card
                 VStack(spacing: 0) {
@@ -272,26 +274,46 @@ struct SettingsView: View {
                                 .help("Resetar contadores")
                             }
 
-                            // Visual ratio bar
+                            // Visual ratio bar (animated)
                             GeometryReader { geo in
                                 let inputRatio = globalTotalTokens > 0
                                     ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
                                     : 0.5
                                 HStack(spacing: 1) {
                                     RoundedRectangle(cornerRadius: 3)
-                                        .fill(Theme.Colors.accentBlue.opacity(0.7))
-                                        .frame(width: max(4, geo.size.width * inputRatio))
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Theme.Colors.accentBlue.opacity(0.8), Theme.Colors.accentBlue.opacity(0.5)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .frame(width: tokenBarAppeared ? max(4, geo.size.width * inputRatio) : 0)
                                     RoundedRectangle(cornerRadius: 3)
-                                        .fill(Theme.Colors.accentTeal.opacity(0.6))
+                                        .fill(
+                                            LinearGradient(
+                                                colors: [Theme.Colors.accentTeal.opacity(0.5), Theme.Colors.accentTeal.opacity(0.7)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
                                 }
                             }
                             .frame(height: 4)
                             .clipShape(RoundedRectangle(cornerRadius: 3))
+                            .onAppear {
+                                withAnimation(Theme.Animation.expressive) {
+                                    tokenBarAppeared = true
+                                }
+                            }
+
+                            let inputPct = globalTotalTokens > 0 ? Int(round(Double(globalInputTokens) / Double(globalTotalTokens) * 100)) : 0
+                            let outputPct = globalTotalTokens > 0 ? 100 - inputPct : 0
 
                             HStack(spacing: 12) {
                                 TokenStat(label: "Total", value: formatTokenCount(globalTotalTokens), isPrimary: true)
-                                TokenStat(label: "Input", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentBlue)
-                                TokenStat(label: "Output", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentTeal)
+                                TokenStat(label: "Input \(inputPct)%", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentBlue)
+                                TokenStat(label: "Output \(outputPct)%", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentTeal)
                                 Spacer()
                             }
                         }
@@ -370,6 +392,7 @@ struct SettingsView: View {
                 .padding(.bottom, 14)
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
+            } // ScrollView
         }
         .background(MaePageBackground())
         .overlay(alignment: .topTrailing) {

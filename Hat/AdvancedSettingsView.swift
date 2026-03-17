@@ -90,25 +90,56 @@ struct AdvancedSettingsView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selectedTab) {
-                Spacer().frame(height: 20)
-                
-                ForEach(SettingsTab.allCases) { tab in
-                    NavigationLink(value: tab) {
-                        Label {
-                            Text(tab.rawValue)
-                                .font(Theme.Typography.bodySmall)
-                        } icon: {
-                            Image(systemName: tab.icon)
-                                .symbolEffect(.bounce, value: selectedTab == tab)
+            VStack(spacing: 0) {
+                // Sidebar header
+                HStack(spacing: 10) {
+                    Image("hat-svgrepo-com")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                        .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                    Text("Configurações")
+                        .font(Theme.Typography.heading)
+                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 28)
+                .padding(.bottom, 16)
+
+                List(selection: $selectedTab) {
+                    ForEach(SettingsTab.allCases) { tab in
+                        NavigationLink(value: tab) {
+                            HStack(spacing: 10) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(selectedTab == tab ? Theme.Colors.accentBlue.opacity(0.15) : .clear)
+                                        .frame(width: 28, height: 28)
+                                    Image(systemName: tab.icon)
+                                        .font(.system(size: 13, weight: .medium))
+                                        .foregroundStyle(selectedTab == tab ? Theme.Colors.accentBlue : Theme.Colors.textSecondary)
+                                        .symbolEffect(.bounce, value: selectedTab == tab)
+                                }
+                                Text(tab.rawValue)
+                                    .font(Theme.Typography.bodySmall)
+                                    .foregroundStyle(selectedTab == tab ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                            }
+                            .padding(.vertical, 4)
                         }
-                        .padding(.vertical, 6)
                     }
                 }
+                .scrollContentBackground(.hidden)
+
+                // Version footer
+                Text("Hat v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                    .font(Theme.Typography.micro)
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 12)
             }
-            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
-            .scrollContentBackground(.hidden)
             .background(Theme.Colors.background)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
             
         } detail: {
             ZStack {

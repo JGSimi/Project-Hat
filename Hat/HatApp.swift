@@ -233,7 +233,7 @@ class WelcomeWindowManager {
 struct WelcomeView: View {
     let width: CGFloat
     let height: CGFloat
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -243,33 +243,39 @@ struct WelcomeView: View {
                     .scaledToFit()
                     .frame(maxWidth: .infinity, maxHeight: 350)
                     .padding(.horizontal, 40)
-                
-                Text("Bem-vindo")
-                    .font(Theme.Typography.largeTitle)
-                    .foregroundColor(Theme.Colors.textPrimary)
-                    .maeStaggered(index: 1, baseDelay: 0.15)
+
+                VStack(spacing: 6) {
+                    Text("Bem-vindo ao Hat")
+                        .font(Theme.Typography.largeTitle)
+                        .foregroundColor(Theme.Colors.textPrimary)
+                        .maeStaggered(index: 1, baseDelay: 0.15)
+                    Text("Seu assistente de IA na barra de menus")
+                        .font(Theme.Typography.bodySmall)
+                        .foregroundColor(Theme.Colors.textSecondary)
+                        .maeStaggered(index: 2, baseDelay: 0.15)
+                }
             }
             .padding(.top, 50)
             .padding(.bottom, 20)
-            
+
             // Content
             VStack(spacing: Theme.Metrics.spacingXLarge) {
-                
-                VStack(spacing: 20) {
+
+                VStack(spacing: 16) {
                     FeatureRow(
                         icon: "arrow.up.to.line.compact",
                         title: "Sempre Pronto",
                         description: "Clique no ícone na barra de menus no topo da tela (perto do relógio) para abrir o chat a qualquer momento."
                     )
                     .maeStaggered(index: 3, baseDelay: 0.10)
-                    
+
                     FeatureRow(
                         icon: "macwindow.badge.plus",
                         title: "Análise de Tela Inteligente",
                         description: "Pressione ⌘ + ⇧ + Z para capturar sua tela e receber ajuda contextual automática."
                     )
                     .maeStaggered(index: 4, baseDelay: 0.10)
-                    
+
                     FeatureRow(
                         icon: "doc.on.clipboard",
                         title: "Análise de Área de Transferência",
@@ -278,22 +284,22 @@ struct WelcomeView: View {
                     .maeStaggered(index: 5, baseDelay: 0.10)
                 }
                 .padding(.horizontal, 40)
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     WelcomeWindowManager.shared.closeWindow()
                 }) {
                     Text("Começar a Usar")
                         .font(Theme.Typography.bodyBold)
-                        .foregroundColor(.black) // #000000
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 32)
+                        .foregroundColor(.black)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 36)
                 }
                 .buttonStyle(.plain)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(Theme.Colors.accent.opacity(0.85))
+                        .fill(Theme.Colors.accent.opacity(0.9))
                 )
                 .maeGlowHover()
                 .maePressEffect()
@@ -314,20 +320,31 @@ struct FeatureRow: View {
     let icon: String
     let title: String
     let description: String
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Metrics.spacingLarge) {
             Image(systemName: icon)
-                .font(.system(size: 20, weight: .light))
-                .foregroundColor(Theme.Colors.accent)
-                .symbolEffect(.pulse.byLayer)
-                .frame(width: 32)
-            
+                .font(.system(size: 18, weight: .light))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: 36, height: 36)
+                .background(Theme.Colors.accentSubtle.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
+                )
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(Theme.Typography.bodyBold)
                     .foregroundColor(Theme.Colors.textPrimary)
-                
+
                 Text(description)
                     .font(Theme.Typography.bodySmall)
                     .foregroundColor(Theme.Colors.textSecondary)
@@ -351,11 +368,23 @@ struct PermissionRowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Metrics.spacingLarge) {
             Image(systemName: icon)
-                .font(.system(size: 20, weight: .light))
-                .foregroundColor(Theme.Colors.accent)
+                .font(.system(size: 18, weight: .light))
+                .foregroundStyle(
+                    isGranted
+                        ? AnyShapeStyle(Theme.Colors.success)
+                        : AnyShapeStyle(LinearGradient(
+                            colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                )
                 .frame(width: 36, height: 36)
-                .background(Theme.Colors.accentSubtle)
+                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentSubtle)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
+                )
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -380,13 +409,13 @@ struct PermissionRowView: View {
                     Text("Permitir")
                         .font(Theme.Typography.bodyBold)
                         .foregroundColor(.black)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 14)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 16)
                 }
                 .buttonStyle(.plain)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                        .fill(Theme.Colors.accent.opacity(0.85))
+                        .fill(Theme.Colors.accent.opacity(0.9))
                 )
                 .maeGlowHover()
                 .maePressEffect()
@@ -412,14 +441,25 @@ struct PermissionsView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            VStack(spacing: 8) {
-                Image(systemName: "lock.shield")
-                    .font(.system(size: 40, weight: .light))
-                    .foregroundColor(Theme.Colors.accent)
-                    .maeStaggered(index: 0, baseDelay: 0.12)
+            VStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Theme.Colors.accentBlue.opacity(0.08))
+                        .frame(width: 72, height: 72)
+                    Image(systemName: "lock.shield")
+                        .font(.system(size: 32, weight: .light))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+                .maeStaggered(index: 0, baseDelay: 0.12)
 
                 Text("Permissões Necessárias")
-                    .font(Theme.Typography.largeTitle)
+                    .font(Theme.Typography.title)
                     .foregroundColor(Theme.Colors.textPrimary)
                     .maeStaggered(index: 1, baseDelay: 0.12)
 

@@ -30,7 +30,7 @@ struct SettingsView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 18, height: 18)
-                    .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                    .foregroundStyle(Theme.Colors.accentBlue.opacity(0.8))
                 Text("Configurações")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
@@ -65,24 +65,34 @@ struct SettingsView: View {
 
                     // Active Model
                     HStack {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             Text("MODELO ATIVO")
                                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Theme.Colors.textMuted)
                                 .tracking(0.5)
 
-                            HStack(spacing: 6) {
+                            HStack(spacing: 8) {
                                 Circle()
-                                    .fill(Color.green.opacity(0.8))
+                                    .fill(Theme.Colors.success.opacity(0.9))
                                     .frame(width: 6, height: 6)
-                                    .shadow(color: Color.green.opacity(0.4), radius: 3)
+                                    .shadow(color: Theme.Colors.success.opacity(0.5), radius: 3)
                                     .maePulse(duration: 2.0)
 
-                                Text(inferenceMode == .local ? localModelName : "\(selectedProvider.rawValue) · \(apiModelName)")
+                                Text(inferenceMode == .local ? localModelName : apiModelName)
                                     .font(Theme.Typography.bodyBold)
                                     .foregroundStyle(Theme.Colors.textPrimary)
                                     .lineLimit(1)
                                     .truncationMode(.middle)
+                            }
+
+                            if inferenceMode == .api {
+                                Text(selectedProvider.rawValue)
+                                    .font(Theme.Typography.micro)
+                                    .foregroundStyle(Theme.Colors.accentBlue.opacity(0.8))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Theme.Colors.accentBlue.opacity(0.1))
+                                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                             }
                         }
                         Spacer(minLength: 0)
@@ -241,50 +251,48 @@ struct SettingsView: View {
                 // Token Usage Card
                 if globalTotalTokens > 0 {
                     VStack(spacing: 0) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("USO DE TOKENS")
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundStyle(Theme.Colors.textMuted)
-                                .tracking(0.5)
-
-                            HStack(spacing: 16) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Total")
-                                        .font(.system(size: 9, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                    Text(formatTokenCount(globalTotalTokens))
-                                        .font(.system(size: 15, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textPrimary)
-                                }
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Input")
-                                        .font(.system(size: 9, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                    Text(formatTokenCount(globalInputTokens))
-                                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textSecondary)
-                                }
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Output")
-                                        .font(.system(size: 9, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                    Text(formatTokenCount(globalOutputTokens))
-                                        .font(.system(size: 13, weight: .medium, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textSecondary)
-                                }
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack {
+                                Text("USO DE TOKENS")
+                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Theme.Colors.textMuted)
+                                    .tracking(0.5)
                                 Spacer()
                                 Button {
                                     SettingsManager.resetGlobalTokens()
                                 } label: {
-                                    Text("Resetar")
-                                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                                    Image(systemName: "arrow.counterclockwise")
+                                        .font(.system(size: 9, weight: .medium))
                                         .foregroundStyle(Theme.Colors.textMuted)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Theme.Colors.surfaceSecondary.opacity(0.5))
-                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                        .padding(4)
+                                        .background(Theme.Colors.surface)
+                                        .clipShape(Circle())
                                 }
                                 .buttonStyle(.plain)
+                                .help("Resetar contadores")
+                            }
+
+                            // Visual ratio bar
+                            GeometryReader { geo in
+                                let inputRatio = globalTotalTokens > 0
+                                    ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
+                                    : 0.5
+                                HStack(spacing: 1) {
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(Theme.Colors.accentBlue.opacity(0.7))
+                                        .frame(width: max(4, geo.size.width * inputRatio))
+                                    RoundedRectangle(cornerRadius: 3)
+                                        .fill(Theme.Colors.accentTeal.opacity(0.6))
+                                }
+                            }
+                            .frame(height: 4)
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+
+                            HStack(spacing: 12) {
+                                TokenStat(label: "Total", value: formatTokenCount(globalTotalTokens), isPrimary: true)
+                                TokenStat(label: "Input", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentBlue)
+                                TokenStat(label: "Output", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentTeal)
+                                Spacer()
                             }
                         }
                         .padding(14)
@@ -404,6 +412,30 @@ struct SettingsView: View {
         if count >= 1_000_000 { return String(format: "%.1fM", Double(count) / 1_000_000) }
         if count >= 1_000 { return String(format: "%.1fK", Double(count) / 1_000) }
         return "\(count)"
+    }
+}
+
+// MARK: - Token Stat Component
+private struct TokenStat: View {
+    let label: String
+    let value: String
+    var isPrimary: Bool = false
+    var color: Color? = nil
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                if let color {
+                    Circle().fill(color).frame(width: 5, height: 5)
+                }
+                Text(label)
+                    .font(Theme.Typography.micro)
+                    .foregroundStyle(Theme.Colors.textMuted)
+            }
+            Text(value)
+                .font(.system(size: isPrimary ? 15 : 13, weight: isPrimary ? .semibold : .medium, design: .rounded))
+                .foregroundStyle(isPrimary ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+        }
     }
 }
 

@@ -37,23 +37,32 @@ enum Theme {
         // Surfaces — slightly more visible for depth
         static let surface             = Color.white.opacity(0.06)
         static let surfaceSecondary    = Color.white.opacity(0.05)
+        static let surfaceElevated     = Color.white.opacity(0.08)
 
         // Borders — more visible for definition
         static let border              = Color.white.opacity(0.08)
         static let borderHighlight     = Color.white.opacity(0.14)
+        static let borderFocused       = Color(NSColor(red: 0.45, green: 0.55, blue: 1.0, alpha: 0.5))
 
         // Text
         static let textPrimary         = Color.white.opacity(0.95)
         static let textSecondary       = Color.white.opacity(0.55)
         static let textMuted           = Color.white.opacity(0.30)
 
-        // Accent
+        // Accent — soft indigo-blue for a modern feel
         static let accent              = Color.white
         static let accentSubtle        = Color.white.opacity(0.15)
+        static let accentBlue          = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
+        static let accentTeal          = Color(NSColor(red: 0.30, green: 0.78, blue: 0.75, alpha: 1.0))
 
         // Semantic
-        static let success             = Color.green
-        static let error               = Color.red
+        static let success             = Color(NSColor(red: 0.30, green: 0.85, blue: 0.55, alpha: 1.0))
+        static let error               = Color(NSColor(red: 1.0, green: 0.38, blue: 0.38, alpha: 1.0))
+        static let warning             = Color(NSColor(red: 1.0, green: 0.78, blue: 0.30, alpha: 1.0))
+
+        // Gradient helpers
+        static let gradientStart       = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
+        static let gradientEnd         = Color(NSColor(red: 0.65, green: 0.40, blue: 1.0, alpha: 1.0))
     }
 
     // MARK: Typography — SF Pro Rounded (Apple native)
@@ -61,11 +70,14 @@ enum Theme {
         static let largeTitle    = Font.system(size: 28, weight: .bold, design: .rounded)
         static let title         = Font.system(size: 22, weight: .bold, design: .rounded)
         static let heading       = Font.system(size: 17, weight: .semibold, design: .rounded)
+        static let subheading    = Font.system(size: 15, weight: .medium, design: .rounded)
         static let bodyBold      = Font.system(size: 14, weight: .medium, design: .rounded)
         static let body          = Font.system(size: 14, weight: .regular, design: .rounded)
         static let bodySmall     = Font.system(size: 13, weight: .regular, design: .rounded)
         static let caption       = Font.system(size: 11, weight: .regular, design: .rounded)
+        static let captionBold   = Font.system(size: 11, weight: .semibold, design: .rounded)
         static let sectionHeader = Font.system(size: 11, weight: .semibold, design: .rounded)
+        static let micro         = Font.system(size: 9, weight: .medium, design: .rounded)
     }
 
     // MARK: Metrics
@@ -478,9 +490,13 @@ struct MaeDivider: View {
 // MARK: MaeGradientDivider
 /// Gradient fade divider (center → edges).
 struct MaeGradientDivider: View {
+    var tinted: Bool = false
+
     var body: some View {
         LinearGradient(
-            colors: [.clear, Theme.Colors.border, .clear],
+            colors: tinted
+                ? [.clear, Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.2), .clear]
+                : [.clear, Theme.Colors.border, .clear],
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -632,5 +648,145 @@ struct MaeTextField: View {
         TextField(placeholder, text: $text, axis: axis)
             .maeInputStyle()
             .lineLimit(lineLimit)
+    }
+}
+
+// MARK: MaeStatusBadge
+/// Compact status indicator with dot + label.
+struct MaeStatusBadge: View {
+    let label: String
+    var color: Color = Theme.Colors.success
+    var isActive: Bool = true
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(color.opacity(isActive ? 0.9 : 0.4))
+                .frame(width: 6, height: 6)
+                .shadow(color: color.opacity(isActive ? 0.5 : 0), radius: 3)
+                .maePulse(duration: isActive ? 2.0 : 0)
+
+            Text(label)
+                .font(Theme.Typography.micro)
+                .foregroundStyle(Theme.Colors.textSecondary)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Theme.Colors.surfaceSecondary)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+    }
+}
+
+// MARK: MaeAccentGradient
+/// Reusable accent gradient for highlighted elements.
+struct MaeAccentGradient: View {
+    var opacity: Double = 1.0
+
+    var body: some View {
+        LinearGradient(
+            colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .opacity(opacity)
+    }
+}
+
+// MARK: MaeChip
+/// Small selectable chip/tag component.
+struct MaeChip: View {
+    let label: String
+    var isSelected: Bool = false
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundStyle(isSelected ? Color.black : Theme.Colors.textPrimary.opacity(0.9))
+                .lineLimit(1)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(isSelected ? Theme.Colors.accent : Theme.Colors.surfaceSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(isSelected ? Theme.Colors.accent.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: MaeEmptyState
+/// Reusable empty state with icon, title, and subtitle.
+struct MaeEmptyState: View {
+    let icon: String
+    let title: String
+    var subtitle: String? = nil
+
+    var body: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Theme.Colors.accent.opacity(0.04))
+                    .frame(width: 80, height: 80)
+                Circle()
+                    .fill(Theme.Colors.accent.opacity(0.06))
+                    .frame(width: 56, height: 56)
+                Image(systemName: icon)
+                    .font(.system(size: 24, weight: .light))
+                    .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+            }
+            .maeFloating(amplitude: 4, duration: 4.0)
+
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(Theme.Typography.heading)
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
+
+                if let subtitle {
+                    Text(subtitle)
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+            }
+        }
+    }
+}
+
+// MARK: MaeTooltipButton
+/// Icon button that shows a contextual tooltip and has a hover background.
+struct MaeTooltipButton: View {
+    let icon: String
+    var size: CGFloat = 13
+    var helpText: String
+    var action: () -> Void
+    @State private var isHovered = false
+    @State private var tapCount: Int = 0
+
+    var body: some View {
+        Button {
+            tapCount += 1
+            action()
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: size, weight: .regular))
+                .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                .symbolEffect(.bounce, value: tapCount)
+                .frame(width: 28, height: 28)
+                .background(isHovered ? Theme.Colors.surfaceElevated : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(Theme.Animation.hover) { isHovered = hovering }
+        }
+        .help(helpText)
+        .accessibilityLabel(helpText)
     }
 }

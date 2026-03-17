@@ -54,8 +54,8 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .general:   return "slider.horizontal.3"
-        case .models:    return "cpu"
-        case .prompt:    return "text.bubble"
+        case .models:    return "cpu.fill"
+        case .prompt:    return "text.bubble.fill"
         case .shortcuts: return "command"
         }
     }

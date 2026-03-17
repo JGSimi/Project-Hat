@@ -53,6 +53,7 @@ struct AnalysisView: View {
     @State private var followUpText: String = ""
     @State private var showConfirmation = false
     @State private var localImage: NSImage? = nil
+    @State private var analysisSpinAngle: Double = 0
     @FocusState private var isFollowUpFocused: Bool
 
     init(viewModel: AssistantViewModel) {
@@ -71,9 +72,16 @@ struct AnalysisView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         // Header
                         HStack(spacing: 14) {
-                            Text("Análise de Tela")
-                                .font(Theme.Typography.title)
-                                .foregroundStyle(Theme.Colors.textPrimary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Análise de Tela")
+                                    .font(Theme.Typography.title)
+                                    .foregroundStyle(Theme.Colors.textPrimary)
+                                if viewModel.isAnalyzingScreen {
+                                    Text("Processando...")
+                                        .font(Theme.Typography.micro)
+                                        .foregroundStyle(Theme.Colors.accentBlue)
+                                }
+                            }
                             
                             Spacer()
                             
@@ -116,40 +124,89 @@ struct AnalysisView: View {
                             
                         // Content
                         if viewModel.isAnalyzingScreen {
-                            VStack(spacing: Theme.Metrics.spacingLarge) {
+                            VStack(spacing: 20) {
                                 Spacer()
-                                MaeTypingDots()
-                                    .scaleEffect(1.5)
-                                    .padding(.bottom, 4)
-                                Text("Analisando...")
-                                    .font(Theme.Typography.bodyBold)
-                                    .foregroundColor(Theme.Colors.textSecondary)
-                                    .maePulse(duration: 2.0)
-                                Text("Processando captura de tela com IA...")
-                                    .font(Theme.Typography.bodySmall)
-                                    .foregroundColor(Theme.Colors.textMuted)
-                                    .maeStaggered(index: 1, baseDelay: 0.15)
+
+                                // Animated analysis indicator
+                                ZStack {
+                                    Circle()
+                                        .stroke(Theme.Colors.border, lineWidth: 2)
+                                        .frame(width: 60, height: 60)
+                                    Circle()
+                                        .trim(from: 0, to: 0.3)
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                                        )
+                                        .frame(width: 60, height: 60)
+                                        .rotationEffect(.degrees(analysisSpinAngle))
+                                        .onAppear {
+                                            withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+                                                analysisSpinAngle = 360
+                                            }
+                                        }
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 20, weight: .light))
+                                        .foregroundStyle(Theme.Colors.accentBlue)
+                                        .symbolEffect(.pulse.byLayer)
+                                }
+
+                                VStack(spacing: 6) {
+                                    Text("Analisando...")
+                                        .font(Theme.Typography.subheading)
+                                        .foregroundColor(Theme.Colors.textPrimary.opacity(0.8))
+                                    Text("Processando captura de tela com IA")
+                                        .font(Theme.Typography.caption)
+                                        .foregroundColor(Theme.Colors.textMuted)
+                                        .maeStaggered(index: 1, baseDelay: 0.15)
+                                }
+
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity)
                             .transition(.maeFadeScale)
                         } else if viewModel.analysisResult.isEmpty {
-                            VStack {
+                            VStack(spacing: 16) {
                                 Spacer()
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 40, weight: .ultraLight))
-                                    .foregroundColor(Theme.Colors.accent.opacity(0.3))
-                                    .symbolEffect(.breathe.plain)
-                                    .padding(.bottom, 8)
-                                Text("Nenhuma análise disponível.")
-                                    .font(Theme.Typography.bodySmall)
-                                    .foregroundColor(Theme.Colors.textSecondary)
-                                    .maeStaggered(index: 1, baseDelay: 0.12)
-                                Text("Pressione ⌘+⇧+Z para capturar sua tela")
-                                    .font(Theme.Typography.caption)
-                                    .foregroundColor(Theme.Colors.textMuted)
-                                    .padding(.top, 4)
+
+                                ZStack {
+                                    Circle()
+                                        .fill(Theme.Colors.accentBlue.opacity(0.05))
+                                        .frame(width: 80, height: 80)
+                                    Image(systemName: "viewfinder")
+                                        .font(.system(size: 32, weight: .ultraLight))
+                                        .foregroundColor(Theme.Colors.accent.opacity(0.3))
+                                        .symbolEffect(.breathe.plain)
+                                }
+
+                                VStack(spacing: 6) {
+                                    Text("Nenhuma análise disponível")
+                                        .font(Theme.Typography.subheading)
+                                        .foregroundColor(Theme.Colors.textSecondary)
+                                        .maeStaggered(index: 1, baseDelay: 0.12)
+
+                                    HStack(spacing: 4) {
+                                        Text("Pressione")
+                                            .font(Theme.Typography.caption)
+                                            .foregroundColor(Theme.Colors.textMuted)
+                                        Text("⌘⇧Z")
+                                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                                            .foregroundColor(Theme.Colors.textSecondary)
+                                            .padding(.horizontal, 5)
+                                            .padding(.vertical, 2)
+                                            .background(Theme.Colors.surface)
+                                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                                        Text("para capturar")
+                                            .font(Theme.Typography.caption)
+                                            .foregroundColor(Theme.Colors.textMuted)
+                                    }
                                     .maeStaggered(index: 2, baseDelay: 0.12)
+                                }
+
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity)

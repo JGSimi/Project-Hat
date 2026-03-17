@@ -533,7 +533,7 @@ struct ContentView: View {
                     Text("·")
                         .foregroundStyle(Theme.Colors.textMuted)
                     Text(formatTokenCount(globalTotalTokens) + " tokens")
-                        .font(.system(size: 10, weight: .regular, design: .rounded))
+                        .font(Theme.Typography.micro)
                         .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                         .help("Total de tokens usados no app")
                 }
@@ -541,13 +541,13 @@ struct ContentView: View {
                 Spacer()
 
                 HStack(spacing: 2) {
-                    MaeIconButton(icon: "macwindow.badge.plus", size: 13, helpText: "Abrir Janela de Análise") {
+                    MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
                         AnalysisWindowManager.shared.showWindow()
                     }
-                    MaeIconButton(icon: "trash", size: 13, helpText: "Limpar histórico") {
+                    MaeTooltipButton(icon: "trash", helpText: "Limpar histórico") {
                         withAnimation { viewModel.clearHistory() }
                     }
-                    MaeIconButton(icon: "circle.lefthalf.filled", size: 13, helpText: "Opacidade") {
+                    MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
                         withAnimation(Theme.Animation.smooth) {
                             showOpacitySlider.toggle()
                         }
@@ -563,7 +563,7 @@ struct ContentView: View {
                         .padding(12)
                         .frame(width: 200)
                     }
-                    MaeIconButton(icon: "gearshape", size: 13, helpText: "Configurações") {
+                    MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
                         withAnimation(Theme.Animation.smooth) {
                             showSettings = true
                         }
@@ -581,30 +581,48 @@ struct ContentView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         if viewModel.messages.isEmpty {
-                            VStack(spacing: 24) {
-                                Spacer().frame(height: 40)
+                            VStack(spacing: 20) {
+                                Spacer().frame(height: 30)
 
-                                // Icon with subtle glow
+                                // Icon with accent glow ring
                                 ZStack {
                                     Circle()
-                                        .fill(Theme.Colors.accent.opacity(0.04))
-                                        .frame(width: 80, height: 80)
+                                        .fill(
+                                            RadialGradient(
+                                                colors: [Theme.Colors.gradientStart.opacity(0.06), .clear],
+                                                center: .center,
+                                                startRadius: 10,
+                                                endRadius: 50
+                                            )
+                                        )
+                                        .frame(width: 90, height: 90)
                                     Circle()
-                                        .fill(Theme.Colors.accent.opacity(0.06))
-                                        .frame(width: 56, height: 56)
+                                        .fill(Theme.Colors.surfaceSecondary)
+                                        .frame(width: 60, height: 60)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [Theme.Colors.gradientStart.opacity(0.3), Theme.Colors.gradientEnd.opacity(0.15)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                        )
                                     Image("sunglasses-2-svgrepo-com")
                                         .renderingMode(.template)
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 28, height: 28)
-                                        .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                                        .frame(width: 26, height: 26)
+                                        .foregroundStyle(Theme.Colors.accent.opacity(0.6))
                                 }
-                                .maeFloating(amplitude: 4, duration: 4.0)
+                                .maeFloating(amplitude: 3, duration: 4.5)
 
                                 VStack(spacing: 6) {
-                                    Text("Como posso ajudar?")
+                                    Text(greetingText)
                                         .font(Theme.Typography.heading)
-                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
+                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
                                         .maeStaggered(index: 1, baseDelay: 0.12)
                                     Text("Pergunte qualquer coisa ou use os atalhos abaixo.")
                                         .font(Theme.Typography.caption)
@@ -613,7 +631,7 @@ struct ContentView: View {
                                 }
 
                                 // Quick action suggestions
-                                VStack(spacing: 8) {
+                                VStack(spacing: 6) {
                                     EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
                                         Task { await viewModel.processarIA() }
                                     }
@@ -629,8 +647,8 @@ struct ContentView: View {
                                     }
                                     .maeStaggered(index: 5, baseDelay: 0.10)
                                 }
-                                .padding(.horizontal, 40)
-                                .padding(.top, 8)
+                                .padding(.horizontal, 36)
+                                .padding(.top, 6)
                             }
                             .frame(maxWidth: .infinity)
                             .maeAppearAnimation(animation: Theme.Animation.expressive)
@@ -717,21 +735,22 @@ struct ContentView: View {
                 MaeGradientDivider()
 
                 if viewModel.conversationTotalTokens > 0 {
-                    HStack(spacing: 6) {
-                        Image(systemName: "number.circle")
-                            .font(.system(size: 9))
-                            .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
-                        Text("\(formatTokenCount(viewModel.conversationTotalTokens)) tokens na conversa")
-                            .font(.system(size: 9, weight: .medium, design: .rounded))
+                    HStack(spacing: 5) {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.system(size: 8))
+                            .foregroundStyle(Theme.Colors.accentBlue.opacity(0.5))
+                        Text("\(formatTokenCount(viewModel.conversationTotalTokens)) tokens")
+                            .font(Theme.Typography.micro)
                             .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
                         Spacer()
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 3)
+                    .transition(.maeSlideUp)
                 }
 
-                HStack(alignment: .bottom, spacing: 10) {
-                    MaeIconButton(icon: "plus.circle.fill", size: 16, color: Theme.Colors.textSecondary.opacity(0.8), helpText: "Anexar arquivo/imagem") {
+                HStack(alignment: .bottom, spacing: 8) {
+                    MaeTooltipButton(icon: "plus.circle.fill", size: 16, helpText: "Anexar arquivo/imagem") {
                         let panel = NSOpenPanel()
                         panel.allowedContentTypes = [UTType.image, UTType.plainText, UTType.pdf, UTType.json, UTType.sourceCode, UTType.data]
                         panel.allowsMultipleSelection = true
@@ -769,7 +788,8 @@ struct ContentView: View {
                                 .font(.system(size: 28))
                                 .foregroundStyle(
                                     (viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
-                                    ? Theme.Colors.textMuted.opacity(0.5) : Theme.Colors.accent
+                                    ? Theme.Colors.textMuted.opacity(0.4)
+                                    : Theme.Colors.accent
                                 )
                                 .background(Theme.Colors.background.clipShape(Circle()))
                                 .frame(width: 30, height: 30)
@@ -840,6 +860,16 @@ struct ContentView: View {
         return nil
     }
 
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:  return "Bom dia! Como posso ajudar?"
+        case 12..<18: return "Boa tarde! Como posso ajudar?"
+        case 18..<23: return "Boa noite! Como posso ajudar?"
+        default:      return "Como posso ajudar?"
+        }
+    }
+
     private func formatTokenCount(_ count: Int) -> String {
         if count >= 1_000_000 { return String(format: "%.1fM", Double(count) / 1_000_000) }
         if count >= 1_000 { return String(format: "%.1fK", Double(count) / 1_000) }
@@ -853,18 +883,21 @@ struct EmptyStateSuggestion: View {
     let label: String
     let shortcut: String
     let action: () -> Void
+    @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                    .foregroundStyle(isHovered ? Theme.Colors.accentBlue : Theme.Colors.accent.opacity(0.6))
                     .frame(width: 20)
+                    .animation(Theme.Animation.hover, value: isHovered)
 
                 Text(label)
                     .font(Theme.Typography.bodySmall)
-                    .foregroundStyle(Theme.Colors.textSecondary)
+                    .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                    .animation(Theme.Animation.hover, value: isHovered)
 
                 Spacer()
 
@@ -878,14 +911,23 @@ struct EmptyStateSuggestion: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Theme.Colors.surfaceSecondary.opacity(0.6))
+            .background(
+                isHovered
+                    ? Theme.Colors.surfaceElevated.opacity(0.8)
+                    : Theme.Colors.surfaceSecondary.opacity(0.6)
+            )
             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                    .stroke(
+                        isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border,
+                        lineWidth: 0.5
+                    )
             )
+            .animation(Theme.Animation.hover, value: isHovered)
         }
         .buttonStyle(.plain)
+        .onHover { hovering in isHovered = hovering }
         .maePressEffect()
     }
 }

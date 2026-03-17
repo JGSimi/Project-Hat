@@ -170,55 +170,80 @@ struct QuickInputView: View {
     // MARK: - Input Bar
 
     private var inputBar: some View {
-        HStack(alignment: .center, spacing: 10) {
-            actionButtons
+        VStack(spacing: 0) {
+            HStack(alignment: .center, spacing: 10) {
+                actionButtons
 
-            TextField("Pergunte algo à Hat...", text: $inputText, axis: .vertical)
-                .textFieldStyle(.plain)
-                .font(Theme.Typography.body)
-                .foregroundStyle(Theme.Colors.textPrimary)
-                .lineLimit(1...4)
-                .focused($isInputFocused)
-                .onSubmit {
-                    send()
-                }
+                TextField("Pergunte algo à Hat...", text: $inputText, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .font(Theme.Typography.body)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                    .lineLimit(1...4)
+                    .focused($isInputFocused)
+                    .onSubmit {
+                        send()
+                    }
 
-            if viewModel.isProcessing {
-                MaeTypingDots()
-                    .frame(width: 32, height: 32)
+                if viewModel.isProcessing {
+                    MaeTypingDots()
+                        .frame(width: 32, height: 32)
+                        .transition(.maeScaleFade)
+                } else {
+                    Button {
+                        send()
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted.opacity(0.4))
+                            .symbolEffect(.bounce, options: .nonRepeating)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!hasContent)
+                    .maePressEffect()
                     .transition(.maeScaleFade)
-            } else {
-                Button {
-                    send()
-                } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.system(size: 26))
-                        .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted)
-                        .symbolEffect(.bounce, options: .nonRepeating)
                 }
-                .buttonStyle(.plain)
-                .disabled(!hasContent)
-                .maePressEffect()
-                .transition(.maeScaleFade)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            // Keyboard hint
+            if inputText.isEmpty && viewModel.pendingAttachments.isEmpty {
+                HStack(spacing: 12) {
+                    keyboardHint(key: "⏎", label: "enviar")
+                    keyboardHint(key: "esc", label: "fechar")
+                }
+                .padding(.bottom, 10)
+                .transition(.maeSlideUp)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+    }
+
+    private func keyboardHint(key: String, label: String) -> some View {
+        HStack(spacing: 4) {
+            Text(key)
+                .font(.system(size: 9, weight: .semibold, design: .rounded))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(Theme.Colors.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 3))
+            Text(label)
+                .font(.system(size: 9, weight: .regular, design: .rounded))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+        }
     }
 
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        HStack(spacing: 4) {
-            MaeIconButton(icon: "plus.circle.fill", size: 18, color: Theme.Colors.textSecondary, helpText: "Anexar arquivo") {
+        HStack(spacing: 2) {
+            MaeTooltipButton(icon: "plus.circle.fill", size: 18, helpText: "Anexar arquivo") {
                 attachFile()
             }
 
-            MaeIconButton(
+            MaeTooltipButton(
                 icon: "camera.viewfinder",
                 size: 18,
-                color: viewModel.pendingAttachments.contains(where: { $0.name == "Captura de Tela" })
-                    ? Theme.Colors.accent : Theme.Colors.textSecondary,
                 helpText: "Capturar tela"
             ) {
                 QuickInputWindowManager.shared.captureAndReopen()

@@ -129,6 +129,7 @@ struct QuickInputView: View {
     @ObservedObject private var viewModel: AssistantViewModel
     @State private var inputText: String = ""
     @FocusState private var isInputFocused: Bool
+    @State private var isFocusedForBorder: Bool = false
 
     init(viewModel: AssistantViewModel) {
         self.viewModel = viewModel
@@ -157,12 +158,25 @@ struct QuickInputView: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
-                .stroke(Theme.Colors.border, lineWidth: 1)
+            Group {
+                if isFocusedForBorder {
+                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
+                        .stroke(.clear, lineWidth: 1)
+                        .maeGradientBorder(cornerRadius: Theme.Metrics.radiusLarge)
+                        .transition(.opacity)
+                } else {
+                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
+                        .stroke(Theme.Colors.border, lineWidth: 1)
+                }
+            }
         )
+        .animation(Theme.Animation.smooth, value: isFocusedForBorder)
         .frame(width: 680)
         .onAppear {
             isInputFocused = true
+            withAnimation(Theme.Animation.gentle.delay(0.3)) {
+                isFocusedForBorder = true
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -206,11 +220,34 @@ struct QuickInputView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Keyboard hint
+            // Recent prompts + keyboard hints
             if inputText.isEmpty && viewModel.pendingAttachments.isEmpty {
-                HStack(spacing: 12) {
-                    keyboardHint(key: "⏎", label: "enviar")
-                    keyboardHint(key: "esc", label: "fechar")
+                VStack(spacing: 8) {
+                    // Recent prompt suggestions
+                    let recentPrompts = Array(
+                        viewModel.messages
+                            .filter { $0.isUser && !$0.content.isEmpty && $0.content.count < 60 }
+                            .suffix(3)
+                            .reversed()
+                    )
+                    if !recentPrompts.isEmpty {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(recentPrompts, id: \.id) { msg in
+                                    MaeChip(label: msg.content, isSelected: false) {
+                                        inputText = msg.content
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                        .transition(.maeSlideUp)
+                    }
+
+                    HStack(spacing: 12) {
+                        keyboardHint(key: "⏎", label: "enviar")
+                        keyboardHint(key: "esc", label: "fechar")
+                    }
                 }
                 .padding(.bottom, 10)
                 .transition(.maeSlideUp)

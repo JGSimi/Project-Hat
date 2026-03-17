@@ -207,6 +207,12 @@ struct AnalysisView: View {
                                     .maeStaggered(index: 2, baseDelay: 0.12)
                                 }
 
+                                MaeActionButton(label: "Capturar Tela", icon: "camera.viewfinder") {
+                                    Task { await viewModel.processarScreen() }
+                                }
+                                .maeStaggered(index: 3, baseDelay: 0.12)
+                                .padding(.top, 8)
+
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity)
@@ -262,7 +268,7 @@ struct AnalysisView: View {
                             .transition(.maeSlideUp)
                         }
                     }
-                    .frame(width: max(360, geo.size.width * 0.38))
+                    .frame(width: min(max(360, geo.size.width * 0.38), geo.size.width * 0.55))
                     .background(Theme.Colors.backgroundSecondary)
                     
                     Divider()

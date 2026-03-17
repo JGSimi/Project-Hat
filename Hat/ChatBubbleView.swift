@@ -16,19 +16,25 @@ struct ChatBubble: View {
         HStack(alignment: .top, spacing: 8) {
             if message.isUser { Spacer(minLength: 50) }
 
-            // Assistant avatar
+            // Assistant accent bar + avatar
             if !message.isUser {
-                Image("hat-svgrepo-com")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(Theme.Colors.accent.opacity(0.5))
-                    .padding(6)
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
-                    .padding(.top, 2)
+                VStack(spacing: 0) {
+                    Image("hat-svgrepo-com")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                        .padding(6)
+                        .background(Theme.Colors.surfaceSecondary)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(Theme.Colors.accentBlue.opacity(0.25))
+                        .frame(width: 2)
+                        .padding(.top, 4)
+                }
+                .padding(.top, 2)
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
@@ -110,7 +116,37 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
-                                .maeGlassBackground(cornerRadius: 16)
+                                .background {
+                                    ZStack {
+                                        // Glass base
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(.thinMaterial)
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(Theme.Colors.accent.opacity(0.08))
+                                        // Subtle accent gradient tint
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(Theme.Colors.gradientSubtle)
+                                    }
+                                }
+                                .clipShape(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 16,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 6,
+                                        topTrailingRadius: 16,
+                                        style: .continuous
+                                    )
+                                )
+                                .overlay(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 16,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 6,
+                                        topTrailingRadius: 16,
+                                        style: .continuous
+                                    )
+                                    .stroke(Theme.Colors.accent.opacity(0.15), lineWidth: 0.5)
+                                )
                                 .maeSoftShadow()
                                 .textSelection(.enabled)
                         } else {
@@ -118,7 +154,31 @@ struct ChatBubble: View {
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
-                                .maeSurfaceBackground(cornerRadius: 16)
+                                .background {
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(.ultraThinMaterial)
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(Theme.Colors.surface)
+                                }
+                                .clipShape(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 6,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 16,
+                                        topTrailingRadius: 16,
+                                        style: .continuous
+                                    )
+                                )
+                                .overlay(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 6,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 16,
+                                        topTrailingRadius: 16,
+                                        style: .continuous
+                                    )
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                )
                                 .maeSoftShadow()
                         }
 

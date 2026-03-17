@@ -287,22 +287,9 @@ struct WelcomeView: View {
 
                 Spacer()
 
-                Button(action: {
+                MaeActionButton(label: "Começar a Usar") {
                     WelcomeWindowManager.shared.closeWindow()
-                }) {
-                    Text("Começar a Usar")
-                        .font(Theme.Typography.bodyBold)
-                        .foregroundColor(.black)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 36)
                 }
-                .buttonStyle(.plain)
-                .background(
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(Theme.Colors.accent.opacity(0.9))
-                )
-                .maeGlowHover()
-                .maePressEffect()
                 .maeStaggered(index: 6, baseDelay: 0.10)
                 .padding(.bottom, 30)
             }

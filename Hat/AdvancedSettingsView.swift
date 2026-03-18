@@ -30,8 +30,7 @@ class AdvancedSettingsWindowManager {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.appearance = NSAppearance(named: .darkAqua)
-        newWindow.backgroundColor = NSColor(red: 0.05, green: 0.03, blue: 0.12, alpha: 0.85)
-        newWindow.isOpaque = false
+        newWindow.backgroundColor = NSColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
         newWindow.isReleasedWhenClosed = false
         newWindow.center()
         
@@ -114,8 +113,8 @@ struct AdvancedSettingsView: View {
                         NavigationLink(value: tab) {
                             HStack(spacing: 10) {
                                 ZStack {
-                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                        .fill(selectedTab == tab ? Theme.Colors.accentBlue.opacity(0.20) : .clear)
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(selectedTab == tab ? Theme.Colors.accentBlue.opacity(0.15) : .clear)
                                         .frame(width: 28, height: 28)
                                     Image(systemName: tab.icon)
                                         .font(.system(size: 13, weight: .medium))
@@ -139,14 +138,13 @@ struct AdvancedSettingsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, 12)
             }
-            .background(.ultraThinMaterial)
-            .background(Theme.Colors.background.opacity(0.4))
+            .background(Theme.Colors.background)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
             
         } detail: {
             ZStack {
-                MaePageBackground()
-
+                Theme.Colors.backgroundSecondary.ignoresSafeArea()
+                
                 ScrollView {
                     VStack(alignment: .leading, spacing: Theme.Metrics.spacingXLarge) {
                         
@@ -438,12 +436,11 @@ struct AdvancedSettingsView: View {
                 .padding(12)
                 .frame(minHeight: 180)
                 .scrollContentBackground(.hidden)
-                .background(.ultraThinMaterial)
-                .background(Color.white.opacity(0.08))
+                .background(Theme.Colors.surfaceSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium))
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium)
-                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 1)
                 )
         }
     }

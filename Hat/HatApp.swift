@@ -320,12 +320,11 @@ struct FeatureRow: View {
                     )
                 )
                 .frame(width: 36, height: 36)
-                .background(.ultraThinMaterial)
-                .background(Theme.Colors.accentSubtle.opacity(0.4))
+                .background(Theme.Colors.accentSubtle.opacity(0.6))
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                 )
 
             VStack(alignment: .leading, spacing: 4) {
@@ -367,12 +366,11 @@ struct PermissionRowView: View {
                         ))
                 )
                 .frame(width: 36, height: 36)
-                .background(.ultraThinMaterial)
-                .background(isGranted ? Theme.Colors.success.opacity(0.12) : Theme.Colors.accentSubtle.opacity(0.4))
+                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentSubtle)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                 )
 
             VStack(alignment: .leading, spacing: 4) {
@@ -516,7 +514,7 @@ struct PermissionsView: View {
                 .buttonStyle(.plain)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(allGranted ? Theme.Colors.accent.opacity(0.85) : Color.white.opacity(0.10))
+                        .fill(allGranted ? Theme.Colors.accent.opacity(0.85) : Theme.Colors.surface)
                 )
                 .maeGlowHover()
                 .maePressEffect()

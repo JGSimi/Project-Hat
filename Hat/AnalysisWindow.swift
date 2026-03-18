@@ -154,7 +154,6 @@ struct AnalysisView: View {
                                         .foregroundStyle(Theme.Colors.accentBlue)
                                         .symbolEffect(.pulse.byLayer)
                                 }
-                                .shadow(color: Theme.Colors.glowBlue.opacity(0.3), radius: 20)
 
                                 VStack(spacing: 6) {
                                     Text("Analisando...")
@@ -176,7 +175,7 @@ struct AnalysisView: View {
 
                                 ZStack {
                                     Circle()
-                                        .fill(Theme.Colors.accentBlue.opacity(0.12))
+                                        .fill(Theme.Colors.accentBlue.opacity(0.05))
                                         .frame(width: 80, height: 80)
                                     Image(systemName: "viewfinder")
                                         .font(.system(size: 32, weight: .ultraLight))
@@ -226,7 +225,7 @@ struct AnalysisView: View {
                                     .padding(.horizontal, Theme.Metrics.spacingXLarge)
                                     .padding(.vertical, Theme.Metrics.spacingDefault)
                             }
-                            .background(.ultraThinMaterial)
+                            .background(Theme.Colors.backgroundSecondary)
                             .transition(.maeFadeScale)
                         }
                         
@@ -270,8 +269,7 @@ struct AnalysisView: View {
                         }
                     }
                     .frame(width: min(max(360, geo.size.width * 0.38), geo.size.width * 0.55))
-                    .background(.thinMaterial)
-                    .background(Theme.Colors.ambientGradient.opacity(0.2))
+                    .background(Theme.Colors.backgroundSecondary)
                     
                     Divider()
                     
@@ -300,8 +298,7 @@ struct AnalysisView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.ultraThinMaterial)
-                    .background(Theme.Colors.ambientGradient.opacity(0.15))
+                    .background(Theme.Colors.background)
                 }
                 
                 // Confirmation Toast Overlay
@@ -320,10 +317,8 @@ struct AnalysisView: View {
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
                         .padding(.vertical, 14)
                         .background(.ultraThinMaterial)
-                        .background(Color.white.opacity(0.08))
                         .clipShape(Capsule())
-                        .overlay(Capsule().stroke(Color.white.opacity(0.20), lineWidth: 1))
-                        .shadow(color: Theme.Colors.glowBlue.opacity(0.25), radius: 12)
+                        .maeMediumShadow()
                         .padding(.bottom, 40)
                     }
                     .transition(

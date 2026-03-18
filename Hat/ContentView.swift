@@ -575,7 +575,8 @@ struct ContentView: View {
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.vertical, 10)
-            .background(.regularMaterial)
+            .background(.thinMaterial)
+            .background(Color.white.opacity(0.06))
             .overlay(MaeGradientDivider(), alignment: .bottom)
             .zIndex(1)
 
@@ -592,7 +593,7 @@ struct ContentView: View {
                                     Circle()
                                         .fill(
                                             RadialGradient(
-                                                colors: [Theme.Colors.gradientStart.opacity(0.06), .clear],
+                                                colors: [Theme.Colors.glowBlue.opacity(0.15), .clear],
                                                 center: .center,
                                                 startRadius: 10,
                                                 endRadius: 50
@@ -600,13 +601,15 @@ struct ContentView: View {
                                         )
                                         .frame(width: 90, height: 90)
                                     Circle()
-                                        .fill(Theme.Colors.surfaceSecondary)
+                                        .fill(.ultraThinMaterial)
+                                        .overlay(Color.white.opacity(0.10))
                                         .frame(width: 60, height: 60)
+                                        .clipShape(Circle())
                                         .overlay(
                                             Circle()
                                                 .stroke(
                                                     LinearGradient(
-                                                        colors: [Theme.Colors.gradientStart.opacity(0.3), Theme.Colors.gradientEnd.opacity(0.15)],
+                                                        colors: [Theme.Colors.gradientStart.opacity(0.4), Theme.Colors.gradientEnd.opacity(0.25)],
                                                         startPoint: .topLeading,
                                                         endPoint: .bottomTrailing
                                                     ),
@@ -672,8 +675,8 @@ struct ContentView: View {
                     .padding(.vertical, Theme.Metrics.spacingDefault)
                 }
                 .scrollContentBackground(.hidden)
-                .background(Theme.Colors.background.opacity(0.5))
-                .background(.ultraThinMaterial)
+                .background(.thinMaterial)
+                .background(Theme.Colors.ambientGradient.opacity(0.3))
                 .onChange(of: viewModel.messages.count) {
                     withAnimation(Theme.Animation.responsive) {
                         proxy.scrollTo(bottomID, anchor: .bottom)
@@ -687,7 +690,7 @@ struct ContentView: View {
                 Rectangle()
                     .fill(.clear)
                     .frame(height: 0)
-                    .shadow(color: Color.black.opacity(0.18), radius: 8, y: -4)
+                    .shadow(color: Theme.Colors.glowPurple.opacity(0.15), radius: 8, y: -4)
                 // Attached Images and Files Preview
                 if !viewModel.pendingAttachments.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -811,7 +814,7 @@ struct ContentView: View {
                                     ? Theme.Colors.textMuted.opacity(0.4)
                                     : Theme.Colors.accent
                                 )
-                                .background(Theme.Colors.background.clipShape(Circle()))
+                                .background(Color.clear)
                                 .frame(width: 30, height: 30)
                         }
                         .buttonStyle(.plain)
@@ -823,7 +826,8 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(.regularMaterial)
+                .background(.thinMaterial)
+                .background(Color.white.opacity(0.06))
             }
             .zIndex(1)
         }
@@ -926,22 +930,19 @@ struct EmptyStateSuggestion: View {
                     .foregroundStyle(Theme.Colors.textMuted)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Theme.Colors.surface)
+                    .background(Color.white.opacity(0.10))
                     .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(
-                isHovered
-                    ? Theme.Colors.surfaceElevated.opacity(0.8)
-                    : Theme.Colors.surfaceSecondary.opacity(0.6)
-            )
+            .background(.ultraThinMaterial)
+            .background(Color.white.opacity(isHovered ? 0.14 : 0.08))
             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
                     .stroke(
-                        isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border,
-                        lineWidth: 0.5
+                        isHovered ? Color.white.opacity(0.30) : Color.white.opacity(0.20),
+                        lineWidth: 1
                     )
             )
             .animation(Theme.Animation.hover, value: isHovered)

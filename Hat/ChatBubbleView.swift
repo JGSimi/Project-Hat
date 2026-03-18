@@ -118,18 +118,9 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
-                                .background {
-                                    ZStack {
-                                        // Frosted glass base
-                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                            .fill(.regularMaterial)
-                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                            .fill(Color.white.opacity(0.14))
-                                        // Vivid accent gradient tint
-                                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                            .fill(Theme.Colors.gradientSubtle)
-                                    }
-                                }
+                                .background(.regularMaterial)
+                                .background(Color.white.opacity(0.14))
+                                .background(Theme.Colors.gradientSubtle)
                                 .clipShape(
                                     UnevenRoundedRectangle(
                                         topLeadingRadius: 18,
@@ -156,12 +147,8 @@ struct ChatBubble: View {
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .fill(.thinMaterial)
-                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .fill(Color.white.opacity(0.10))
-                                }
+                                .background(.thinMaterial)
+                                .background(Color.white.opacity(0.10))
                                 .clipShape(
                                     UnevenRoundedRectangle(
                                         topLeadingRadius: 6,

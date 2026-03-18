@@ -26,10 +26,9 @@ struct ChatBubble: View {
                         .frame(width: 16, height: 16)
                         .foregroundStyle(Theme.Colors.accent.opacity(0.5))
                         .padding(6)
-                        .background(.ultraThinMaterial)
-                        .background(Color.white.opacity(0.10))
+                        .background(Theme.Colors.surfaceSecondary)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.20), lineWidth: 1))
+                        .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
                     RoundedRectangle(cornerRadius: 1)
                         .fill(Theme.Colors.accentBlue.opacity(0.25))
                         .frame(width: 2)
@@ -82,12 +81,11 @@ struct ChatBubble: View {
                             }
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(.ultraThinMaterial)
-                            .background(Color.white.opacity(0.08))
+                            .background(Theme.Colors.surfaceSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
                             .overlay(
                                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                                    .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
                             )
                         }
                     }
@@ -118,57 +116,70 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
-                                .background(.regularMaterial)
-                                .background(Color.white.opacity(0.14))
-                                .background(Theme.Colors.gradientSubtle)
+                                .background {
+                                    ZStack {
+                                        // Glass base
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(.thinMaterial)
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(Theme.Colors.accent.opacity(0.08))
+                                        // Subtle accent gradient tint
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .fill(Theme.Colors.gradientSubtle)
+                                    }
+                                }
                                 .clipShape(
                                     UnevenRoundedRectangle(
-                                        topLeadingRadius: 18,
-                                        bottomLeadingRadius: 18,
+                                        topLeadingRadius: 16,
+                                        bottomLeadingRadius: 16,
                                         bottomTrailingRadius: 6,
-                                        topTrailingRadius: 18,
+                                        topTrailingRadius: 16,
                                         style: .continuous
                                     )
                                 )
                                 .overlay(
                                     UnevenRoundedRectangle(
-                                        topLeadingRadius: 18,
-                                        bottomLeadingRadius: 18,
+                                        topLeadingRadius: 16,
+                                        bottomLeadingRadius: 16,
                                         bottomTrailingRadius: 6,
-                                        topTrailingRadius: 18,
+                                        topTrailingRadius: 16,
                                         style: .continuous
                                     )
-                                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                                    .stroke(Theme.Colors.accent.opacity(0.15), lineWidth: 0.5)
                                 )
-                                .shadow(color: Theme.Colors.glowBlue.opacity(0.20), radius: 10)
+                                .maeSoftShadow()
                                 .textSelection(.enabled)
                         } else {
                             HatMarkdownView(markdown: message.content)
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
-                                .background(.thinMaterial)
-                                .background(Color.white.opacity(0.10))
+                                .background {
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(.ultraThinMaterial)
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(Theme.Colors.surface)
+                                }
                                 .clipShape(
                                     UnevenRoundedRectangle(
                                         topLeadingRadius: 6,
-                                        bottomLeadingRadius: 18,
-                                        bottomTrailingRadius: 18,
-                                        topTrailingRadius: 18,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 16,
+                                        topTrailingRadius: 16,
                                         style: .continuous
                                     )
                                 )
                                 .overlay(
                                     UnevenRoundedRectangle(
                                         topLeadingRadius: 6,
-                                        bottomLeadingRadius: 18,
-                                        bottomTrailingRadius: 18,
-                                        topTrailingRadius: 18,
+                                        bottomLeadingRadius: 16,
+                                        bottomTrailingRadius: 16,
+                                        topTrailingRadius: 16,
                                         style: .continuous
                                     )
-                                    .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
                                 )
-                                .shadow(color: Theme.Colors.glowPurple.opacity(0.15), radius: 8)
+                                .maeSoftShadow()
                         }
 
                         // Copy button on hover
@@ -193,11 +204,11 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 4)
                                 .background(.ultraThinMaterial)
-                                .background(Color.white.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .background(Theme.Colors.background.opacity(0.6))
+                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                                 )
                             }
                             .buttonStyle(.plain)

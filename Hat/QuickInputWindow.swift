@@ -166,7 +166,7 @@ struct QuickInputView: View {
                         .transition(.opacity)
                 } else {
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
-                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 1)
                 }
             }
         )
@@ -262,7 +262,7 @@ struct QuickInputView: View {
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .background(Color.white.opacity(0.10))
+                .background(Theme.Colors.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 3))
             Text(label)
                 .font(.system(size: 9, weight: .regular, design: .rounded))
@@ -322,8 +322,7 @@ struct QuickInputView: View {
                                     .frame(width: 50)
                             }
                             .frame(width: 60, height: 60)
-                            .background(.ultraThinMaterial)
-                            .background(Color.white.opacity(0.08))
+                            .background(Theme.Colors.surfaceSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
                             .shadow(radius: 2)
                         }

@@ -30,24 +30,24 @@ enum Theme {
 
     // MARK: Colors
     enum Colors {
-        // Backgrounds — semi-transparent for glassmorphism (gradients bleed through)
-        static let background          = Color(NSColor(red: 0.08, green: 0.05, blue: 0.15, alpha: 0.65))
-        static let backgroundSecondary = Color(NSColor(red: 0.05, green: 0.03, blue: 0.12, alpha: 0.55))
+        // Backgrounds — Apple dark system palette
+        static let background          = Color(NSColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)) // #1C1C1E
+        static let backgroundSecondary = Color(NSColor(red: 0.08, green: 0.08, blue: 0.09, alpha: 1.0)) // #141415
 
-        // Surfaces — frosted glass tints (higher opacity for visible glass)
-        static let surface             = Color.white.opacity(0.12)
-        static let surfaceSecondary    = Color.white.opacity(0.10)
-        static let surfaceElevated     = Color.white.opacity(0.16)
+        // Surfaces — slightly more visible for depth
+        static let surface             = Color.white.opacity(0.06)
+        static let surfaceSecondary    = Color.white.opacity(0.05)
+        static let surfaceElevated     = Color.white.opacity(0.08)
 
-        // Borders — bright for glass edge definition
-        static let border              = Color.white.opacity(0.20)
-        static let borderHighlight     = Color.white.opacity(0.30)
-        static let borderFocused       = Color(NSColor(red: 0.45, green: 0.55, blue: 1.0, alpha: 0.7))
+        // Borders — more visible for definition
+        static let border              = Color.white.opacity(0.08)
+        static let borderHighlight     = Color.white.opacity(0.14)
+        static let borderFocused       = Color(NSColor(red: 0.45, green: 0.55, blue: 1.0, alpha: 0.5))
 
         // Text
         static let textPrimary         = Color.white.opacity(0.95)
         static let textSecondary       = Color.white.opacity(0.55)
-        static let textMuted           = Color.white.opacity(0.40)
+        static let textMuted           = Color.white.opacity(0.30)
 
         // Accent — soft indigo-blue for a modern feel
         static let accent              = Color.white
@@ -64,30 +64,10 @@ enum Theme {
         static let gradientStart       = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
         static let gradientEnd         = Color(NSColor(red: 0.65, green: 0.40, blue: 1.0, alpha: 1.0))
         static let gradientSubtle      = LinearGradient(
-            colors: [gradientStart.opacity(0.12), gradientEnd.opacity(0.08)],
+            colors: [gradientStart.opacity(0.04), gradientEnd.opacity(0.02)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
-
-        // Glassmorphism — vivid ambient gradient (shines through glass panels)
-        static let ambientGradient = LinearGradient(
-            colors: [
-                Color(NSColor(red: 0.30, green: 0.20, blue: 0.80, alpha: 1.0)),
-                Color(NSColor(red: 0.15, green: 0.50, blue: 0.85, alpha: 1.0)),
-                Color(NSColor(red: 0.60, green: 0.25, blue: 0.90, alpha: 1.0)),
-                Color(NSColor(red: 0.20, green: 0.70, blue: 0.70, alpha: 1.0))
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-
-        // Glass tint overlay
-        static let glassTint = Color.white.opacity(0.08)
-
-        // Colored glow shadows
-        static let glowBlue   = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
-        static let glowPurple = Color(NSColor(red: 0.65, green: 0.40, blue: 1.0, alpha: 1.0))
-        static let glowTeal   = Color(NSColor(red: 0.30, green: 0.78, blue: 0.75, alpha: 1.0))
     }
 
     // MARK: Typography — SF Pro Rounded (Apple native)
@@ -107,9 +87,9 @@ enum Theme {
 
     // MARK: Metrics
     enum Metrics {
-        static let radiusSmall:  CGFloat = 10
-        static let radiusMedium: CGFloat = 20
-        static let radiusLarge:  CGFloat = 28
+        static let radiusSmall:  CGFloat = 8
+        static let radiusMedium: CGFloat = 16
+        static let radiusLarge:  CGFloat = 22
 
         static let spacingSmall:  CGFloat = 8
         static let spacingDefault: CGFloat = 12
@@ -117,11 +97,10 @@ enum Theme {
         static let spacingXLarge: CGFloat = 24
     }
 
-    // MARK: Shadows — colored glow for glassmorphism
+    // MARK: Shadows
     enum Shadows {
-        static let soft   = (color: Color(NSColor(red: 0.35, green: 0.30, blue: 0.80, alpha: 0.20)), radius: CGFloat(8), x: CGFloat(0), y: CGFloat(2))
-        static let medium = (color: Color(NSColor(red: 0.35, green: 0.30, blue: 0.80, alpha: 0.25)), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(4))
-        static let glow   = (color: Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 0.30)), radius: CGFloat(16), x: CGFloat(0), y: CGFloat(4))
+        static let soft   = (color: Color.black.opacity(0.10), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
+        static let medium = (color: Color.black.opacity(0.15), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
     }
 
     // MARK: Animation
@@ -216,7 +195,7 @@ struct MaeHoverEffect: ViewModifier {
     func body(content: Content) -> some View {
         content
             .scaleEffect(isHovered ? scale : 1.0)
-            .shadow(color: Theme.Colors.glowBlue.opacity(isHovered ? 0.20 : 0), radius: 14)
+            .shadow(color: Theme.Colors.accent.opacity(isHovered ? 0.06 : 0), radius: 8)
             .onHover { hovering in
                 withAnimation(Theme.Animation.snappy) {
                     isHovered = hovering
@@ -355,14 +334,14 @@ struct MaeFloatingEffect: ViewModifier {
 
 /// Glow hover effect — hover with radiant glow behind element
 struct MaeGlowHoverEffect: ViewModifier {
-    var glowColor: Color = Theme.Colors.glowBlue
-    var glowRadius: CGFloat = 18
+    var glowColor: Color = Theme.Colors.accent
+    var glowRadius: CGFloat = 12
     @State private var isHovered = false
 
     func body(content: Content) -> some View {
         content
             .scaleEffect(isHovered ? 1.03 : 1.0)
-            .shadow(color: glowColor.opacity(isHovered ? 0.45 : 0), radius: glowRadius)
+            .shadow(color: glowColor.opacity(isHovered ? 0.35 : 0), radius: glowRadius)
             .brightness(isHovered ? 0.05 : 0)
             .animation(Theme.Animation.responsive, value: isHovered)
             .onHover { hovering in
@@ -396,45 +375,42 @@ struct MaeTypingDots: View {
 
 extension View {
 
-    /// Glassmorphism — thick frosted glass with glow (user bubbles, highlighted panels)
+    /// Glassmorphism — frosted glass with vibrancy (user bubbles)
     func maeGlassBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(.regularMaterial)
-            .background(Color.white.opacity(0.12))
+            .background(.thinMaterial)
+            .background(Theme.Colors.accent.opacity(0.08))
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                    .stroke(Theme.Colors.accent.opacity(0.15), lineWidth: 0.5)
             )
-            .shadow(color: Theme.Colors.glowBlue.opacity(0.15), radius: 8)
     }
 
-    /// Frosted surface with subtle purple glow (assistant bubbles, cards)
+    /// Neutral dark surface with subtle material (assistant bubbles, cards)
     func maeSurfaceBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .background(.ultraThinMaterial)
-            .background(Color.white.opacity(0.06))
+            .background(Theme.Colors.surface)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
             )
-            .shadow(color: Theme.Colors.glowPurple.opacity(0.10), radius: 6)
     }
 
-    /// Glass card shape: frosted material + bright border
+    /// Standard card shape: surfaceSecondary + border
     func maeCardStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(.ultraThinMaterial)
-            .background(Color.white.opacity(0.08))
+            .background(Theme.Colors.surfaceSecondary)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                    .stroke(Theme.Colors.border, lineWidth: 1)
             )
     }
 
-    /// Glass text input style — frosted with bright border
+    /// Text input style — Apple-like with material background
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -442,18 +418,13 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(.thinMaterial)
-            .background(Color.white.opacity(0.10))
+            .background(.ultraThinMaterial)
+            .background(Theme.Colors.surfaceSecondary)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
             )
-    }
-
-    /// Colored glow shadow for glass elements
-    func maeGlowShadow(color: Color = Theme.Colors.glowBlue, radius: CGFloat = 12, opacity: Double = 0.25) -> some View {
-        self.shadow(color: color.opacity(opacity), radius: radius, x: 0, y: 4)
     }
 
     /// Soft shadow token
@@ -529,8 +500,8 @@ struct MaeGradientDivider: View {
     var body: some View {
         LinearGradient(
             colors: tinted
-                ? [.clear, Theme.Colors.gradientStart.opacity(0.35), Theme.Colors.gradientEnd.opacity(0.35), .clear]
-                : [.clear, Color.white.opacity(0.15), .clear],
+                ? [.clear, Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.2), .clear]
+                : [.clear, Theme.Colors.border, .clear],
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -539,18 +510,17 @@ struct MaeGradientDivider: View {
 }
 
 // MARK: MaeCard
-/// Glassmorphism GroupBox with frosted material + bright border.
+/// Themed GroupBox with dark surface + subtle border.
 struct MaeCardStyle: GroupBoxStyle {
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             configuration.content
         }
-        .background(.ultraThinMaterial)
-        .background(Color.white.opacity(0.08))
+        .background(Theme.Colors.surfaceSecondary)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                .stroke(Theme.Colors.border, lineWidth: 1)
         )
     }
 }
@@ -642,55 +612,30 @@ struct MaeIconButton: View {
 }
 
 // MARK: MaePageBackground
-/// Glassmorphism ambient background — vivid gradient behind frosted layers.
+/// Vibrant background with material depth — Apple-like layered appearance.
 struct MaePageBackground: View {
     var showGlow: Bool = false
 
     var body: some View {
         ZStack {
-            // Vivid gradient base (shines through all glass panels)
-            Theme.Colors.ambientGradient
-                .ignoresSafeArea()
-
-            // Frosted overlay to soften the gradient
+            Theme.Colors.backgroundSecondary.ignoresSafeArea()
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()
-
-            // Colored orbs for depth
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Theme.Colors.glowBlue.opacity(showGlow ? 0.15 : 0.08),
-                    .clear
-                ]),
-                center: .topLeading,
-                startRadius: 0,
-                endRadius: 400
-            )
-            .ignoresSafeArea()
-
-            RadialGradient(
-                gradient: Gradient(colors: [
-                    Theme.Colors.glowPurple.opacity(showGlow ? 0.10 : 0.05),
-                    .clear
-                ]),
-                center: .bottomTrailing,
-                startRadius: 0,
-                endRadius: 350
-            )
-            .ignoresSafeArea()
-
             if showGlow {
                 RadialGradient(
-                    gradient: Gradient(colors: [
-                        Theme.Colors.glowTeal.opacity(0.08),
-                        .clear
-                    ]),
-                    center: .bottom,
+                    gradient: Gradient(colors: [Theme.Colors.accent.opacity(0.05), .clear]),
+                    center: .topLeading,
                     startRadius: 0,
-                    endRadius: 300
+                    endRadius: 400
                 )
-                .ignoresSafeArea()
+            } else {
+                RadialGradient(
+                    gradient: Gradient(colors: [Color.white.opacity(0.02), .clear]),
+                    center: .topLeading,
+                    startRadius: 0,
+                    endRadius: 400
+                )
             }
         }
     }
@@ -733,10 +678,9 @@ struct MaeStatusBadge: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(.ultraThinMaterial)
-        .background(Color.white.opacity(0.08))
+        .background(Theme.Colors.surfaceSecondary)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Color.white.opacity(0.20), lineWidth: 1))
+        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
     }
 }
 
@@ -770,12 +714,11 @@ struct MaeChip: View {
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(isSelected ? Theme.Colors.accent : .ultraThinMaterial)
-                .background(isSelected ? Color.clear : Color.white.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .background(isSelected ? Theme.Colors.accent : Theme.Colors.surfaceSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(isSelected ? Theme.Colors.accent.opacity(0.5) : Color.white.opacity(0.20), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(isSelected ? Theme.Colors.accent.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
@@ -793,10 +736,10 @@ struct MaeEmptyState: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.glowBlue.opacity(0.08))
+                    .fill(Theme.Colors.accent.opacity(0.04))
                     .frame(width: 80, height: 80)
                 Circle()
-                    .fill(Theme.Colors.glowBlue.opacity(0.12))
+                    .fill(Theme.Colors.accent.opacity(0.06))
                     .frame(width: 56, height: 56)
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .light))
@@ -848,7 +791,8 @@ struct MaeDateSeparator: View {
     }
 
     private var capsuleLine: some View {
-        LinearGradient(colors: [.clear, Color.white.opacity(0.15), .clear], startPoint: .leading, endPoint: .trailing)
+        Rectangle()
+            .fill(Theme.Colors.border)
             .frame(height: 0.5)
     }
 }
@@ -874,15 +818,9 @@ struct MaeActionButton: View {
             .padding(.vertical, 10)
             .padding(.horizontal, 24)
             .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(.thinMaterial)
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(Theme.Colors.accent.opacity(0.9))
-                }
+                RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
+                    .fill(Theme.Colors.accent.opacity(0.9))
             )
-            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-            .shadow(color: Theme.Colors.glowBlue.opacity(0.3), radius: 12)
         }
         .buttonStyle(.plain)
         .maeGlowHover()
@@ -952,9 +890,8 @@ struct MaeTooltipButton: View {
                 .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                 .symbolEffect(.bounce, value: tapCount)
                 .frame(width: 28, height: 28)
-                .background(isHovered ? .ultraThinMaterial : .regularMaterial.opacity(0))
-                .background(isHovered ? Color.white.opacity(0.12) : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(isHovered ? Theme.Colors.surfaceElevated : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

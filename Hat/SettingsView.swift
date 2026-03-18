@@ -101,11 +101,12 @@ struct SettingsView: View {
                     }
                     .padding(14)
                 }
-                .background(Theme.Colors.surfaceSecondary)
+                .background(.ultraThinMaterial)
+                .background(Color.white.opacity(0.08))
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Theme.Colors.border, lineWidth: 0.5)
+                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
                 )
                 .maeStaggered(index: 0, baseDelay: 0.06)
 
@@ -148,18 +149,19 @@ struct SettingsView: View {
                                                     .background(
                                                         selectedProvider == provider
                                                             ? Theme.Colors.accent
-                                                            : Theme.Colors.surfaceSecondary
+                                                            : Color.white.opacity(0.08)
                                                     )
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                                     .overlay(
-                                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
                                                             .stroke(
                                                                 selectedProvider == provider
                                                                     ? Theme.Colors.accent.opacity(0.5)
-                                                                    : Theme.Colors.border,
-                                                                lineWidth: 0.5
+                                                                    : Color.white.opacity(0.20),
+                                                                lineWidth: 1
                                                             )
                                                     )
+                                                    .shadow(color: selectedProvider == provider ? Theme.Colors.glowBlue.opacity(0.3) : .clear, radius: 8)
                                             }
                                             .buttonStyle(.plain)
                                         }
@@ -210,16 +212,16 @@ struct SettingsView: View {
                                                         .background(
                                                             apiModelName == model
                                                                 ? Theme.Colors.accent
-                                                                : Theme.Colors.background.opacity(0.6)
+                                                                : Color.white.opacity(0.08)
                                                         )
-                                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                                         .overlay(
-                                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                            RoundedRectangle(cornerRadius: 8, style: .continuous)
                                                                 .stroke(
                                                                     apiModelName == model
                                                                         ? Theme.Colors.accent.opacity(0.5)
-                                                                        : Theme.Colors.border,
-                                                                    lineWidth: 0.5
+                                                                        : Color.white.opacity(0.20),
+                                                                    lineWidth: 1
                                                                 )
                                                         )
                                                 }
@@ -267,7 +269,7 @@ struct SettingsView: View {
                                         .font(.system(size: 9, weight: .medium))
                                         .foregroundStyle(Theme.Colors.textMuted)
                                         .padding(4)
-                                        .background(Theme.Colors.surface)
+                                        .background(Color.white.opacity(0.10))
                                         .clipShape(Circle())
                                 }
                                 .buttonStyle(.plain)
@@ -346,11 +348,12 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 11)
-                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(.ultraThinMaterial)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.white.opacity(0.20), lineWidth: 1)
                         )
                     }
                     .buttonStyle(.plain)
@@ -378,11 +381,12 @@ struct SettingsView: View {
                         }
                         .padding(.horizontal, 14)
                         .padding(.vertical, 11)
-                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .background(.ultraThinMaterial)
+                        .background(Color.white.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(Color.white.opacity(0.20), lineWidth: 1)
                         )
                     }
                     .buttonStyle(.plain)

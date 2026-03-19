@@ -320,12 +320,8 @@ struct FeatureRow: View {
                     )
                 )
                 .frame(width: 36, height: 36)
-                .background(Theme.Colors.accentSubtle.opacity(0.6))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Theme.Colors.border, lineWidth: 0.5)
-                )
+                .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.08)),
+                             in: RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -366,11 +362,11 @@ struct PermissionRowView: View {
                         ))
                 )
                 .frame(width: 36, height: 36)
-                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentSubtle)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(Theme.Colors.border, lineWidth: 0.5)
+                .glassEffect(
+                    isGranted
+                        ? .regular.tint(Theme.Colors.success.opacity(0.1))
+                        : .regular.tint(Theme.Colors.accentBlue.opacity(0.08)),
+                    in: RoundedRectangle(cornerRadius: 10)
                 )
 
             VStack(alignment: .leading, spacing: 4) {
@@ -431,8 +427,9 @@ struct PermissionsView: View {
             VStack(spacing: 10) {
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.accentBlue.opacity(0.08))
+                        .fill(Color.clear)
                         .frame(width: 72, height: 72)
+                        .glassEffect(.clear.tint(Theme.Colors.accentBlue.opacity(0.08)), in: Circle())
                     Image(systemName: "lock.shield")
                         .font(.system(size: 32, weight: .light))
                         .foregroundStyle(
@@ -510,12 +507,16 @@ struct PermissionsView: View {
                         .foregroundColor(allGranted ? .black : Theme.Colors.textSecondary)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 32)
+                        .background(
+                            allGranted
+                                ? RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
+                                    .fill(Theme.Colors.accent.opacity(0.85))
+                                : nil
+                        )
                 }
                 .buttonStyle(.plain)
-                .background(
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                        .fill(allGranted ? Theme.Colors.accent.opacity(0.85) : Theme.Colors.surface)
-                )
+                .glassEffect(allGranted ? .identity : .regular,
+                             in: RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
                 .maeGlowHover()
                 .maePressEffect()
                 .maeStaggered(index: 6, baseDelay: 0.12)

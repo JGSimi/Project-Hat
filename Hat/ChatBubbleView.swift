@@ -50,8 +50,7 @@ struct ChatBubble: View {
                     .foregroundStyle(Theme.Colors.accentBlue)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentBlue.opacity(0.12))
-                    .clipShape(Capsule())
+                    .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.12)), in: Capsule())
                 }
 
                 // Attachments
@@ -116,39 +115,15 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
-                                .background {
-                                    ZStack {
-                                        // Glass base
-                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .fill(.thinMaterial)
-                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .fill(Theme.Colors.accent.opacity(0.08))
-                                        // Subtle accent gradient tint
-                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                            .fill(Theme.Colors.gradientSubtle)
-                                    }
-                                }
-                                .clipShape(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 16,
-                                        bottomLeadingRadius: 16,
-                                        bottomTrailingRadius: 6,
-                                        topTrailingRadius: 16,
-                                        style: .continuous
-                                    )
-                                )
-                                .overlay(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 16,
-                                        bottomLeadingRadius: 16,
-                                        bottomTrailingRadius: 6,
-                                        topTrailingRadius: 16,
-                                        style: .continuous
-                                    )
-                                    .stroke(Theme.Colors.accent.opacity(0.15), lineWidth: 0.5)
-                                )
-                                .maeSoftShadow()
                                 .textSelection(.enabled)
+                                .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.10)),
+                                             in: UnevenRoundedRectangle(
+                                                topLeadingRadius: 16,
+                                                bottomLeadingRadius: 16,
+                                                bottomTrailingRadius: 6,
+                                                topTrailingRadius: 16,
+                                                style: .continuous
+                                             ))
                         } else {
                             HatMarkdownView(markdown: message.content)
                                 .font(Theme.Typography.bodySmall)
@@ -203,13 +178,7 @@ struct ChatBubble: View {
                                 .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textSecondary)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 4)
-                                .background(.ultraThinMaterial)
-                                .background(Theme.Colors.background.opacity(0.6))
-                                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                        .stroke(Theme.Colors.border, lineWidth: 0.5)
-                                )
+                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                             }
                             .buttonStyle(.plain)
                             .offset(x: message.isUser ? -8 : -8, y: -8)

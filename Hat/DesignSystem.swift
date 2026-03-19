@@ -375,16 +375,11 @@ struct MaeTypingDots: View {
 
 extension View {
 
-    /// Glassmorphism — frosted glass with vibrancy (user bubbles)
+    /// Liquid Glass — macOS 26 native frosted glass (navigation layer elements)
     func maeGlassBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(.thinMaterial)
-            .background(Theme.Colors.accent.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.accent.opacity(0.15), lineWidth: 0.5)
-            )
+            .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.12)),
+                         in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
     /// Neutral dark surface with subtle material (assistant bubbles, cards)
@@ -410,7 +405,7 @@ extension View {
             )
     }
 
-    /// Text input style — Apple-like with material background
+    /// Text input style — Liquid Glass appearance
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -418,7 +413,17 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(.ultraThinMaterial)
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
+    /// Opaque text input style — for use inside Liquid Glass containers (glass cannot sample glass)
+    func maeInputStyleOpaque(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
+        self
+            .textFieldStyle(.plain)
+            .font(Theme.Typography.bodySmall)
+            .foregroundStyle(Theme.Colors.textPrimary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .background(Theme.Colors.surfaceSecondary)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
@@ -678,9 +683,7 @@ struct MaeStatusBadge: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Theme.Colors.surfaceSecondary)
-        .clipShape(Capsule())
-        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+        .glassEffect(.regular, in: Capsule())
     }
 }
 
@@ -714,12 +717,10 @@ struct MaeChip: View {
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(isSelected ? Theme.Colors.accent : Theme.Colors.surfaceSecondary)
+                .background(isSelected ? Theme.Colors.accent : Color.clear)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(isSelected ? Theme.Colors.accent.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
-                )
+                .glassEffect(isSelected ? .identity : .regular,
+                             in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -741,6 +742,7 @@ struct MaeEmptyState: View {
                 Circle()
                     .fill(Theme.Colors.accent.opacity(0.06))
                     .frame(width: 56, height: 56)
+                    .glassEffect(.clear, in: Circle())
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .light))
                     .foregroundStyle(Theme.Colors.accent.opacity(0.5))
@@ -890,9 +892,9 @@ struct MaeTooltipButton: View {
                 .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                 .symbolEffect(.bounce, value: tapCount)
                 .frame(width: 28, height: 28)
-                .background(isHovered ? Theme.Colors.surfaceElevated : .clear)
-                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 .contentShape(Rectangle())
+                .glassEffect(isHovered ? .regular : .clear,
+                             in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
         .buttonStyle(.plain)
         .onHover { hovering in

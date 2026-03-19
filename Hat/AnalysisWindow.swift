@@ -86,35 +86,38 @@ struct AnalysisView: View {
                             Spacer()
                             
                             if !viewModel.analysisResult.isEmpty && !viewModel.isAnalyzingScreen {
-                                MaeIconButton(
-                                    icon: "arrow.trianglehead.2.counterclockwise.rotate.90",
-                                    color: Theme.Colors.accent,
-                                    bgColor: Theme.Colors.accentSubtle,
-                                    helpText: "Nova análise de tela"
-                                ) {
-                                    Task { await viewModel.processarScreen() }
-                                }
-                                .maePressEffect()
-                                .transition(.maeScaleFade)
-                                
-                                MaeIconButton(
-                                    icon: "bubble.left.and.bubble.right.fill",
-                                    color: Theme.Colors.accent,
-                                    bgColor: Theme.Colors.accentSubtle,
-                                    helpText: "Transferir análise para o chat principal"
-                                ) {
-                                    withAnimation(Theme.Animation.bouncy) {
-                                        showConfirmation = true
+                                GlassEffectContainer(spacing: 8) {
+                                    HStack(spacing: 8) {
+                                        MaeIconButton(
+                                            icon: "arrow.trianglehead.2.counterclockwise.rotate.90",
+                                            color: Theme.Colors.accent,
+                                            bgColor: Theme.Colors.accentSubtle,
+                                            helpText: "Nova análise de tela"
+                                        ) {
+                                            Task { await viewModel.processarScreen() }
+                                        }
+                                        .maePressEffect()
+
+                                        MaeIconButton(
+                                            icon: "bubble.left.and.bubble.right.fill",
+                                            color: Theme.Colors.accent,
+                                            bgColor: Theme.Colors.accentSubtle,
+                                            helpText: "Transferir análise para o chat principal"
+                                        ) {
+                                            withAnimation(Theme.Animation.bouncy) {
+                                                showConfirmation = true
+                                            }
+                                            Task { @MainActor in
+                                                try? await Task.sleep(nanoseconds: 800_000_000)
+                                                viewModel.continueWithAnalysis(followUp: followUpText.isEmpty ? nil : followUpText)
+                                                followUpText = ""
+                                                AnalysisWindowManager.shared.closeWindow()
+                                                showConfirmation = false
+                                            }
+                                        }
+                                        .maePressEffect()
                                     }
-                                    Task { @MainActor in
-                                        try? await Task.sleep(nanoseconds: 800_000_000)
-                                        viewModel.continueWithAnalysis(followUp: followUpText.isEmpty ? nil : followUpText)
-                                        followUpText = ""
-                                        AnalysisWindowManager.shared.closeWindow()
-                                        showConfirmation = false
-                                    }
                                 }
-                                .maePressEffect()
                                 .transition(.maeScaleFade)
                             }
                         }
@@ -198,8 +201,7 @@ struct AnalysisView: View {
                                             .foregroundColor(Theme.Colors.textSecondary)
                                             .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
-                                            .background(Theme.Colors.surface)
-                                            .clipShape(RoundedRectangle(cornerRadius: 4))
+                                            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 4))
                                         Text("para capturar")
                                             .font(Theme.Typography.caption)
                                             .foregroundColor(Theme.Colors.textMuted)
@@ -236,7 +238,7 @@ struct AnalysisView: View {
                                 
                                 HStack(spacing: 10) {
                                     TextField("Perguntar algo sobre a análise...", text: $followUpText, axis: .vertical)
-                                        .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
+                                        .maeInputStyleOpaque(cornerRadius: Theme.Metrics.radiusSmall)
                                         .lineLimit(1...4)
                                         .focused($isFollowUpFocused)
                                         .onSubmit {
@@ -316,9 +318,7 @@ struct AnalysisView: View {
                         }
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
                         .padding(.vertical, 14)
-                        .background(.ultraThinMaterial)
-                        .clipShape(Capsule())
-                        .maeMediumShadow()
+                        .glassEffect(.regular, in: Capsule())
                         .padding(.bottom, 40)
                     }
                     .transition(

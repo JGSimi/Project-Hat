@@ -18,20 +18,7 @@ struct ConversationTurn {
     let textContent: String
 }
 
-// MARK: - Ollama Models (legacy single-turn)
-struct OllamaRequest: Codable {
-    let model: String
-    let prompt: String
-    let stream: Bool
-    let images: [String]?
-    let options: [String: Double]
-}
-
-struct OllamaResponse: Decodable {
-    let response: String
-}
-
-// MARK: - Ollama Chat Models (multi-turn)
+// MARK: - Ollama Chat Models
 struct OllamaChatRequest: Codable {
     let model: String
     let messages: [OllamaChatMessage]

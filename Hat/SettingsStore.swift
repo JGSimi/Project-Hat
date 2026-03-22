@@ -1,5 +1,19 @@
 import Foundation
 
+// MARK: - Shared Constants
+enum APIConstants {
+    static let localHistoryMaxChars = 16_000
+    static let cloudHistoryMaxChars = 100_000
+    static let requestTimeoutSeconds: TimeInterval = 120
+    static let defaultMaxTokens = 4096
+    static let defaultTemperature = 0.0
+    static let ollamaEndpoint = "http://localhost:11434/api/chat"
+    static let jpegCompressionFactor: CGFloat = 0.7
+    static let screenCaptureMaxDimension: CGFloat = 1024
+    static let defaultAPIModelName = "gpt-4o-mini"
+    static let defaultLocalModelName = "gemma3:4b"
+}
+
 enum InferenceMode: String, CaseIterable, Identifiable {
     case local = "Modelos Locais (Ollama)"
     case api = "API na Nuvem (Google, OpenAI, etc)"
@@ -103,6 +117,20 @@ enum CloudProvider: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Auth Header Helper
+extension CloudProvider {
+    func applyAuthHeaders(to request: inout URLRequest, apiKey: String) {
+        guard !apiKey.isEmpty else { return }
+        switch self {
+        case .google, .openai, .inception, .openrouter, .custom:
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        case .anthropic:
+            request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+            request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        }
+    }
+}
+
 struct SettingsManager {
     static var inferenceMode: InferenceMode {
         let val = UserDefaults.standard.string(forKey: "inferenceMode") ?? InferenceMode.local.rawValue
@@ -112,9 +140,9 @@ struct SettingsManager {
         let val = UserDefaults.standard.string(forKey: "selectedProvider") ?? CloudProvider.google.rawValue
         return CloudProvider(rawValue: val) ?? .google
     }
-    static var localModelName: String { UserDefaults.standard.string(forKey: "localModelName") ?? "gemma3:4b" }
+    static var localModelName: String { UserDefaults.standard.string(forKey: "localModelName") ?? APIConstants.defaultLocalModelName }
     static var apiEndpoint: String { UserDefaults.standard.string(forKey: "apiEndpoint") ?? "https://api.openai.com/v1/chat/completions" }
-    static var apiModelName: String { UserDefaults.standard.string(forKey: "apiModelName") ?? "gpt-4o-mini" }
+    static var apiModelName: String { UserDefaults.standard.string(forKey: "apiModelName") ?? APIConstants.defaultAPIModelName }
     static var apiKey: String { KeychainManager.shared.loadKey(for: selectedProvider) ?? "" }
     static var systemPrompt: String { UserDefaults.standard.string(forKey: "systemPrompt") ?? "Resposta direta. Pergunta: " }
     static var playNotifications: Bool { UserDefaults.standard.object(forKey: "playNotifications") as? Bool ?? true }

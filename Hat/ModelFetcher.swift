@@ -23,15 +23,7 @@ class ModelFetcher {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         
-        if !apiKey.isEmpty {
-            switch provider {
-            case .google, .openai, .inception, .openrouter, .custom:
-                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            case .anthropic:
-                request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-                request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
-            }
-        }
+        provider.applyAuthHeaders(to: &request, apiKey: apiKey)
         
         // Timeout curto para não prender a interface se a rede estiver ruim
         request.timeoutInterval = 15

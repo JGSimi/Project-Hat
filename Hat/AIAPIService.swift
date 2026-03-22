@@ -35,7 +35,7 @@ class AIAPIService {
     }
 
     private func executeLocalRequest(prompt: String, images: [String]?, history: [ConversationTurn], systemPrompt: String) async throws -> AIResponse {
-        let trimmedHistory = truncateHistory(history, maxChars: 16_000)
+        let trimmedHistory = truncateHistory(history, maxChars: APIConstants.localHistoryMaxChars)
 
         var messages: [OllamaChatMessage] = []
 
@@ -57,15 +57,15 @@ class AIAPIService {
             model: SettingsManager.localModelName,
             messages: messages,
             stream: false,
-            options: ["temperature": 0.0]
+            options: ["temperature": APIConstants.defaultTemperature]
         )
 
-        guard let url = URL(string: "http://localhost:11434/api/chat") else { throw URLError(.badURL) }
+        guard let url = URL(string: APIConstants.ollamaEndpoint) else { throw URLError(.badURL) }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(payload)
-        request.timeoutInterval = 120
+        request.timeoutInterval = APIConstants.requestTimeoutSeconds
 
         let (data, response) = try await session.data(for: request)
         if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
@@ -81,7 +81,7 @@ class AIAPIService {
     }
 
     private func executeAPIRequest(prompt: String, images: [String]?, history: [ConversationTurn], systemPrompt: String) async throws -> AIResponse {
-        let trimmedHistory = truncateHistory(history, maxChars: 100_000)
+        let trimmedHistory = truncateHistory(history, maxChars: APIConstants.cloudHistoryMaxChars)
 
         guard let url = URL(string: SettingsManager.apiEndpoint),
               let scheme = url.scheme?.lowercased(),
@@ -92,20 +92,12 @@ class AIAPIService {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.timeoutInterval = 120
+        request.timeoutInterval = APIConstants.requestTimeoutSeconds
 
         let apiKey = SettingsManager.apiKey
         let isAnthropic = SettingsManager.selectedProvider == .anthropic
 
-        if !apiKey.isEmpty {
-            switch SettingsManager.selectedProvider {
-            case .google, .openai, .inception, .openrouter, .custom:
-                request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            case .anthropic:
-                request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-                request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
-            }
-        }
+        SettingsManager.selectedProvider.applyAuthHeaders(to: &request, apiKey: apiKey)
 
         if isAnthropic {
             // Build Anthropic messages array with history
@@ -135,10 +127,10 @@ class AIAPIService {
 
             let payload = AnthropicRequest(
                 model: SettingsManager.apiModelName,
-                max_tokens: 4096,
+                max_tokens: APIConstants.defaultMaxTokens,
                 system: systemText,
                 messages: anthropicMessages,
-                temperature: 0.0
+                temperature: APIConstants.defaultTemperature
             )
 
             request.httpBody = try JSONEncoder().encode(payload)
@@ -188,8 +180,8 @@ class AIAPIService {
             let payload = APIRequest(
                 model: modelName,
                 messages: apiMessages,
-                temperature: isOModel ? nil : 0.0,
-                max_tokens: 4096,
+                temperature: isOModel ? nil : APIConstants.defaultTemperature,
+                max_tokens: APIConstants.defaultMaxTokens,
                 stream: false
             )
 

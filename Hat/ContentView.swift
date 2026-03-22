@@ -74,7 +74,7 @@ extension NSPasteboard: PasteboardClient {
 
 // MARK: - NSImage Extension
 extension NSImage {
-    func resizedAndCompressedBase64(maxDimension: CGFloat = 1024) -> String? {
+    func resizedAndCompressedBase64(maxDimension: CGFloat = APIConstants.screenCaptureMaxDimension) -> String? {
         guard let tiffData = self.tiffRepresentation,
               let imageSource = CGImageSourceCreateWithData(tiffData as CFData, nil) else {
             return nil
@@ -93,7 +93,7 @@ extension NSImage {
         let newImage = NSImage(cgImage: cgImage, size: .zero)
         guard let compressedTiff = newImage.tiffRepresentation,
               let bitmapImage = NSBitmapImageRep(data: compressedTiff),
-              let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
+              let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: APIConstants.jpegCompressionFactor]) else {
             return nil
         }
         
@@ -109,7 +109,6 @@ class AssistantViewModel: ObservableObject {
     @Published var isProcessing = false
     @Published var messages: [ChatMessage] = []
     @Published var inputText: String = ""
-    @Published var attachedImages: [NSImage] = [] // Deprecated logic soon
     @Published var pendingAttachments: [ChatAttachment] = []
     
     // Análise de Tela - Novas Propriedades
@@ -216,7 +215,7 @@ class AssistantViewModel: ObservableObject {
 
         guard !textoClipboard.isEmpty || copiedImage != nil else { return }
 
-        await executeRequest(prompt: textoClipboard, rawImages: copiedImage != nil ? [copiedImage!] : nil, attachments: nil)
+        await executeRequest(prompt: textoClipboard, rawImages: copiedImage.map { [$0] }, attachments: nil)
     }
 
     /// Chamado pelo atalho global (Intelligent Screen Analysis)
@@ -282,7 +281,7 @@ class AssistantViewModel: ObservableObject {
         
         let prompt = "📸 Análise de Tela"
         
-        let userMsg = ChatMessage(content: prompt, images: analysisImage != nil ? [analysisImage!] : nil, attachments: nil, isUser: true, source: .screenAnalysis)
+        let userMsg = ChatMessage(content: prompt, images: analysisImage.map { [$0] }, attachments: nil, isUser: true, source: .screenAnalysis)
         let assistantMsg = ChatMessage(content: analysisResult, images: nil, attachments: nil, isUser: false, source: .screenAnalysis)
         
         messages.append(userMsg)
@@ -324,7 +323,6 @@ class AssistantViewModel: ObservableObject {
         
         inputText = ""
         pendingAttachments.removeAll()
-        attachedImages.removeAll()
         
         var finalPrompt = text
         var extractedImages: [NSImage] = []
@@ -462,7 +460,7 @@ struct ContentView: View {
     @AppStorage("windowOpacity") private var windowOpacity: Double = 1.0
     @AppStorage("globalTotalTokens") private var globalTotalTokens: Int = 0
     @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
-    @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
+    @AppStorage("apiModelName") private var apiModelName: String = "gpt-4o-mini"
     @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
     @FocusState private var isInputFocused: Bool
     @State private var placeholderIndex: Int = 0
@@ -656,9 +654,20 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                             .maeAppearAnimation(animation: Theme.Animation.expressive)
                         } else {
+                            let daySeparatorIndices: Set<Int> = {
+                                let msgs = viewModel.messages
+                                let cal = Calendar.current
+                                var indices = Set<Int>()
+                                for i in msgs.indices {
+                                    if i == 0 || !cal.isDate(msgs[i].timestamp, inSameDayAs: msgs[i - 1].timestamp) {
+                                        indices.insert(i)
+                                    }
+                                }
+                                return indices
+                            }()
+
                             ForEach(viewModel.messages.indices, id: \.self) { index in
-                                // Date separator when day changes
-                                if index == 0 || !Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp) {
+                                if daySeparatorIndices.contains(index) {
                                     MaeDateSeparator(date: viewModel.messages[index].timestamp)
                                         .transition(.opacity)
                                 }

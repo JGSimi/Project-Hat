@@ -543,40 +543,41 @@ struct ContentView: View {
 
                 Spacer()
 
-                HStack(spacing: 2) {
-                    MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
-                        AnalysisWindowManager.shared.showWindow()
-                    }
-                    MaeTooltipButton(icon: "trash", helpText: "Limpar histórico") {
-                        withAnimation { viewModel.clearHistory() }
-                    }
-                    MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
-                        withAnimation(Theme.Animation.smooth) {
-                            showOpacitySlider.toggle()
+                GlassEffectContainer(spacing: 2) {
+                    HStack(spacing: 2) {
+                        MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
+                            AnalysisWindowManager.shared.showWindow()
                         }
-                    }
-                    .popover(isPresented: $showOpacitySlider) {
-                        VStack(spacing: 8) {
-                            Text("Opacidade")
-                                .font(Theme.Typography.caption)
-                                .foregroundStyle(Theme.Colors.textSecondary)
-                            Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
-                                .frame(width: 160)
+                        MaeTooltipButton(icon: "trash", helpText: "Limpar histórico") {
+                            withAnimation { viewModel.clearHistory() }
                         }
-                        .padding(12)
-                        .frame(width: 200)
-                    }
-                    MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
-                        withAnimation(Theme.Animation.smooth) {
-                            showSettings = true
+                        MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
+                            withAnimation(Theme.Animation.smooth) {
+                                showOpacitySlider.toggle()
+                            }
+                        }
+                        .popover(isPresented: $showOpacitySlider) {
+                            VStack(spacing: 8) {
+                                Text("Opacidade")
+                                    .font(Theme.Typography.caption)
+                                    .foregroundStyle(Theme.Colors.textSecondary)
+                                Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
+                                    .frame(width: 160)
+                            }
+                            .padding(12)
+                            .frame(width: 200)
+                        }
+                        MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
+                            withAnimation(Theme.Animation.smooth) {
+                                showSettings = true
+                            }
                         }
                     }
                 }
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.vertical, 10)
-            .background(.regularMaterial)
-            .overlay(MaeGradientDivider(), alignment: .bottom)
+            .glassEffect(.regular, in: Rectangle())
             .zIndex(1)
 
             // Chat List
@@ -634,21 +635,23 @@ struct ContentView: View {
                                 }
 
                                 // Quick action suggestions
-                                VStack(spacing: 6) {
-                                    EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
-                                        Task { await viewModel.processarIA() }
-                                    }
-                                    .maeStaggered(index: 3, baseDelay: 0.10)
+                                GlassEffectContainer(spacing: 6) {
+                                    VStack(spacing: 6) {
+                                        EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
+                                            Task { await viewModel.processarIA() }
+                                        }
+                                        .maeStaggered(index: 3, baseDelay: 0.10)
 
-                                    EmptyStateSuggestion(icon: "camera.viewfinder", label: "Analisar tela", shortcut: "⌘⇧Z") {
-                                        Task { await viewModel.processarScreen() }
-                                    }
-                                    .maeStaggered(index: 4, baseDelay: 0.10)
+                                        EmptyStateSuggestion(icon: "camera.viewfinder", label: "Analisar tela", shortcut: "⌘⇧Z") {
+                                            Task { await viewModel.processarScreen() }
+                                        }
+                                        .maeStaggered(index: 4, baseDelay: 0.10)
 
-                                    EmptyStateSuggestion(icon: "bolt.fill", label: "Entrada rápida", shortcut: "⌘⇧Space") {
-                                        QuickInputWindowManager.shared.toggleWindow()
+                                        EmptyStateSuggestion(icon: "bolt.fill", label: "Entrada rápida", shortcut: "⌘⇧Space") {
+                                            QuickInputWindowManager.shared.toggleWindow()
+                                        }
+                                        .maeStaggered(index: 5, baseDelay: 0.10)
                                     }
-                                    .maeStaggered(index: 5, baseDelay: 0.10)
                                 }
                                 .padding(.horizontal, 36)
                                 .padding(.top, 6)
@@ -781,7 +784,7 @@ struct ContentView: View {
                     }
 
                     TextField(placeholders[placeholderIndex], text: $viewModel.inputText, axis: .vertical)
-                        .maeInputStyle(cornerRadius: 18)
+                        .maeInputStyleOpaque(cornerRadius: 18)
                         .lineLimit(1...6)
                         .focused($isInputFocused)
                         .onSubmit {
@@ -823,7 +826,7 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(.regularMaterial)
+                .glassEffect(.regular, in: Rectangle())
             }
             .zIndex(1)
         }
@@ -926,24 +929,12 @@ struct EmptyStateSuggestion: View {
                     .foregroundStyle(Theme.Colors.textMuted)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .background(Theme.Colors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(
-                isHovered
-                    ? Theme.Colors.surfaceElevated.opacity(0.8)
-                    : Theme.Colors.surfaceSecondary.opacity(0.6)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                    .stroke(
-                        isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border,
-                        lineWidth: 0.5
-                    )
-            )
+            .glassEffect(isHovered ? .regular.tint(Theme.Colors.accentBlue.opacity(0.08)) : .regular,
+                         in: RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
             .animation(Theme.Animation.hover, value: isHovered)
         }
         .buttonStyle(.plain)

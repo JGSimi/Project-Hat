@@ -332,62 +332,56 @@ struct SettingsView: View {
 
                 // Action Buttons
                 VStack(spacing: 6) {
-                    Button {
-                        UpdaterController.shared.checkForUpdates()
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(Theme.Colors.textSecondary)
-                            Text("Verificar Atualizações")
-                                .font(Theme.Typography.bodySmall)
-                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                            Spacer(minLength: 0)
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Theme.Colors.border, lineWidth: 0.5)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .maePressEffect()
-                    .maeStaggered(index: 3, baseDelay: 0.06)
+                    GlassEffectContainer(spacing: 6) {
+                        VStack(spacing: 6) {
+                            Button {
+                                UpdaterController.shared.checkForUpdates()
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "arrow.triangle.2.circlepath")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(Theme.Colors.textSecondary)
+                                    Text("Verificar Atualizações")
+                                        .font(Theme.Typography.bodySmall)
+                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                                    Spacer(minLength: 0)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 11)
+                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                            .maePressEffect()
+                            .maeStaggered(index: 3, baseDelay: 0.06)
 
-                    Button {
-                        withAnimation {
-                            isPresented = false
+                            Button {
+                                withAnimation {
+                                    isPresented = false
+                                }
+                                NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
+                                AdvancedSettingsWindowManager.shared.showWindow()
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "gearshape.fill")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(Theme.Colors.textSecondary)
+                                    Text("Configurações Avançadas")
+                                        .font(Theme.Typography.bodySmall)
+                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                                    Spacer(minLength: 0)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundStyle(Theme.Colors.textMuted)
+                                }
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 11)
+                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                            .maePressEffect()
+                            .maeStaggered(index: 4, baseDelay: 0.06)
                         }
-                        NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
-                        AdvancedSettingsWindowManager.shared.showWindow()
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(Theme.Colors.textSecondary)
-                            Text("Configurações Avançadas")
-                                .font(Theme.Typography.bodySmall)
-                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                            Spacer(minLength: 0)
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 10, weight: .medium))
-                                .foregroundStyle(Theme.Colors.textMuted)
-                        }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(Theme.Colors.surfaceSecondary.opacity(0.7))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(Theme.Colors.border, lineWidth: 0.5)
-                        )
                     }
-                    .buttonStyle(.plain)
-                    .maePressEffect()
-                    .maeStaggered(index: 4, baseDelay: 0.06)
                 }
                 .padding(.bottom, 14)
             }

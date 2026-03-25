@@ -346,7 +346,7 @@ struct FeatureRow: View {
                     )
                 )
                 .frame(width: 36, height: 36)
-                .background(Theme.Colors.accentOrange.opacity(0.06))
+                .background(Theme.Colors.accentPrimary.opacity(0.06))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -390,7 +390,7 @@ struct PermissionRowView: View {
                         ))
                 )
                 .frame(width: 36, height: 36)
-                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentOrange.opacity(0.08))
+                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentPrimary.opacity(0.08))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -461,7 +461,7 @@ struct PermissionsView: View {
                         )
                         .frame(width: 76, height: 76)
                     Circle()
-                        .fill(Theme.Colors.accentOrange.opacity(0.06))
+                        .fill(Theme.Colors.accentPrimary.opacity(0.06))
                         .frame(width: 68, height: 68)
                     Image(systemName: allGranted ? "lock.shield.fill" : "lock.shield")
                         .font(.system(size: 30, weight: .light))

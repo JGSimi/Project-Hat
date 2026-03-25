@@ -38,7 +38,7 @@ struct ChatBubble: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 18, height: 18)
-                            .foregroundStyle(Theme.Colors.accentOrange.opacity(0.75))
+                            .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.75))
                             .padding(5)
                             .background(Theme.Colors.surfaceSecondary)
                             .clipShape(Circle())
@@ -57,10 +57,10 @@ struct ChatBubble: View {
                         Text("Análise de Tela")
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                     }
-                    .foregroundStyle(Theme.Colors.accentOrange)
+                    .foregroundStyle(Theme.Colors.accentPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentOrange.opacity(0.1))
+                    .background(Theme.Colors.accentPrimary.opacity(0.1))
                     .clipShape(Capsule())
                 }
 
@@ -82,7 +82,7 @@ struct ChatBubble: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "doc.text.fill")
                                     .font(.system(size: 14))
-                                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
+                                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.8))
                                 Text(attachment.name)
                                     .font(Theme.Typography.caption)
                                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -130,8 +130,8 @@ struct ChatBubble: View {
                                 .background(
                                     LinearGradient(
                                         colors: [
-                                            Theme.Colors.accentOrange.opacity(0.07),
-                                            Theme.Colors.accentSand.opacity(0.04)
+                                            Theme.Colors.accentPrimary.opacity(0.12),
+                                            Theme.Colors.accentSecondary.opacity(0.06)
                                         ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
@@ -140,7 +140,7 @@ struct ChatBubble: View {
                                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous))
                                 .overlay(
                                     UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous)
-                                        .stroke(Theme.Colors.accentOrange.opacity(0.08), lineWidth: 0.5)
+                                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 0.5)
                                 )
                         } else {
                             HatMarkdownView(markdown: message.content)
@@ -219,7 +219,7 @@ struct ChatBubble: View {
         .padding(.vertical, isGrouped ? 2 : 6)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isHovered ? Theme.Colors.accentOrange.opacity(0.015) : Color.clear)
+                .fill(isHovered ? Theme.Colors.accentPrimary.opacity(0.015) : Color.clear)
         )
         .onHover { hovering in
             withAnimation(Theme.Animation.hover) { isHovered = hovering }

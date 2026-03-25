@@ -4,7 +4,7 @@ import Combine
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║                     Hat · Design System                        ║
 // ║  Single source of truth for all visual tokens and components.  ║
-// ║  Inspired by Claude (Anthropic) — warm, minimal, adaptive.    ║
+// ║  Dark mode premium — vibrant violet & cyan accents.            ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
 // MARK: - Font Extension (Cormorant Garamond)
@@ -41,101 +41,92 @@ extension Color {
 
 enum Theme {
 
-    // MARK: Colors — Claude-inspired warm palette (refined)
+    // MARK: Colors — Dark mode premium with vibrant accents
     enum Colors {
-        // Backgrounds — warmer, richer tones
+        // Backgrounds — deep neutral blacks
         static let background = Color.adaptive(
-            light: Color(NSColor(red: 0.98, green: 0.973, blue: 0.96, alpha: 1.0)),   // #FAF8F5
-            dark:  Color(NSColor(red: 0.11, green: 0.106, blue: 0.09, alpha: 1.0))    // #1C1B17
+            light: Color(NSColor(red: 0.980, green: 0.980, blue: 0.980, alpha: 1.0)),   // #FAFAFA
+            dark:  Color(NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1.0))     // #09090B
         )
         static let backgroundSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.941, green: 0.929, blue: 0.902, alpha: 1.0)), // #F0EDE6
-            dark:  Color(NSColor(red: 0.078, green: 0.075, blue: 0.059, alpha: 1.0))  // #14130F
+            light: Color(NSColor(red: 0.957, green: 0.957, blue: 0.957, alpha: 1.0)),    // #F4F4F5
+            dark:  Color(NSColor(red: 0.059, green: 0.059, blue: 0.071, alpha: 1.0))     // #0F0F12
         )
 
-        // Surfaces — layered depth
+        // Surfaces — layered depth with subtle blue undertone
         static let surface = Color.adaptive(
             light: Color.white,
-            dark:  Color.white.opacity(0.05)
+            dark:  Color(NSColor(red: 0.086, green: 0.086, blue: 0.102, alpha: 1.0))     // #16161A
         )
         static let surfaceSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.961, green: 0.949, blue: 0.922, alpha: 1.0)), // #F5F2EB
-            dark:  Color.white.opacity(0.04)
+            light: Color(NSColor(red: 0.941, green: 0.941, blue: 0.949, alpha: 1.0)),    // #F0F0F2
+            dark:  Color.white.opacity(0.06)
         )
         static let surfaceTertiary = Color.adaptive(
-            light: Color(NSColor(red: 0.949, green: 0.937, blue: 0.91, alpha: 1.0)),  // #F2EFE8
-            dark:  Color.white.opacity(0.03)
+            light: Color(NSColor(red: 0.910, green: 0.910, blue: 0.918, alpha: 1.0)),    // #E8E8EA
+            dark:  Color.white.opacity(0.04)
         )
         static let surfaceElevated = Color.adaptive(
             light: Color.white,
-            dark:  Color.white.opacity(0.07)
+            dark:  Color.white.opacity(0.10)
         )
 
         // Borders
         static let border = Color.adaptive(
-            light: Color.black.opacity(0.08),
+            light: Color.black.opacity(0.10),
             dark:  Color.white.opacity(0.08)
         )
         static let borderHighlight = Color.adaptive(
-            light: Color.black.opacity(0.12),
+            light: Color.black.opacity(0.14),
             dark:  Color.white.opacity(0.12)
         )
-        static let borderFocused = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.45)) // deeper terracotta @ 45%
+        static let borderFocused = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.50)) // violet #8B5CF6 @ 50%
 
-        // Text — warm tones with better contrast
+        // Text — clean neutral tones
         static let textPrimary = Color.adaptive(
-            light: Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0)), // #1A1915
-            dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
+            light: Color(NSColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1.0)),    // #18181B
+            dark:  Color(NSColor(red: 0.957, green: 0.957, blue: 0.961, alpha: 1.0))     // #F4F4F5
         )
         static let textSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.361, green: 0.333, blue: 0.286, alpha: 1.0)), // #5C5549 — improved WCAG AA
-            dark:  Color(NSColor(red: 0.722, green: 0.678, blue: 0.620, alpha: 1.0))  // #B8AD9E
+            light: Color(NSColor(red: 0.322, green: 0.322, blue: 0.357, alpha: 1.0)),    // #52525B
+            dark:  Color(NSColor(red: 0.631, green: 0.631, blue: 0.667, alpha: 1.0))     // #A1A1AA
         )
         static let textMuted = Color.adaptive(
-            light: Color(NSColor(red: 0.565, green: 0.529, blue: 0.478, alpha: 1.0)), // #90877A
-            dark:  Color(NSColor(red: 0.478, green: 0.439, blue: 0.376, alpha: 1.0))  // #7A7060
+            light: Color(NSColor(red: 0.443, green: 0.443, blue: 0.478, alpha: 1.0)),    // #71717A
+            dark:  Color(NSColor(red: 0.388, green: 0.388, blue: 0.400, alpha: 1.0))     // #636366
         )
 
-        // Accent — adaptive for buttons (dark text on light, cream on dark)
+        // Accent — adaptive for buttons (dark text on light, light text on dark)
         static let accent = Color.adaptive(
-            light: Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0)), // #1A1915
-            dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
+            light: Color(NSColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1.0)),    // #18181B
+            dark:  Color(NSColor(red: 0.957, green: 0.957, blue: 0.961, alpha: 1.0))     // #F4F4F5
         )
         static let accentSubtle = Color.adaptive(
-            light: Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.10)),
-            dark:  Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.15))
+            light: Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.10)),   // violet @ 10%
+            dark:  Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.15))    // violet @ 15%
         )
-        // Signature terracotta — deeper, more sophisticated
-        static let accentOrange = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 1.0))  // #D4714F
-        static let accentOrangeHover = Color(NSColor(red: 0.878, green: 0.545, blue: 0.416, alpha: 1.0)) // #E08B6A
-        // Warm sand secondary
-        static let accentSand = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0))   // #C4A882
+        // Signature violet — vibrant primary accent
+        static let accentPrimary = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 1.0))      // #8B5CF6
+        static let accentPrimaryHover = Color(NSColor(red: 0.655, green: 0.545, blue: 0.980, alpha: 1.0)) // #A78BFA
+        // Cyan secondary accent
+        static let accentSecondary = Color(NSColor(red: 0.024, green: 0.714, blue: 0.831, alpha: 1.0))    // #06B6D4
 
         // Input — dedicated input background
         static let inputBackground = Color.adaptive(
-            light: Color(NSColor(red: 0.969, green: 0.957, blue: 0.937, alpha: 1.0)), // #F7F4EF
-            dark:  Color.white.opacity(0.045)
+            light: Color(NSColor(red: 0.961, green: 0.961, blue: 0.961, alpha: 1.0)),    // #F5F5F5
+            dark:  Color.white.opacity(0.06)
         )
 
-        // Semantic
-        static let success = Color.adaptive(
-            light: Color(NSColor(red: 0.302, green: 0.659, blue: 0.478, alpha: 1.0)), // #4DA87A
-            dark:  Color(NSColor(red: 0.357, green: 0.725, blue: 0.549, alpha: 1.0))  // #5BB98C
-        )
-        static let error = Color.adaptive(
-            light: Color(NSColor(red: 0.851, green: 0.310, blue: 0.310, alpha: 1.0)), // #D94F4F
-            dark:  Color(NSColor(red: 0.878, green: 0.376, blue: 0.376, alpha: 1.0))  // #E06060
-        )
-        static let warning = Color.adaptive(
-            light: Color(NSColor(red: 0.769, green: 0.580, blue: 0.251, alpha: 1.0)), // #C49440
-            dark:  Color(NSColor(red: 0.831, green: 0.651, blue: 0.302, alpha: 1.0))  // #D4A04D
-        )
+        // Semantic — vivid
+        static let success = Color(NSColor(red: 0.204, green: 0.827, blue: 0.600, alpha: 1.0)) // #34D399
+        static let error   = Color(NSColor(red: 0.973, green: 0.443, blue: 0.443, alpha: 1.0)) // #F87171
+        static let warning = Color(NSColor(red: 0.984, green: 0.749, blue: 0.141, alpha: 1.0)) // #FBBF24
 
-        // Gradient helpers — orange to sand
-        static let gradientStart = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 1.0))  // #D4714F
-        static let gradientEnd   = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0)) // #C4A882
+        // Gradient helpers — violet to cyan
+        static let gradientStart = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 1.0))   // #8B5CF6
+        static let gradientEnd   = Color(NSColor(red: 0.024, green: 0.714, blue: 0.831, alpha: 1.0))   // #06B6D4
         static let gradientSubtle = LinearGradient(
-            colors: [gradientStart.opacity(0.04), gradientEnd.opacity(0.02)],
+            colors: [gradientStart.opacity(0.06), gradientEnd.opacity(0.03)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -185,9 +176,12 @@ enum Theme {
 
     // MARK: Shadows
     enum Shadows {
-        static let soft     = (color: Color.black.opacity(0.08), radius: CGFloat(5), x: CGFloat(0), y: CGFloat(2))
-        static let medium   = (color: Color.black.opacity(0.12), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
-        static let elevated = (color: Color.black.opacity(0.14), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(6))
+        static let soft     = (color: Color.black.opacity(0.10), radius: CGFloat(5), x: CGFloat(0), y: CGFloat(2))
+        static let medium   = (color: Color.black.opacity(0.14), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
+        static let elevated = (color: Color.black.opacity(0.18), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(6))
+        // Premium glow shadows
+        static let accentGlow  = (color: Colors.accentPrimary.opacity(0.15), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(4))
+        static let subtleGlow  = (color: Colors.accentPrimary.opacity(0.08), radius: CGFloat(8), x: CGFloat(0), y: CGFloat(2))
     }
 
     // MARK: Animation
@@ -346,9 +340,9 @@ struct MaeShimmerEffect: ViewModifier {
                 LinearGradient(
                     colors: [
                         .clear,
-                        Theme.Colors.accentOrange.opacity(0.06),
-                        Theme.Colors.accentOrange.opacity(0.12),
-                        Theme.Colors.accentOrange.opacity(0.06),
+                        Theme.Colors.accentPrimary.opacity(0.06),
+                        Theme.Colors.accentPrimary.opacity(0.12),
+                        Theme.Colors.accentPrimary.opacity(0.06),
                         .clear
                     ],
                     startPoint: .init(x: phase - 0.5, y: 0.5),
@@ -409,7 +403,7 @@ struct MaeFloatingEffect: ViewModifier {
 }
 
 struct MaeGlowHoverEffect: ViewModifier {
-    var glowColor: Color = Theme.Colors.accentOrange
+    var glowColor: Color = Theme.Colors.accentPrimary
     var glowRadius: CGFloat = 12
     @State private var isHovered = false
 
@@ -433,7 +427,7 @@ struct MaeTypingDots: View {
             HStack(spacing: 5) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(Theme.Colors.accentOrange.opacity(activeIndex == index ? 0.9 : 0.3))
+                        .fill(Theme.Colors.accentPrimary.opacity(activeIndex == index ? 0.9 : 0.3))
                         .frame(width: 6, height: 6)
                         .scaleEffect(activeIndex == index ? 1.3 : 1.0)
                         .animation(Theme.Animation.microBounce, value: activeIndex)
@@ -489,7 +483,7 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
-    /// Text input style — warm input background
+    /// Text input style — dedicated input background
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -564,8 +558,18 @@ extension View {
         self.modifier(MaeFloatingEffect(amplitude: amplitude, duration: duration))
     }
 
-    func maeGlowHover(color: Color = Theme.Colors.accentOrange) -> some View {
+    func maeGlowHover(color: Color = Theme.Colors.accentPrimary) -> some View {
         self.modifier(MaeGlowHoverEffect(glowColor: color))
+    }
+
+    func maeAccentGlow() -> some View {
+        let s = Theme.Shadows.accentGlow
+        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
+    }
+
+    func maeSubtleGlow() -> some View {
+        let s = Theme.Shadows.subtleGlow
+        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
 }
 
@@ -628,7 +632,7 @@ struct MaeActionRow: View {
     let title: String
     var subtitle: String? = nil
     var icon: String? = nil
-    var iconColor: Color = Theme.Colors.accentOrange
+    var iconColor: Color = Theme.Colors.accentPrimary
     @State private var appeared = false
 
     var body: some View {
@@ -700,14 +704,14 @@ struct MaePageBackground: View {
             Theme.Colors.background.ignoresSafeArea()
             if showGlow {
                 RadialGradient(
-                    gradient: Gradient(colors: [Theme.Colors.accentOrange.opacity(0.04), .clear]),
+                    gradient: Gradient(colors: [Theme.Colors.accentPrimary.opacity(0.06), Theme.Colors.accentSecondary.opacity(0.02), .clear]),
                     center: .topLeading,
                     startRadius: 0,
                     endRadius: 400
                 )
             } else {
                 RadialGradient(
-                    gradient: Gradient(colors: [Theme.Colors.accentSand.opacity(0.02), .clear]),
+                    gradient: Gradient(colors: [Theme.Colors.accentSecondary.opacity(0.03), .clear]),
                     center: .topLeading,
                     startRadius: 0,
                     endRadius: 400
@@ -782,11 +786,11 @@ struct MaeChip: View {
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(isSelected ? Theme.Colors.accentOrange : Theme.Colors.surfaceSecondary)
+                .background(isSelected ? Theme.Colors.accentPrimary : Theme.Colors.surfaceSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(isSelected ? Theme.Colors.accentOrange.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
+                        .stroke(isSelected ? Theme.Colors.accentPrimary.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
@@ -802,7 +806,7 @@ struct MaeEmptyState: View {
         VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accentOrange.opacity(0.03))
+                    .fill(Theme.Colors.accentPrimary.opacity(0.03))
                     .frame(width: 84, height: 84)
                 Circle()
                     .stroke(
@@ -819,7 +823,7 @@ struct MaeEmptyState: View {
                     .frame(width: 56, height: 56)
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .light))
-                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.6))
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
             }
             .maeFloating(amplitude: 4, duration: 4.0)
 
@@ -1023,7 +1027,7 @@ struct MaeProgressBar: View {
 struct MaeTag: View {
     let label: String
     var icon: String? = nil
-    var color: Color = Theme.Colors.accentOrange
+    var color: Color = Theme.Colors.accentPrimary
 
     var body: some View {
         HStack(spacing: 4) {

@@ -570,7 +570,7 @@ struct ContentView: View {
                         }
                         .popover(isPresented: $showOpacitySlider) {
                             Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
-                                .tint(Theme.Colors.accentOrange)
+                                .tint(Theme.Colors.accentPrimary)
                                 .frame(width: 160)
                                 .padding(12)
                         }
@@ -601,12 +601,12 @@ struct ContentView: View {
                                 ZStack {
                                     // Subtle radial glow
                                     RadialGradient(
-                                        gradient: Gradient(colors: [Theme.Colors.accentOrange.opacity(0.04), .clear]),
+                                        gradient: Gradient(colors: [Theme.Colors.accentPrimary.opacity(0.08), Theme.Colors.accentSecondary.opacity(0.03), .clear]),
                                         center: .center,
                                         startRadius: 0,
-                                        endRadius: 120
+                                        endRadius: 140
                                     )
-                                    .frame(width: 240, height: 240)
+                                    .frame(width: 280, height: 280)
 
                                     VStack(spacing: 16) {
                                         // Icon with gradient ring
@@ -629,7 +629,7 @@ struct ContentView: View {
                                                 .resizable()
                                                 .scaledToFit()
                                                 .frame(width: 24, height: 24)
-                                                .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
+                                                .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                                         }
                                         .maeFloating(amplitude: 3, duration: 4.0)
 
@@ -727,7 +727,7 @@ struct ContentView: View {
                                         VStack(spacing: 4) {
                                             Image(systemName: "doc.text.fill")
                                                 .font(.system(size: 24))
-                                                .foregroundStyle(Theme.Colors.accentOrange)
+                                                .foregroundStyle(Theme.Colors.accentPrimary)
                                                 .symbolEffect(.bounce, options: .nonRepeating)
                                             Text(attachment.name)
                                                 .font(.system(size: 9))
@@ -829,9 +829,10 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 28))
-                                .foregroundStyle(hasContent ? Theme.Colors.accentOrange : Theme.Colors.textMuted.opacity(0.3))
+                                .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.3))
                                 .background(Theme.Colors.background.clipShape(Circle()))
                                 .frame(width: 32, height: 32)
+                                .shadow(color: hasContent ? Theme.Colors.accentPrimary.opacity(0.3) : .clear, radius: 6)
                                 .animation(Theme.Animation.quickSnap, value: hasContent)
                         }
                         .buttonStyle(.plain)
@@ -988,7 +989,7 @@ struct EmptyStateSuggestion: View {
                 HStack(spacing: 10) {
                     Image(systemName: icon)
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(isHovered ? Theme.Colors.accentOrange : Theme.Colors.accent.opacity(0.6))
+                        .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.accent.opacity(0.6))
                         .frame(width: 20)
 
                     Text(label)

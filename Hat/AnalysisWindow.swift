@@ -79,45 +79,46 @@ struct AnalysisView: View {
                                 if viewModel.isAnalyzingScreen {
                                     Text("Processando...")
                                         .font(Theme.Typography.micro)
-                                        .foregroundStyle(Theme.Colors.accentBlue)
+                                        .foregroundStyle(Theme.Colors.accentOrange)
                                 }
                             }
                             
                             Spacer()
                             
                             if !viewModel.analysisResult.isEmpty && !viewModel.isAnalyzingScreen {
-                                GlassEffectContainer(spacing: 8) {
-                                    HStack(spacing: 8) {
-                                        MaeIconButton(
-                                            icon: "arrow.trianglehead.2.counterclockwise.rotate.90",
-                                            color: Theme.Colors.accent,
-                                            bgColor: Theme.Colors.accentSubtle,
-                                            helpText: "Nova análise de tela"
-                                        ) {
-                                            Task { await viewModel.processarScreen() }
-                                        }
-                                        .maePressEffect()
-
-                                        MaeIconButton(
-                                            icon: "bubble.left.and.bubble.right.fill",
-                                            color: Theme.Colors.accent,
-                                            bgColor: Theme.Colors.accentSubtle,
-                                            helpText: "Transferir análise para o chat principal"
-                                        ) {
-                                            withAnimation(Theme.Animation.bouncy) {
-                                                showConfirmation = true
-                                            }
-                                            Task { @MainActor in
-                                                try? await Task.sleep(nanoseconds: 800_000_000)
-                                                viewModel.continueWithAnalysis(followUp: followUpText.isEmpty ? nil : followUpText)
-                                                followUpText = ""
-                                                AnalysisWindowManager.shared.closeWindow()
-                                                showConfirmation = false
-                                            }
-                                        }
-                                        .maePressEffect()
+                                HStack(spacing: 8) {
+                                    MaeIconButton(
+                                        icon: "arrow.trianglehead.2.counterclockwise.rotate.90",
+                                        color: Theme.Colors.accent,
+                                        bgColor: Theme.Colors.accentSubtle,
+                                        helpText: "Nova análise de tela"
+                                    ) {
+                                        Task { await viewModel.processarScreen() }
                                     }
+                                    .maePressEffect()
+
+                                    MaeIconButton(
+                                        icon: "bubble.left.and.bubble.right.fill",
+                                        color: Theme.Colors.accent,
+                                        bgColor: Theme.Colors.accentSubtle,
+                                        helpText: "Transferir análise para o chat principal"
+                                    ) {
+                                        withAnimation(Theme.Animation.bouncy) {
+                                            showConfirmation = true
+                                        }
+                                        Task { @MainActor in
+                                            try? await Task.sleep(nanoseconds: 800_000_000)
+                                            viewModel.continueWithAnalysis(followUp: followUpText.isEmpty ? nil : followUpText)
+                                            followUpText = ""
+                                            AnalysisWindowManager.shared.closeWindow()
+                                            showConfirmation = false
+                                        }
+                                    }
+                                    .maePressEffect()
                                 }
+                                .background(Theme.Colors.surfaceSecondary)
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                                 .transition(.maeScaleFade)
                             }
                         }
@@ -154,7 +155,7 @@ struct AnalysisView: View {
                                         }
                                     Image(systemName: "sparkles")
                                         .font(.system(size: 20, weight: .light))
-                                        .foregroundStyle(Theme.Colors.accentBlue)
+                                        .foregroundStyle(Theme.Colors.accentOrange)
                                         .symbolEffect(.pulse.byLayer)
                                 }
 
@@ -178,7 +179,7 @@ struct AnalysisView: View {
 
                                 ZStack {
                                     Circle()
-                                        .fill(Theme.Colors.accentBlue.opacity(0.05))
+                                        .fill(Theme.Colors.accentOrange.opacity(0.05))
                                         .frame(width: 80, height: 80)
                                     Image(systemName: "viewfinder")
                                         .font(.system(size: 32, weight: .ultraLight))
@@ -201,7 +202,8 @@ struct AnalysisView: View {
                                             .foregroundColor(Theme.Colors.textSecondary)
                                             .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
-                                            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 4))
+                                            .background(Theme.Colors.surfaceSecondary)
+                                            .clipShape(RoundedRectangle(cornerRadius: 4))
                                         Text("para capturar")
                                             .font(Theme.Typography.caption)
                                             .foregroundColor(Theme.Colors.textMuted)
@@ -318,7 +320,10 @@ struct AnalysisView: View {
                         }
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
                         .padding(.vertical, 14)
-                        .glassEffect(.regular, in: Capsule())
+                        .background(Theme.Colors.surface)
+                        .clipShape(Capsule())
+                        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+                        .maeSoftShadow()
                         .padding(.bottom, 40)
                     }
                     .transition(

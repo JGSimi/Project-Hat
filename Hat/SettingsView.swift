@@ -31,7 +31,7 @@ struct SettingsView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 18, height: 18)
-                    .foregroundStyle(Theme.Colors.accentBlue.opacity(0.8))
+                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
                 Text("Configurações")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
@@ -59,7 +59,7 @@ struct SettingsView: View {
                         }
                         .pickerStyle(.segmented)
                         .labelsHidden()
-                        .colorScheme(.dark)
+
                     }
                     .padding(14)
 
@@ -90,10 +90,10 @@ struct SettingsView: View {
                             if inferenceMode == .api {
                                 Text(selectedProvider.rawValue)
                                     .font(Theme.Typography.micro)
-                                    .foregroundStyle(Theme.Colors.accentBlue.opacity(0.8))
+                                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 2)
-                                    .background(Theme.Colors.accentBlue.opacity(0.1))
+                                    .background(Theme.Colors.accentOrange.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                             }
                         }
@@ -140,7 +140,7 @@ struct SettingsView: View {
                                                     .font(.system(size: 11, weight: .medium, design: .rounded))
                                                     .foregroundStyle(
                                                         selectedProvider == provider
-                                                            ? Color.black
+                                                            ? Theme.Colors.background
                                                             : Theme.Colors.textPrimary.opacity(0.9)
                                                     )
                                                     .padding(.horizontal, 10)
@@ -201,7 +201,7 @@ struct SettingsView: View {
                                                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                                                         .foregroundStyle(
                                                             apiModelName == model
-                                                                ? Color.black
+                                                                ? Theme.Colors.background
                                                                 : Theme.Colors.textPrimary.opacity(0.9)
                                                         )
                                                         .lineLimit(1)
@@ -283,7 +283,7 @@ struct SettingsView: View {
                                     RoundedRectangle(cornerRadius: 3)
                                         .fill(
                                             LinearGradient(
-                                                colors: [Theme.Colors.accentBlue.opacity(0.8), Theme.Colors.accentBlue.opacity(0.5)],
+                                                colors: [Theme.Colors.accentOrange.opacity(0.8), Theme.Colors.accentOrange.opacity(0.5)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
@@ -292,7 +292,7 @@ struct SettingsView: View {
                                     RoundedRectangle(cornerRadius: 3)
                                         .fill(
                                             LinearGradient(
-                                                colors: [Theme.Colors.accentTeal.opacity(0.5), Theme.Colors.accentTeal.opacity(0.7)],
+                                                colors: [Theme.Colors.accentSand.opacity(0.5), Theme.Colors.accentSand.opacity(0.7)],
                                                 startPoint: .leading,
                                                 endPoint: .trailing
                                             )
@@ -312,8 +312,8 @@ struct SettingsView: View {
 
                             HStack(spacing: 12) {
                                 TokenStat(label: "Total", value: formatTokenCount(globalTotalTokens), isPrimary: true)
-                                TokenStat(label: "Input \(inputPct)%", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentBlue)
-                                TokenStat(label: "Output \(outputPct)%", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentTeal)
+                                TokenStat(label: "Input \(inputPct)%", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentOrange)
+                                TokenStat(label: "Output \(outputPct)%", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentSand)
                                 Spacer()
                             }
                         }
@@ -332,7 +332,7 @@ struct SettingsView: View {
 
                 // Action Buttons
                 VStack(spacing: 6) {
-                    GlassEffectContainer(spacing: 6) {
+                    VStack(spacing: 0) {
                         VStack(spacing: 6) {
                             Button {
                                 UpdaterController.shared.checkForUpdates()
@@ -348,7 +348,7 @@ struct SettingsView: View {
                                 }
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 11)
-                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                             }
                             .buttonStyle(.plain)
                             .maePressEffect()
@@ -375,13 +375,14 @@ struct SettingsView: View {
                                 }
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 11)
-                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                             }
                             .buttonStyle(.plain)
                             .maePressEffect()
                             .maeStaggered(index: 4, baseDelay: 0.06)
                         }
                     }
+                    .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)).overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                 }
                 .padding(.bottom, 14)
             }
@@ -399,7 +400,7 @@ struct SettingsView: View {
             .padding(.top, 12)
             .padding(.trailing, Theme.Metrics.spacingDefault)
         }
-        .preferredColorScheme(.dark)
+
     }
 
     private func loadQuickModels() {

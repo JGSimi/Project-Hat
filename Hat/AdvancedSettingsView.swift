@@ -16,7 +16,6 @@ class AdvancedSettingsWindowManager {
         }
 
         let contentView = AdvancedSettingsView()
-            .preferredColorScheme(.dark)
         
         let windowRect = NSRect(x: 0, y: 0, width: 700, height: 500)
         let newWindow = NSWindow(
@@ -29,8 +28,6 @@ class AdvancedSettingsWindowManager {
         newWindow.titlebarAppearsTransparent = true
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
-        newWindow.appearance = NSAppearance(named: .darkAqua)
-        newWindow.backgroundColor = NSColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)
         newWindow.isReleasedWhenClosed = false
         newWindow.center()
         
@@ -114,11 +111,11 @@ struct AdvancedSettingsView: View {
                             HStack(spacing: 10) {
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                        .fill(selectedTab == tab ? Theme.Colors.accentBlue.opacity(0.15) : .clear)
+                                        .fill(selectedTab == tab ? Theme.Colors.accentOrange.opacity(0.15) : .clear)
                                         .frame(width: 28, height: 28)
                                     Image(systemName: tab.icon)
                                         .font(.system(size: 13, weight: .medium))
-                                        .foregroundStyle(selectedTab == tab ? Theme.Colors.accentBlue : Theme.Colors.textSecondary)
+                                        .foregroundStyle(selectedTab == tab ? Theme.Colors.accentOrange : Theme.Colors.textSecondary)
                                         .symbolEffect(.bounce, value: selectedTab == tab)
                                 }
                                 Text(tab.rawValue)
@@ -190,7 +187,7 @@ struct AdvancedSettingsView: View {
             GroupBox {
                 VStack(spacing: 0) {
                     HStack {
-                        MaeActionRow(title: "Início Automático", subtitle: "Abrir a Hat junto com o Mac", icon: "macwindow", iconColor: Theme.Colors.accent)
+                        MaeActionRow(title: "Início Automático", subtitle: "Abrir a Hat junto com o Mac", icon: "macwindow", iconColor: Theme.Colors.accentOrange)
                         Toggle("", isOn: $launchAtLogin)
                             .toggleStyle(.switch)
                     }
@@ -208,7 +205,7 @@ struct AdvancedSettingsView: View {
                     MaeDivider()
                     
                     HStack {
-                        MaeActionRow(title: "Sons e Alertas", subtitle: "Tocar som quando a resposta terminar", icon: "bell.fill", iconColor: Theme.Colors.accent)
+                        MaeActionRow(title: "Sons e Alertas", subtitle: "Tocar som quando a resposta terminar", icon: "bell.fill", iconColor: Theme.Colors.accentOrange)
                         Toggle("", isOn: $playNotifications)
                             .toggleStyle(.switch)
                     }
@@ -220,7 +217,7 @@ struct AdvancedSettingsView: View {
                         WelcomeWindowManager.shared.showWindow()
                     } label: {
                         HStack {
-                            MaeActionRow(title: "Tela de Boas Vindas", subtitle: "Rever apresentação do aplicativo", icon: "hand.wave.fill", iconColor: Theme.Colors.accent)
+                            MaeActionRow(title: "Tela de Boas Vindas", subtitle: "Rever apresentação do aplicativo", icon: "hand.wave.fill", iconColor: Theme.Colors.accentOrange)
                             Image(systemName: "chevron.right")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textMuted)
@@ -237,7 +234,7 @@ struct AdvancedSettingsView: View {
                         UpdaterController.shared.checkForUpdates()
                     } label: {
                         HStack {
-                            MaeActionRow(title: "Atualizações", subtitle: "Buscar nova versão da Hat", icon: "arrow.triangle.2.circlepath", iconColor: Theme.Colors.accent)
+                            MaeActionRow(title: "Atualizações", subtitle: "Buscar nova versão da Hat", icon: "arrow.triangle.2.circlepath", iconColor: Theme.Colors.accentOrange)
                             Image(systemName: "chevron.right")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textMuted)
@@ -282,7 +279,7 @@ struct AdvancedSettingsView: View {
                     GroupBox {
                         VStack(spacing: 0) {
                             HStack {
-                                MaeActionRow(title: "Nome do Modelo", subtitle: "Deve estar baixado no Ollama", icon: "desktopcomputer", iconColor: Theme.Colors.accent)
+                                MaeActionRow(title: "Nome do Modelo", subtitle: "Deve estar baixado no Ollama", icon: "desktopcomputer", iconColor: Theme.Colors.accentOrange)
                                 Spacer()
                                 TextField("ex: gemma3:4b", text: $localModelName)
                                     .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
@@ -302,7 +299,7 @@ struct AdvancedSettingsView: View {
                     GroupBox {
                         VStack(spacing: 0) {
                             HStack {
-                                MaeActionRow(title: "Provedor", icon: "cloud.fill", iconColor: Theme.Colors.accent)
+                                MaeActionRow(title: "Provedor", icon: "cloud.fill", iconColor: Theme.Colors.accentOrange)
                                 Spacer()
                                 Picker("", selection: $selectedProvider) {
                                     ForEach(CloudProvider.allCases) { provider in
@@ -358,7 +355,7 @@ struct AdvancedSettingsView: View {
                                 
                             } else {
                                 HStack {
-                                    MaeActionRow(title: "Modelo", icon: "server.rack", iconColor: Theme.Colors.accent)
+                                    MaeActionRow(title: "Modelo", icon: "server.rack", iconColor: Theme.Colors.accentOrange)
                                     
                                     if isFetchingModels {
                                         ProgressView().controlSize(.small).padding(.trailing, 8)
@@ -395,7 +392,7 @@ struct AdvancedSettingsView: View {
                             MaeDivider()
                             
                             VStack(alignment: .leading, spacing: 12) {
-                                MaeActionRow(title: "Chave de API (Autenticação)", icon: "key.fill", iconColor: Theme.Colors.accent)
+                                MaeActionRow(title: "Chave de API (Autenticação)", icon: "key.fill", iconColor: Theme.Colors.accentOrange)
                                 
                                 SecureField("Cole sua API Key...", text: $apiKey)
                                     .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
@@ -454,7 +451,7 @@ struct AdvancedSettingsView: View {
             GroupBox {
                 VStack(spacing: 0) {
                     HStack {
-                        MaeActionRow(title: "Analisar Clipboard", subtitle: "Manda o texto copiado para a IA", icon: "doc.on.clipboard", iconColor: Theme.Colors.accent)
+                        MaeActionRow(title: "Analisar Clipboard", subtitle: "Manda o texto copiado para a IA", icon: "doc.on.clipboard", iconColor: Theme.Colors.accentOrange)
                         Spacer()
                         KeyboardShortcuts.Recorder(for: .processClipboard)
                     }
@@ -463,7 +460,7 @@ struct AdvancedSettingsView: View {
                     MaeDivider()
                     
                     HStack {
-                        MaeActionRow(title: "Analisar Tela", subtitle: "Tira print contínuo e analisa a tela", icon: "viewfinder", iconColor: Theme.Colors.accent)
+                        MaeActionRow(title: "Analisar Tela", subtitle: "Tira print contínuo e analisa a tela", icon: "viewfinder", iconColor: Theme.Colors.accentOrange)
                         Spacer()
                         KeyboardShortcuts.Recorder(for: .processScreen)
                     }
@@ -472,7 +469,7 @@ struct AdvancedSettingsView: View {
                     MaeDivider()
                     
                     HStack {
-                        MaeActionRow(title: "Input Rápido", subtitle: "Abre overlay para perguntar sem abrir o chat", icon: "text.cursor", iconColor: Theme.Colors.accent)
+                        MaeActionRow(title: "Input Rápido", subtitle: "Abre overlay para perguntar sem abrir o chat", icon: "text.cursor", iconColor: Theme.Colors.accentOrange)
                         Spacer()
                         KeyboardShortcuts.Recorder(for: .quickInput)
                     }

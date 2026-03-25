@@ -24,13 +24,13 @@ struct ChatBubble: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 16, height: 16)
-                        .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                        .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
                         .padding(6)
                         .background(Theme.Colors.surfaceSecondary)
                         .clipShape(Circle())
                         .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
                     RoundedRectangle(cornerRadius: 1)
-                        .fill(Theme.Colors.accentBlue.opacity(0.25))
+                        .fill(Theme.Colors.accentOrange.opacity(0.25))
                         .frame(width: 2)
                         .padding(.top, 4)
                 }
@@ -47,10 +47,11 @@ struct ChatBubble: View {
                         Text("Análise de Tela")
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                     }
-                    .foregroundStyle(Theme.Colors.accentBlue)
+                    .foregroundStyle(Theme.Colors.accentOrange)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.12)), in: Capsule())
+                    .background(Theme.Colors.accentOrange.opacity(0.12))
+                    .clipShape(Capsule())
                 }
 
                 // Attachments
@@ -71,7 +72,7 @@ struct ChatBubble: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "doc.text.fill")
                                     .font(.system(size: 14))
-                                    .foregroundStyle(Theme.Colors.accentBlue.opacity(0.8))
+                                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
                                 Text(attachment.name)
                                     .font(Theme.Typography.caption)
                                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -116,25 +117,17 @@ struct ChatBubble: View {
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                                 .textSelection(.enabled)
-                                .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.10)),
-                                             in: UnevenRoundedRectangle(
-                                                topLeadingRadius: 16,
-                                                bottomLeadingRadius: 16,
-                                                bottomTrailingRadius: 6,
-                                                topTrailingRadius: 16,
-                                                style: .continuous
-                                             ))
+                                .background(Theme.Colors.accentOrange.opacity(0.08))
+                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 16, bottomTrailingRadius: 6, topTrailingRadius: 16, style: .continuous))
                         } else {
                             HatMarkdownView(markdown: message.content)
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
-                                .background {
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(.ultraThinMaterial)
+                                .background(
                                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                                         .fill(Theme.Colors.surface)
-                                }
+                                )
                                 .clipShape(
                                     UnevenRoundedRectangle(
                                         topLeadingRadius: 6,
@@ -178,7 +171,7 @@ struct ChatBubble: View {
                                 .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textSecondary)
                                 .padding(.horizontal, 7)
                                 .padding(.vertical, 4)
-                                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                             }
                             .buttonStyle(.plain)
                             .offset(x: message.isUser ? -8 : -8, y: -8)

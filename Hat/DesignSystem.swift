@@ -4,6 +4,7 @@ import Combine
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║                     Hat · Design System                        ║
 // ║  Single source of truth for all visual tokens and components.  ║
+// ║  Inspired by Claude (Anthropic) — warm, minimal, adaptive.    ║
 // ╚══════════════════════════════════════════════════════════════════╝
 
 // MARK: - Font Extension (Cormorant Garamond)
@@ -22,48 +23,107 @@ extension Font {
     }
 }
 
+// MARK: - Adaptive Color Helper
+
+extension Color {
+    /// Creates a color that adapts to light/dark appearance automatically.
+    static func adaptive(light: Color, dark: Color) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+                ? NSColor(dark) : NSColor(light)
+        })
+    }
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MARK: - 1. Design Tokens
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 enum Theme {
 
-    // MARK: Colors
+    // MARK: Colors — Claude-inspired warm palette
     enum Colors {
-        // Backgrounds — Apple dark system palette
-        static let background          = Color(NSColor(red: 0.11, green: 0.11, blue: 0.12, alpha: 1.0)) // #1C1C1E
-        static let backgroundSecondary = Color(NSColor(red: 0.08, green: 0.08, blue: 0.09, alpha: 1.0)) // #141415
+        // Backgrounds — warm cream (light) / warm dark (dark)
+        static let background = Color.adaptive(
+            light: Color(NSColor(red: 0.98, green: 0.976, blue: 0.965, alpha: 1.0)),  // #FAF9F6
+            dark:  Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0))  // #1A1915
+        )
+        static let backgroundSecondary = Color.adaptive(
+            light: Color(NSColor(red: 0.941, green: 0.929, blue: 0.902, alpha: 1.0)), // #F0EDE6
+            dark:  Color(NSColor(red: 0.078, green: 0.075, blue: 0.059, alpha: 1.0))  // #14130F
+        )
 
-        // Surfaces — slightly more visible for depth
-        static let surface             = Color.white.opacity(0.06)
-        static let surfaceSecondary    = Color.white.opacity(0.05)
-        static let surfaceElevated     = Color.white.opacity(0.08)
+        // Surfaces — flat, warm
+        static let surface = Color.adaptive(
+            light: Color.white,
+            dark:  Color.white.opacity(0.05)
+        )
+        static let surfaceSecondary = Color.adaptive(
+            light: Color(NSColor(red: 0.961, green: 0.949, blue: 0.922, alpha: 1.0)), // #F5F2EB
+            dark:  Color.white.opacity(0.04)
+        )
+        static let surfaceElevated = Color.adaptive(
+            light: Color.white,
+            dark:  Color.white.opacity(0.07)
+        )
 
-        // Borders — more visible for definition
-        static let border              = Color.white.opacity(0.08)
-        static let borderHighlight     = Color.white.opacity(0.14)
-        static let borderFocused       = Color(NSColor(red: 0.45, green: 0.55, blue: 1.0, alpha: 0.5))
+        // Borders
+        static let border = Color.adaptive(
+            light: Color.black.opacity(0.08),
+            dark:  Color.white.opacity(0.08)
+        )
+        static let borderHighlight = Color.adaptive(
+            light: Color.black.opacity(0.12),
+            dark:  Color.white.opacity(0.12)
+        )
+        static let borderFocused = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.4)) // #DA7756 @ 40%
 
-        // Text
-        static let textPrimary         = Color.white.opacity(0.95)
-        static let textSecondary       = Color.white.opacity(0.55)
-        static let textMuted           = Color.white.opacity(0.30)
+        // Text — warm tones
+        static let textPrimary = Color.adaptive(
+            light: Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0)), // #1A1915
+            dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
+        )
+        static let textSecondary = Color.adaptive(
+            light: Color(NSColor(red: 0.420, green: 0.388, blue: 0.333, alpha: 1.0)), // #6B6355
+            dark:  Color(NSColor(red: 0.722, green: 0.678, blue: 0.620, alpha: 1.0))  // #B8AD9E
+        )
+        static let textMuted = Color.adaptive(
+            light: Color(NSColor(red: 0.612, green: 0.573, blue: 0.518, alpha: 1.0)), // #9C9284
+            dark:  Color(NSColor(red: 0.478, green: 0.439, blue: 0.376, alpha: 1.0))  // #7A7060
+        )
 
-        // Accent — soft indigo-blue for a modern feel
-        static let accent              = Color.white
-        static let accentSubtle        = Color.white.opacity(0.15)
-        static let accentBlue          = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
-        static let accentTeal          = Color(NSColor(red: 0.30, green: 0.78, blue: 0.75, alpha: 1.0))
+        // Accent — adaptive for buttons (dark text on light, cream on dark)
+        static let accent = Color.adaptive(
+            light: Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0)), // #1A1915
+            dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
+        )
+        static let accentSubtle = Color.adaptive(
+            light: Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.10)),
+            dark:  Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.15))
+        )
+        // Claude signature terracotta/orange
+        static let accentOrange = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 1.0)) // #DA7756
+        // Warm sand secondary
+        static let accentSand = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0))   // #C4A882
 
         // Semantic
-        static let success             = Color(NSColor(red: 0.30, green: 0.85, blue: 0.55, alpha: 1.0))
-        static let error               = Color(NSColor(red: 1.0, green: 0.38, blue: 0.38, alpha: 1.0))
-        static let warning             = Color(NSColor(red: 1.0, green: 0.78, blue: 0.30, alpha: 1.0))
+        static let success = Color.adaptive(
+            light: Color(NSColor(red: 0.302, green: 0.659, blue: 0.478, alpha: 1.0)), // #4DA87A
+            dark:  Color(NSColor(red: 0.357, green: 0.725, blue: 0.549, alpha: 1.0))  // #5BB98C
+        )
+        static let error = Color.adaptive(
+            light: Color(NSColor(red: 0.851, green: 0.310, blue: 0.310, alpha: 1.0)), // #D94F4F
+            dark:  Color(NSColor(red: 0.878, green: 0.376, blue: 0.376, alpha: 1.0))  // #E06060
+        )
+        static let warning = Color.adaptive(
+            light: Color(NSColor(red: 0.769, green: 0.580, blue: 0.251, alpha: 1.0)), // #C49440
+            dark:  Color(NSColor(red: 0.831, green: 0.651, blue: 0.302, alpha: 1.0))  // #D4A04D
+        )
 
-        // Gradient helpers
-        static let gradientStart       = Color(NSColor(red: 0.42, green: 0.52, blue: 1.0, alpha: 1.0))
-        static let gradientEnd         = Color(NSColor(red: 0.65, green: 0.40, blue: 1.0, alpha: 1.0))
-        static let gradientSubtle      = LinearGradient(
+        // Gradient helpers — orange to sand
+        static let gradientStart = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 1.0)) // #DA7756
+        static let gradientEnd   = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0)) // #C4A882
+        static let gradientSubtle = LinearGradient(
             colors: [gradientStart.opacity(0.04), gradientEnd.opacity(0.02)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -85,22 +145,22 @@ enum Theme {
         static let micro         = Font.system(size: 9, weight: .medium, design: .rounded)
     }
 
-    // MARK: Metrics
+    // MARK: Metrics — generous breathing room
     enum Metrics {
         static let radiusSmall:  CGFloat = 8
-        static let radiusMedium: CGFloat = 16
-        static let radiusLarge:  CGFloat = 22
+        static let radiusMedium: CGFloat = 14
+        static let radiusLarge:  CGFloat = 18
 
         static let spacingSmall:  CGFloat = 8
-        static let spacingDefault: CGFloat = 12
-        static let spacingLarge:  CGFloat = 16
-        static let spacingXLarge: CGFloat = 24
+        static let spacingDefault: CGFloat = 14
+        static let spacingLarge:  CGFloat = 20
+        static let spacingXLarge: CGFloat = 28
     }
 
     // MARK: Shadows
     enum Shadows {
-        static let soft   = (color: Color.black.opacity(0.10), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
-        static let medium = (color: Color.black.opacity(0.15), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
+        static let soft   = (color: Color.black.opacity(0.08), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
+        static let medium = (color: Color.black.opacity(0.12), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
     }
 
     // MARK: Animation
@@ -138,7 +198,6 @@ enum Theme {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 extension AnyTransition {
-    /// Slide from trailing edge + fade — settings panels, drawers
     static var maeSlideIn: AnyTransition {
         .asymmetric(
             insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -146,7 +205,6 @@ extension AnyTransition {
         )
     }
 
-    /// Scale up from 0.92 + fade — chat message pop-in (refined)
     static var maePopIn: AnyTransition {
         .asymmetric(
             insertion: .scale(scale: 0.92)
@@ -156,12 +214,10 @@ extension AnyTransition {
         )
     }
 
-    /// Scale + fade — buttons, action items
     static var maeScaleFade: AnyTransition {
         .scale(scale: 0.9).combined(with: .opacity)
     }
 
-    /// Slide from bottom + fade — toasts, input areas
     static var maeSlideUp: AnyTransition {
         .asymmetric(
             insertion: .move(edge: .bottom).combined(with: .opacity),
@@ -169,12 +225,10 @@ extension AnyTransition {
         )
     }
 
-    /// Slide from leading + fade — sidebar content
     static var maeSlideFromLeading: AnyTransition {
         .move(edge: .leading).combined(with: .opacity)
     }
 
-    /// Subtle scale fade — panel content switching
     static var maeFadeScale: AnyTransition {
         .asymmetric(
             insertion: .scale(scale: 0.96).combined(with: .opacity),
@@ -187,7 +241,6 @@ extension AnyTransition {
 // MARK: - 1.6. Animation View Modifiers
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-/// Micro-scale effect triggered on hover — chat bubbles, cards
 struct MaeHoverEffect: ViewModifier {
     var scale: CGFloat = 1.005
     @State private var isHovered = false
@@ -204,7 +257,6 @@ struct MaeHoverEffect: ViewModifier {
     }
 }
 
-/// Scale + fade appear animation triggered on `.onAppear`
 struct MaeAppearAnimation: ViewModifier {
     var animation: SwiftUI.Animation = Theme.Animation.gentle
     var scale: CGFloat = 0.95
@@ -222,7 +274,6 @@ struct MaeAppearAnimation: ViewModifier {
     }
 }
 
-/// Staggered appear — each item slides up + fades in with incremental delay
 struct MaeStaggeredAppear: ViewModifier {
     var index: Int
     var baseDelay: Double = 0.04
@@ -241,7 +292,6 @@ struct MaeStaggeredAppear: ViewModifier {
     }
 }
 
-/// Button press feedback — scales down on tap with spring return
 struct MaeButtonPressEffect: ViewModifier {
     @State private var isPressed = false
 
@@ -258,7 +308,6 @@ struct MaeButtonPressEffect: ViewModifier {
     }
 }
 
-/// Shimmer loading effect — animated gradient overlay
 struct MaeShimmerEffect: ViewModifier {
     @State private var phase: CGFloat = -1.0
 
@@ -268,9 +317,9 @@ struct MaeShimmerEffect: ViewModifier {
                 LinearGradient(
                     colors: [
                         .clear,
-                        Theme.Colors.accent.opacity(0.08),
-                        Theme.Colors.accent.opacity(0.15),
-                        Theme.Colors.accent.opacity(0.08),
+                        Theme.Colors.accentOrange.opacity(0.06),
+                        Theme.Colors.accentOrange.opacity(0.12),
+                        Theme.Colors.accentOrange.opacity(0.06),
                         .clear
                     ],
                     startPoint: .init(x: phase - 0.5, y: 0.5),
@@ -289,7 +338,6 @@ struct MaeShimmerEffect: ViewModifier {
     }
 }
 
-/// Pulse effect — subtle scale + opacity breathing (status dots, icons)
 struct MaePulseEffect: ViewModifier {
     var minScale: CGFloat = 0.92
     var maxOpacity: Double = 1.0
@@ -312,7 +360,6 @@ struct MaePulseEffect: ViewModifier {
     }
 }
 
-/// Floating effect — gentle vertical oscillation (empty states, decorative icons)
 struct MaeFloatingEffect: ViewModifier {
     var amplitude: CGFloat = 6
     var duration: Double = 3.0
@@ -332,17 +379,16 @@ struct MaeFloatingEffect: ViewModifier {
     }
 }
 
-/// Glow hover effect — hover with radiant glow behind element
 struct MaeGlowHoverEffect: ViewModifier {
-    var glowColor: Color = Theme.Colors.accent
+    var glowColor: Color = Theme.Colors.accentOrange
     var glowRadius: CGFloat = 12
     @State private var isHovered = false
 
     func body(content: Content) -> some View {
         content
             .scaleEffect(isHovered ? 1.03 : 1.0)
-            .shadow(color: glowColor.opacity(isHovered ? 0.35 : 0), radius: glowRadius)
-            .brightness(isHovered ? 0.05 : 0)
+            .shadow(color: glowColor.opacity(isHovered ? 0.25 : 0), radius: glowRadius)
+            .brightness(isHovered ? 0.03 : 0)
             .animation(Theme.Animation.responsive, value: isHovered)
             .onHover { hovering in
                 isHovered = hovering
@@ -350,7 +396,6 @@ struct MaeGlowHoverEffect: ViewModifier {
     }
 }
 
-/// Animated typing dots for loading state
 struct MaeTypingDots: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.35)) { context in
@@ -359,7 +404,7 @@ struct MaeTypingDots: View {
             HStack(spacing: 5) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(Theme.Colors.accent.opacity(activeIndex == index ? 0.9 : 0.3))
+                        .fill(Theme.Colors.accentOrange.opacity(activeIndex == index ? 0.9 : 0.3))
                         .frame(width: 6, height: 6)
                         .scaleEffect(activeIndex == index ? 1.3 : 1.0)
                         .animation(Theme.Animation.microBounce, value: activeIndex)
@@ -375,17 +420,20 @@ struct MaeTypingDots: View {
 
 extension View {
 
-    /// Liquid Glass — macOS 26 native frosted glass (navigation layer elements)
+    /// Flat surface background — replaces glass effect
     func maeGlassBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.12)),
-                         in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(Theme.Colors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+            )
     }
 
-    /// Neutral dark surface with subtle material (assistant bubbles, cards)
+    /// Neutral surface with border (assistant bubbles, cards)
     func maeSurfaceBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(.ultraThinMaterial)
             .background(Theme.Colors.surface)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
@@ -405,7 +453,7 @@ extension View {
             )
     }
 
-    /// Text input style — Liquid Glass appearance
+    /// Text input style — flat solid background
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -413,10 +461,15 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(Theme.Colors.surfaceSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+            )
     }
 
-    /// Opaque text input style — for use inside Liquid Glass containers (glass cannot sample glass)
+    /// Opaque text input style (same as maeInputStyle in flat design)
     func maeInputStyleOpaque(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -432,55 +485,45 @@ extension View {
             )
     }
 
-    /// Soft shadow token
     func maeSoftShadow() -> some View {
         let s = Theme.Shadows.soft
         return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
-    
-    /// Medium shadow token
+
     func maeMediumShadow() -> some View {
         let s = Theme.Shadows.medium
         return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
 
-    /// Micro-scale hover effect
     func maeHover(scale: CGFloat = 1.005) -> some View {
         self.modifier(MaeHoverEffect(scale: scale))
     }
 
-    /// Scale + fade appear animation on `.onAppear`
     func maeAppearAnimation(animation: SwiftUI.Animation = Theme.Animation.gentle, scale: CGFloat = 0.95) -> some View {
         self.modifier(MaeAppearAnimation(animation: animation, scale: scale))
     }
 
-    /// Staggered appear — list items cascade in
     func maeStaggered(index: Int, baseDelay: Double = 0.04) -> some View {
         self.modifier(MaeStaggeredAppear(index: index, baseDelay: baseDelay))
     }
 
-    /// Button press feedback
     func maePressEffect() -> some View {
         self.modifier(MaeButtonPressEffect())
     }
 
-    /// Shimmer loading overlay
     func maeShimmer() -> some View {
         self.modifier(MaeShimmerEffect())
     }
 
-    /// Pulse breathing effect
     func maePulse(duration: Double = 1.6) -> some View {
         self.modifier(MaePulseEffect(duration: duration))
     }
 
-    /// Floating idle animation
     func maeFloating(amplitude: CGFloat = 6, duration: Double = 3.0) -> some View {
         self.modifier(MaeFloatingEffect(amplitude: amplitude, duration: duration))
     }
 
-    /// Glow on hover
-    func maeGlowHover(color: Color = Theme.Colors.accent) -> some View {
+    func maeGlowHover(color: Color = Theme.Colors.accentOrange) -> some View {
         self.modifier(MaeGlowHoverEffect(glowColor: color))
     }
 }
@@ -489,16 +532,12 @@ extension View {
 // MARK: - 3. Reusable Components
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// MARK: MaeDivider
-/// Subtle divider using Theme border color.
 struct MaeDivider: View {
     var body: some View {
         Divider().background(Theme.Colors.border)
     }
 }
 
-// MARK: MaeGradientDivider
-/// Gradient fade divider (center → edges).
 struct MaeGradientDivider: View {
     var tinted: Bool = false
 
@@ -514,8 +553,6 @@ struct MaeGradientDivider: View {
     }
 }
 
-// MARK: MaeCard
-/// Themed GroupBox with dark surface + subtle border.
 struct MaeCardStyle: GroupBoxStyle {
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -530,8 +567,6 @@ struct MaeCardStyle: GroupBoxStyle {
     }
 }
 
-// MARK: MaeSectionHeader
-/// Uppercased section label for settings panels.
 struct MaeSectionHeader: View {
     let title: String
     var body: some View {
@@ -544,13 +579,11 @@ struct MaeSectionHeader: View {
     }
 }
 
-// MARK: MaeActionRow
-/// Themed row for settings: icon + title + optional subtitle.
 struct MaeActionRow: View {
     let title: String
     var subtitle: String? = nil
     var icon: String? = nil
-    var iconColor: Color = Theme.Colors.accent
+    var iconColor: Color = Theme.Colors.accentOrange
     @State private var appeared = false
 
     var body: some View {
@@ -561,7 +594,7 @@ struct MaeActionRow: View {
                     .foregroundStyle(iconColor)
                     .symbolEffect(.bounce, value: appeared)
                     .frame(width: 24, height: 24)
-                    .background(iconColor.opacity(0.15))
+                    .background(iconColor.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .accessibilityHidden(true)
                     .onAppear { appeared = true }
@@ -585,8 +618,6 @@ struct MaeActionRow: View {
     }
 }
 
-// MARK: MaeIconButton
-/// Circular icon button with optional accent highlighting.
 struct MaeIconButton: View {
     let icon: String
     var size: CGFloat = 16
@@ -616,27 +647,22 @@ struct MaeIconButton: View {
     }
 }
 
-// MARK: MaePageBackground
-/// Vibrant background with material depth — Apple-like layered appearance.
 struct MaePageBackground: View {
     var showGlow: Bool = false
 
     var body: some View {
         ZStack {
-            Theme.Colors.backgroundSecondary.ignoresSafeArea()
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
+            Theme.Colors.background.ignoresSafeArea()
             if showGlow {
                 RadialGradient(
-                    gradient: Gradient(colors: [Theme.Colors.accent.opacity(0.05), .clear]),
+                    gradient: Gradient(colors: [Theme.Colors.accentOrange.opacity(0.04), .clear]),
                     center: .topLeading,
                     startRadius: 0,
                     endRadius: 400
                 )
             } else {
                 RadialGradient(
-                    gradient: Gradient(colors: [Color.white.opacity(0.02), .clear]),
+                    gradient: Gradient(colors: [Theme.Colors.accentSand.opacity(0.02), .clear]),
                     center: .topLeading,
                     startRadius: 0,
                     endRadius: 400
@@ -646,8 +672,6 @@ struct MaePageBackground: View {
     }
 }
 
-// MARK: MaeTextField
-/// Themed text field with consistent styling.
 struct MaeTextField: View {
     let placeholder: String
     @Binding var text: String
@@ -661,8 +685,6 @@ struct MaeTextField: View {
     }
 }
 
-// MARK: MaeStatusBadge
-/// Compact status indicator with dot + label.
 struct MaeStatusBadge: View {
     let label: String
     var color: Color = Theme.Colors.success
@@ -683,12 +705,12 @@ struct MaeStatusBadge: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .glassEffect(.regular, in: Capsule())
+        .background(Theme.Colors.surfaceSecondary)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
     }
 }
 
-// MARK: MaeAccentGradient
-/// Reusable accent gradient for highlighted elements.
 struct MaeAccentGradient: View {
     var opacity: Double = 1.0
 
@@ -702,8 +724,6 @@ struct MaeAccentGradient: View {
     }
 }
 
-// MARK: MaeChip
-/// Small selectable chip/tag component.
 struct MaeChip: View {
     let label: String
     var isSelected: Bool = false
@@ -713,21 +733,21 @@ struct MaeChip: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 11, weight: .medium, design: .rounded))
-                .foregroundStyle(isSelected ? Color.black : Theme.Colors.textPrimary.opacity(0.9))
+                .foregroundStyle(isSelected ? Theme.Colors.background : Theme.Colors.textPrimary.opacity(0.9))
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(isSelected ? Theme.Colors.accent : Color.clear)
+                .background(isSelected ? Theme.Colors.accentOrange : Theme.Colors.surfaceSecondary)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .glassEffect(isSelected ? .identity : .regular,
-                             in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(isSelected ? Theme.Colors.accentOrange.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
+                )
         }
         .buttonStyle(.plain)
     }
 }
 
-// MARK: MaeEmptyState
-/// Reusable empty state with icon, title, and subtitle.
 struct MaeEmptyState: View {
     let icon: String
     let title: String
@@ -737,15 +757,15 @@ struct MaeEmptyState: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accent.opacity(0.04))
+                    .fill(Theme.Colors.accentOrange.opacity(0.04))
                     .frame(width: 80, height: 80)
                 Circle()
-                    .fill(Theme.Colors.accent.opacity(0.06))
+                    .fill(Theme.Colors.surfaceSecondary)
                     .frame(width: 56, height: 56)
-                    .glassEffect(.clear, in: Circle())
+                    .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .light))
-                    .foregroundStyle(Theme.Colors.accent.opacity(0.5))
+                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.5))
             }
             .maeFloating(amplitude: 4, duration: 4.0)
 
@@ -765,8 +785,6 @@ struct MaeEmptyState: View {
     }
 }
 
-// MARK: MaeDateSeparator
-/// Centered date pill for chat conversation separators.
 struct MaeDateSeparator: View {
     let date: Date
 
@@ -799,8 +817,6 @@ struct MaeDateSeparator: View {
     }
 }
 
-// MARK: MaeActionButton
-/// Standardized primary CTA button (white bg, black text, glow hover).
 struct MaeActionButton: View {
     let label: String
     var icon: String? = nil
@@ -816,7 +832,7 @@ struct MaeActionButton: View {
                 Text(label)
                     .font(Theme.Typography.bodyBold)
             }
-            .foregroundColor(.black)
+            .foregroundStyle(Theme.Colors.background)
             .padding(.vertical, 10)
             .padding(.horizontal, 24)
             .background(
@@ -830,8 +846,6 @@ struct MaeActionButton: View {
     }
 }
 
-// MARK: MaeGradientBorder
-/// Animated gradient border modifier for focused inputs and highlighted cards.
 struct MaeGradientBorderModifier: ViewModifier {
     var cornerRadius: CGFloat = Theme.Metrics.radiusMedium
     var lineWidth: CGFloat = 1.0
@@ -866,14 +880,11 @@ struct MaeGradientBorderModifier: ViewModifier {
 }
 
 extension View {
-    /// Animated gradient border — focused inputs, highlighted cards
     func maeGradientBorder(cornerRadius: CGFloat = Theme.Metrics.radiusMedium, lineWidth: CGFloat = 1.0) -> some View {
         self.modifier(MaeGradientBorderModifier(cornerRadius: cornerRadius, lineWidth: lineWidth))
     }
 }
 
-// MARK: MaeTooltipButton
-/// Icon button that shows a contextual tooltip and has a hover background.
 struct MaeTooltipButton: View {
     let icon: String
     var size: CGFloat = 13
@@ -893,8 +904,10 @@ struct MaeTooltipButton: View {
                 .symbolEffect(.bounce, value: tapCount)
                 .frame(width: 28, height: 28)
                 .contentShape(Rectangle())
-                .glassEffect(isHovered ? .regular : .clear,
-                             in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(isHovered ? Theme.Colors.surfaceSecondary : Color.clear)
+                )
         }
         .buttonStyle(.plain)
         .onHover { hovering in

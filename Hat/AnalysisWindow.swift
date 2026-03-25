@@ -173,6 +173,45 @@ struct AnalysisView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .transition(.maeFadeScale)
+                        } else if let error = viewModel.analysisError {
+                            // Error state
+                            VStack(spacing: 16) {
+                                Spacer()
+
+                                ZStack {
+                                    Circle()
+                                        .fill(Theme.Colors.error.opacity(0.06))
+                                        .frame(width: 80, height: 80)
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .font(.system(size: 32, weight: .light))
+                                        .foregroundStyle(Theme.Colors.error.opacity(0.7))
+                                        .symbolEffect(.pulse.byLayer)
+                                }
+
+                                VStack(spacing: 6) {
+                                    Text("Erro na análise")
+                                        .font(Theme.Typography.subheading)
+                                        .foregroundColor(Theme.Colors.textPrimary)
+                                        .maeStaggered(index: 1, baseDelay: 0.12)
+                                    Text(error)
+                                        .font(Theme.Typography.caption)
+                                        .foregroundColor(Theme.Colors.textMuted)
+                                        .multilineTextAlignment(.center)
+                                        .padding(.horizontal, 20)
+                                        .maeStaggered(index: 2, baseDelay: 0.12)
+                                }
+
+                                MaeActionButton(label: "Tentar novamente", icon: "arrow.clockwise") {
+                                    viewModel.analysisError = nil
+                                    Task { await viewModel.processarScreen() }
+                                }
+                                .maeStaggered(index: 3, baseDelay: 0.12)
+                                .padding(.top, 8)
+
+                                Spacer()
+                            }
+                            .frame(maxWidth: .infinity)
+                            .maeAppearAnimation(animation: Theme.Animation.expressive)
                         } else if viewModel.analysisResult.isEmpty {
                             VStack(spacing: 16) {
                                 Spacer()

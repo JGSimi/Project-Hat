@@ -110,7 +110,45 @@ struct ChatBubble: View {
                 // Message content
                 if !message.content.isEmpty {
                     ZStack(alignment: message.isUser ? .bottomTrailing : .bottomTrailing) {
-                        if message.isUser {
+                        if message.isError {
+                            // Error bubble
+                            HStack(alignment: .top, spacing: 10) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(Theme.Colors.error)
+                                    .symbolEffect(.pulse.byLayer)
+
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(message.content)
+                                        .font(Theme.Typography.bodySmall)
+                                        .foregroundStyle(Theme.Colors.textPrimary)
+                                        .textSelection(.enabled)
+
+                                    if message.retryPrompt != nil {
+                                        Button {
+                                            Task { await AssistantViewModel.shared.retryLastError() }
+                                        } label: {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "arrow.clockwise")
+                                                    .font(.system(size: 10, weight: .semibold))
+                                                Text("Tentar novamente")
+                                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                            }
+                                            .foregroundStyle(Theme.Colors.accentOrange)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .maePressEffect()
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .background(Theme.Colors.error.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(Theme.Colors.error.opacity(0.18), lineWidth: 0.5)
+                            )
+                        } else if message.isUser {
                             Text(.init(message.content))
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)

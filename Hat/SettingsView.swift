@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var quickModelTask: Task<Void, Never>? = nil
     @State private var quickModelSearchText = ""
     @State private var tokenBarAppeared = false
+    @State private var showResetConfirmation = false
 
     private var filteredQuickModels: [String] {
         if quickModelSearchText.isEmpty { return quickModels }
@@ -228,7 +229,7 @@ struct SettingsView: View {
                                         }
                                     }
                                 } else if !quickModelSearchText.isEmpty {
-                                    Text("Nenhum resultado")
+                                    Text("Nenhum modelo encontrado — tente outro termo")
                                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                                         .foregroundStyle(Theme.Colors.textMuted)
                                 } else if !isFetchingQuickModels {
@@ -262,13 +263,26 @@ struct SettingsView: View {
                                 Spacer()
                                 Button {
                                     SettingsManager.resetGlobalTokens()
+                                    withAnimation(Theme.Animation.snappy) { showResetConfirmation = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        withAnimation(Theme.Animation.smooth) { showResetConfirmation = false }
+                                    }
                                 } label: {
-                                    Image(systemName: "arrow.counterclockwise")
-                                        .font(.system(size: 9, weight: .medium))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                        .padding(4)
-                                        .background(Theme.Colors.surface)
-                                        .clipShape(Circle())
+                                    HStack(spacing: 4) {
+                                        Image(systemName: showResetConfirmation ? "checkmark" : "arrow.counterclockwise")
+                                            .font(.system(size: 9, weight: .medium))
+                                            .foregroundStyle(showResetConfirmation ? Theme.Colors.success : Theme.Colors.textMuted)
+                                        if showResetConfirmation {
+                                            Text("Resetado")
+                                                .font(.system(size: 9, weight: .medium, design: .rounded))
+                                                .foregroundStyle(Theme.Colors.success)
+                                        }
+                                    }
+                                    .padding(.horizontal, showResetConfirmation ? 8 : 4)
+                                    .padding(.vertical, 4)
+                                    .background(showResetConfirmation ? Theme.Colors.success.opacity(0.1) : Theme.Colors.surface)
+                                    .clipShape(Capsule())
+                                    .animation(Theme.Animation.snappy, value: showResetConfirmation)
                                 }
                                 .buttonStyle(.plain)
                                 .help("Resetar contadores")

@@ -917,3 +917,89 @@ struct MaeTooltipButton: View {
         .accessibilityLabel(helpText)
     }
 }
+
+// MARK: - Toast Notification
+
+struct MaeToast: View {
+    let message: String
+    var icon: String = "checkmark.circle.fill"
+    var color: Color = Theme.Colors.success
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(color)
+                .symbolEffect(.bounce, options: .nonRepeating)
+            Text(message)
+                .font(Theme.Typography.bodySmall)
+                .foregroundStyle(Theme.Colors.textPrimary)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Theme.Colors.surface)
+        .clipShape(Capsule())
+        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+        .maeSoftShadow()
+    }
+}
+
+// MARK: - Confirm Dialog
+
+struct MaeConfirmDialog: View {
+    let title: String
+    let message: String
+    var confirmLabel: String = "Confirmar"
+    var confirmColor: Color = Theme.Colors.error
+    let onConfirm: () -> Void
+    let onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(Theme.Typography.heading)
+                    .foregroundStyle(Theme.Colors.textPrimary)
+                Text(message)
+                    .font(Theme.Typography.bodySmall)
+                    .foregroundStyle(Theme.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    onCancel()
+                } label: {
+                    Text("Cancelar")
+                        .font(Theme.Typography.bodySmall)
+                        .foregroundStyle(Theme.Colors.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(Theme.Colors.surfaceSecondary)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    onConfirm()
+                } label: {
+                    Text(confirmLabel)
+                        .font(Theme.Typography.bodySmall)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(confirmColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(20)
+        .frame(width: 280)
+        .background(Theme.Colors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+        .maeSoftShadow()
+    }
+}

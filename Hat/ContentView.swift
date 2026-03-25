@@ -43,15 +43,23 @@ struct ChatMessage: Identifiable {
     var images: [NSImage]? = nil
     var attachments: [ChatAttachment]? = nil
     let isUser: Bool
+    let isError: Bool
     let source: MessageSource
     let timestamp = Date()
-    
-    init(content: String, images: [NSImage]? = nil, attachments: [ChatAttachment]? = nil, isUser: Bool, source: MessageSource = .chat) {
+    var retryPrompt: String? = nil
+    var retryImages: [NSImage]? = nil
+    var retryAttachments: [ChatAttachment]? = nil
+
+    init(content: String, images: [NSImage]? = nil, attachments: [ChatAttachment]? = nil, isUser: Bool, isError: Bool = false, source: MessageSource = .chat, retryPrompt: String? = nil, retryImages: [NSImage]? = nil, retryAttachments: [ChatAttachment]? = nil) {
         self.content = content
         self.images = images
         self.attachments = attachments
         self.isUser = isUser
+        self.isError = isError
         self.source = source
+        self.retryPrompt = retryPrompt
+        self.retryImages = retryImages
+        self.retryAttachments = retryAttachments
     }
 }
 
@@ -116,16 +124,55 @@ class AssistantViewModel: ObservableObject {
     @Published var isAnalyzingScreen = false
     @Published var analysisResult: String = ""
     @Published var analysisImage: NSImage? = nil
+    @Published var analysisError: String? = nil
 
     // Token Counters - Conversa atual
     @Published var conversationInputTokens: Int = 0
     @Published var conversationOutputTokens: Int = 0
     var conversationTotalTokens: Int { conversationInputTokens + conversationOutputTokens }
-    
+
+    // UX: Cancel, Confirm, Toast
+    @Published var currentTask: Task<Void, Never>? = nil
+    @Published var showClearConfirmation = false
+    @Published var toastMessage: String? = nil
+
     private let pasteboard: PasteboardClient
 
     init(pasteboard: PasteboardClient = NSPasteboard.general) {
         self.pasteboard = pasteboard
+    }
+
+    func cancelRequest() {
+        currentTask?.cancel()
+        currentTask = nil
+        isProcessing = false
+        isAnalyzingScreen = false
+    }
+
+    func retryLastError() async {
+        guard let lastError = messages.last, lastError.isError else { return }
+        messages.removeLast()
+        if let prompt = lastError.retryPrompt {
+            await executeRequest(prompt: prompt, rawImages: lastError.retryImages, attachments: lastError.retryAttachments)
+        }
+    }
+
+    func confirmClearHistory() {
+        withAnimation(Theme.Animation.smooth) {
+            messages.removeAll()
+            conversationInputTokens = 0
+            conversationOutputTokens = 0
+            showClearConfirmation = false
+        }
+        showToast("Histórico limpo")
+    }
+
+    func showToast(_ message: String) {
+        withAnimation(Theme.Animation.smooth) { toastMessage = message }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            withAnimation(Theme.Animation.smooth) { toastMessage = nil }
+        }
     }
 
     func attachment(from url: URL) async -> ChatAttachment? {
@@ -235,6 +282,7 @@ class AssistantViewModel: ObservableObject {
         AnalysisWindowManager.shared.showWindow()
         self.analysisImage = screenImage
         self.analysisResult = ""
+        self.analysisError = nil
         self.isAnalyzingScreen = true
 
         let defaultPrompt = "Analise o que está na minha tela e me ajude de forma proativa. Não me pergunte o que fazer, apenas forneça a análise ou ajuda diretamente com base no contexto (por exemplo, se for um currículo, dê dicas; se for código, analise bugs, etc). Por favor, use formatação Markdown em sua resposta para garantir uma boa legibilidade."
@@ -259,6 +307,7 @@ class AssistantViewModel: ObservableObject {
             )
 
             self.analysisResult = aiResponse.text
+            self.analysisError = nil
 
             // Acumula tokens apenas no contador global (análise de tela é fora do chat)
             if let usage = aiResponse.tokenUsage {
@@ -271,7 +320,9 @@ class AssistantViewModel: ObservableObject {
             }
 
         } catch {
-            self.analysisResult = "Erro: \(error.localizedDescription)"
+            if Task.isCancelled { return }
+            self.analysisError = error.localizedDescription
+            self.analysisResult = ""
             print("Error processing AI: \(error)")
         }
     }
@@ -342,7 +393,10 @@ class AssistantViewModel: ObservableObject {
 
     private func executeRequest(prompt: String, rawImages: [NSImage]?, attachments: [ChatAttachment]?) async {
         isProcessing = true
-        defer { isProcessing = false }
+        defer {
+            isProcessing = false
+            currentTask = nil
+        }
 
         let systemPrompt = SettingsManager.systemPrompt
 
@@ -366,6 +420,8 @@ class AssistantViewModel: ObservableObject {
                 systemPrompt: systemPrompt
             )
 
+            guard !Task.isCancelled else { return }
+
             let finalResponse = aiResponse.text
 
             // Acumula tokens
@@ -384,12 +440,22 @@ class AssistantViewModel: ObservableObject {
             pasteboard.copyString(finalResponse, forType: .string)
 
             if SettingsManager.playNotifications {
-                await sendNotification(text: finalResponse)
+                let truncated = finalResponse.count > 100 ? String(finalResponse.prefix(100)) + "…" : finalResponse
+                await sendNotification(text: truncated)
                 NSSound(named: "Glass")?.play()
             }
 
         } catch {
-            let errorMsg = ChatMessage(content: "Erro: \(error.localizedDescription)", images: nil, isUser: false)
+            if Task.isCancelled { return }
+            let errorMsg = ChatMessage(
+                content: error.localizedDescription,
+                images: nil,
+                isUser: false,
+                isError: true,
+                retryPrompt: prompt,
+                retryImages: rawImages,
+                retryAttachments: attachments
+            )
             messages.append(errorMsg)
             print("Error processing AI: \(error)")
         }
@@ -411,9 +477,7 @@ class AssistantViewModel: ObservableObject {
     }
 
     func clearHistory() {
-        messages.removeAll()
-        conversationInputTokens = 0
-        conversationOutputTokens = 0
+        showClearConfirmation = true
     }
 }
 
@@ -466,6 +530,8 @@ struct ContentView: View {
     @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
     @FocusState private var isInputFocused: Bool
     @State private var placeholderIndex: Int = 0
+    @State private var showShortcutsPopover = false
+    @State private var cancelHovered = false
     private let placeholders = ["Mensagem...", "Resuma este texto...", "Explique como...", "Me ajude com..."]
 
     init(viewModel: AssistantViewModel) {
@@ -490,6 +556,35 @@ struct ContentView: View {
                 SettingsView(isPresented: $showSettings)
                     .transition(.maeSlideIn)
                     .zIndex(2)
+            }
+
+            // Clear History Confirmation
+            if viewModel.showClearConfirmation {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation(Theme.Animation.smooth) { viewModel.showClearConfirmation = false } }
+                    .zIndex(3)
+                MaeConfirmDialog(
+                    title: "Limpar Histórico",
+                    message: "Todas as mensagens serão removidas. Deseja continuar?",
+                    confirmLabel: "Limpar",
+                    confirmColor: Theme.Colors.error,
+                    onConfirm: { viewModel.confirmClearHistory() },
+                    onCancel: { withAnimation(Theme.Animation.smooth) { viewModel.showClearConfirmation = false } }
+                )
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+                .zIndex(4)
+            }
+
+            // Toast
+            if let toast = viewModel.toastMessage {
+                VStack {
+                    Spacer()
+                    MaeToast(message: toast)
+                        .padding(.bottom, 80)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .zIndex(5)
             }
         }
         .frame(width: 450, height: 650)
@@ -549,7 +644,23 @@ struct ContentView: View {
                             AnalysisWindowManager.shared.showWindow()
                         }
                         MaeTooltipButton(icon: "trash", helpText: "Limpar histórico") {
-                            withAnimation { viewModel.clearHistory() }
+                            withAnimation(Theme.Animation.smooth) { viewModel.showClearConfirmation = true }
+                        }
+                        MaeTooltipButton(icon: "keyboard", helpText: "Atalhos do teclado") {
+                            showShortcutsPopover = true
+                        }
+                        .popover(isPresented: $showShortcutsPopover) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("ATALHOS")
+                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Theme.Colors.textMuted)
+                                    .tracking(0.5)
+                                shortcutRow(label: "Analisar clipboard", shortcut: "⌘⇧X")
+                                shortcutRow(label: "Analisar tela", shortcut: "⌘⇧Z")
+                                shortcutRow(label: "Entrada rápida", shortcut: "⌘⇧Space")
+                            }
+                            .padding(14)
+                            .frame(width: 220)
                         }
                         MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
                             withAnimation(Theme.Animation.smooth) {
@@ -801,9 +912,26 @@ struct ContentView: View {
                         }
 
                     if viewModel.isProcessing {
-                        MaeTypingDots()
+                        Button {
+                            viewModel.cancelRequest()
+                        } label: {
+                            ZStack {
+                                MaeTypingDots()
+                                if cancelHovered {
+                                    Image(systemName: "stop.fill")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(Theme.Colors.error)
+                                        .transition(.maeScaleFade)
+                                }
+                            }
                             .frame(width: 30, height: 30)
-                            .transition(.maeScaleFade)
+                        }
+                        .buttonStyle(.plain)
+                        .onHover { hovering in
+                            withAnimation(Theme.Animation.hover) { cancelHovered = hovering }
+                        }
+                        .help("Cancelar requisição")
+                        .transition(.maeScaleFade)
                     } else {
                         Button {
                             Task { await viewModel.sendManualMessage() }
@@ -820,6 +948,7 @@ struct ContentView: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                        .help("Digite uma mensagem ou anexe um arquivo")
                         .keyboardShortcut(.defaultAction)
                         .maePressEffect()
                         .transition(.maeScaleFade)
@@ -882,6 +1011,22 @@ struct ContentView: View {
             return URL(string: urlString)
         }
         return nil
+    }
+
+    private func shortcutRow(label: String, shortcut: String) -> some View {
+        HStack {
+            Text(label)
+                .font(Theme.Typography.bodySmall)
+                .foregroundStyle(Theme.Colors.textPrimary)
+            Spacer()
+            Text(shortcut)
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundStyle(Theme.Colors.textMuted)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Theme.Colors.surfaceSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+        }
     }
 
     private var greetingText: String {

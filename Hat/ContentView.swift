@@ -543,7 +543,7 @@ struct ContentView: View {
 
                 Spacer()
 
-                GlassEffectContainer(spacing: 2) {
+                HStack(spacing: 2) {
                     HStack(spacing: 2) {
                         MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Abrir Janela de Análise") {
                             AnalysisWindowManager.shared.showWindow()
@@ -574,10 +574,11 @@ struct ContentView: View {
                         }
                     }
                 }
+                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)).overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.vertical, 10)
-            .glassEffect(.regular, in: Rectangle())
+            .background(Theme.Colors.surface).overlay(alignment: .bottom) { Rectangle().fill(Theme.Colors.border).frame(height: 0.5) }
             .zIndex(1)
 
             // Chat List
@@ -635,7 +636,7 @@ struct ContentView: View {
                                 }
 
                                 // Quick action suggestions
-                                GlassEffectContainer(spacing: 6) {
+                                HStack(spacing: 6) {
                                     VStack(spacing: 6) {
                                         EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
                                             Task { await viewModel.processarIA() }
@@ -653,6 +654,7 @@ struct ContentView: View {
                                         .maeStaggered(index: 5, baseDelay: 0.10)
                                     }
                                 }
+                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)).overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                                 .padding(.horizontal, 36)
                                 .padding(.top, 6)
                             }
@@ -675,8 +677,7 @@ struct ContentView: View {
                     .padding(.vertical, Theme.Metrics.spacingDefault)
                 }
                 .scrollContentBackground(.hidden)
-                .background(Theme.Colors.background.opacity(0.5))
-                .background(.ultraThinMaterial)
+                .background(Theme.Colors.background)
                 .onChange(of: viewModel.messages.count) {
                     withAnimation(Theme.Animation.responsive) {
                         proxy.scrollTo(bottomID, anchor: .bottom)
@@ -754,7 +755,7 @@ struct ContentView: View {
                     HStack(spacing: 5) {
                         Image(systemName: "chart.bar.fill")
                             .font(.system(size: 8))
-                            .foregroundStyle(Theme.Colors.accentBlue.opacity(0.5))
+                            .foregroundStyle(Theme.Colors.accentOrange.opacity(0.5))
                         Text("\(formatTokenCount(viewModel.conversationTotalTokens)) tokens")
                             .font(Theme.Typography.micro)
                             .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
@@ -826,11 +827,11 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .glassEffect(.regular, in: Rectangle())
+                .background(Theme.Colors.surface).overlay(alignment: .top) { Rectangle().fill(Theme.Colors.border).frame(height: 0.5) }
             }
             .zIndex(1)
         }
-        .preferredColorScheme(.dark)
+
         .onDrop(of: [.image, .fileURL], isTargeted: nil) { providers in
             for provider in providers {
                 if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
@@ -913,7 +914,7 @@ struct EmptyStateSuggestion: View {
             HStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(isHovered ? Theme.Colors.accentBlue : Theme.Colors.accent.opacity(0.6))
+                    .foregroundStyle(isHovered ? Theme.Colors.accentOrange : Theme.Colors.accent.opacity(0.6))
                     .frame(width: 20)
                     .animation(Theme.Animation.hover, value: isHovered)
 
@@ -929,12 +930,11 @@ struct EmptyStateSuggestion: View {
                     .foregroundStyle(Theme.Colors.textMuted)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .glassEffect(isHovered ? .regular.tint(Theme.Colors.accentBlue.opacity(0.08)) : .regular,
-                         in: RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
+            .background(isHovered ? Theme.Colors.surfaceElevated : Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)).overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
             .animation(Theme.Animation.hover, value: isHovered)
         }
         .buttonStyle(.plain)

@@ -153,7 +153,10 @@ struct QuickInputView: View {
             inputBar
         }
         .fixedSize(horizontal: false, vertical: true)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
+        .background(Theme.Colors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+        .maeMediumShadow()
         .overlay(
             Group {
                 if isFocusedForBorder {
@@ -172,7 +175,7 @@ struct QuickInputView: View {
                 isFocusedForBorder = true
             }
         }
-        .preferredColorScheme(.dark)
+
     }
 
     // MARK: - Input Bar
@@ -256,7 +259,8 @@ struct QuickInputView: View {
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
                 .padding(.horizontal, 4)
                 .padding(.vertical, 2)
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 3))
+                .background(Theme.Colors.surfaceSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 3))
             Text(label)
                 .font(.system(size: 9, weight: .regular, design: .rounded))
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
@@ -266,21 +270,22 @@ struct QuickInputView: View {
     // MARK: - Action Buttons
 
     private var actionButtons: some View {
-        GlassEffectContainer(spacing: 2) {
-            HStack(spacing: 2) {
-                MaeTooltipButton(icon: "plus.circle.fill", size: 18, helpText: "Anexar arquivo") {
-                    attachFile()
-                }
+        HStack(spacing: 2) {
+            MaeTooltipButton(icon: "plus.circle.fill", size: 18, helpText: "Anexar arquivo") {
+                attachFile()
+            }
 
-                MaeTooltipButton(
-                    icon: "camera.viewfinder",
-                    size: 18,
-                    helpText: "Capturar tela"
-                ) {
-                    QuickInputWindowManager.shared.captureAndReopen()
-                }
+            MaeTooltipButton(
+                icon: "camera.viewfinder",
+                size: 18,
+                helpText: "Capturar tela"
+            ) {
+                QuickInputWindowManager.shared.captureAndReopen()
             }
         }
+        .background(Theme.Colors.surfaceSecondary)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
     }
 
     // MARK: - Attachments Preview

@@ -299,7 +299,6 @@ struct WelcomeView: View {
         .background(MaePageBackground(showGlow: true))
         .edgesIgnoringSafeArea(.all)
         .frame(width: width, height: height)
-        .preferredColorScheme(.dark)
     }
 }
 
@@ -320,8 +319,8 @@ struct FeatureRow: View {
                     )
                 )
                 .frame(width: 36, height: 36)
-                .glassEffect(.regular.tint(Theme.Colors.accentBlue.opacity(0.08)),
-                             in: RoundedRectangle(cornerRadius: 10))
+                .background(Theme.Colors.accentOrange.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -362,12 +361,8 @@ struct PermissionRowView: View {
                         ))
                 )
                 .frame(width: 36, height: 36)
-                .glassEffect(
-                    isGranted
-                        ? .regular.tint(Theme.Colors.success.opacity(0.1))
-                        : .regular.tint(Theme.Colors.accentBlue.opacity(0.08)),
-                    in: RoundedRectangle(cornerRadius: 10)
-                )
+                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentOrange.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -391,7 +386,7 @@ struct PermissionRowView: View {
                 Button(action: onGrant) {
                     Text("Permitir")
                         .font(Theme.Typography.bodyBold)
-                        .foregroundColor(.black)
+                        .foregroundStyle(Theme.Colors.background)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 16)
                 }
@@ -429,7 +424,8 @@ struct PermissionsView: View {
                     Circle()
                         .fill(Color.clear)
                         .frame(width: 72, height: 72)
-                        .glassEffect(.clear.tint(Theme.Colors.accentBlue.opacity(0.08)), in: Circle())
+                        .background(Theme.Colors.accentOrange.opacity(0.08))
+                        .clipShape(Circle())
                     Image(systemName: "lock.shield")
                         .font(.system(size: 32, weight: .light))
                         .foregroundStyle(
@@ -515,8 +511,6 @@ struct PermissionsView: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .glassEffect(allGranted ? .identity : .regular,
-                             in: RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
                 .maeGlowHover()
                 .maePressEffect()
                 .maeStaggered(index: 6, baseDelay: 0.12)
@@ -527,7 +521,6 @@ struct PermissionsView: View {
         .background(MaePageBackground(showGlow: true))
         .edgesIgnoringSafeArea(.all)
         .frame(width: width, height: height)
-        .preferredColorScheme(.dark)
         .task {
             await refreshNotificationStatus()
         }

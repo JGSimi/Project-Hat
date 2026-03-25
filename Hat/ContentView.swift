@@ -226,7 +226,7 @@ class AssistantViewModel: ObservableObject {
         // Ativar o app e trazer para frente
         NSApp.activate(ignoringOtherApps: true)
         
-        guard let screenImage = captureScreen() else {
+        guard let screenImage = await captureScreen() else {
             print("Failed to capture screen")
             return
         }
@@ -300,19 +300,22 @@ class AssistantViewModel: ObservableObject {
         analysisImage = nil
     }
     
-    func captureScreen() -> NSImage? {
+    func captureScreen() async -> NSImage? {
         // Obsolete in macOS 15.0: CGDisplayCreateImage(CGMainDisplayID())
-        // Using screencapture CLI as a robust workaround that also triggers the permission prompt
+        // Using screencapture CLI as a robust workaround that also triggers the permission prompt.
+        // Runs on a background thread to avoid blocking the main thread during capture.
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("png")
-        let task = Process()
-        task.launchPath = "/usr/sbin/screencapture"
-        task.arguments = ["-x", tempURL.path] // -x = no sound
-        task.launch()
-        task.waitUntilExit()
-        
-        let image = NSImage(contentsOf: tempURL)
-        try? FileManager.default.removeItem(at: tempURL)
-        return image
+        return await Task.detached(priority: .userInitiated) {
+            let task = Process()
+            task.launchPath = "/usr/sbin/screencapture"
+            task.arguments = ["-x", tempURL.path] // -x = no sound
+            task.launch()
+            task.waitUntilExit()
+
+            let image = NSImage(contentsOf: tempURL)
+            try? FileManager.default.removeItem(at: tempURL)
+            return image
+        }.value
     }
 
     /// Chamado pela interface via TextField

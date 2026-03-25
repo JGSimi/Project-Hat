@@ -113,7 +113,7 @@ private struct MenuBarIconView: View {
             .scaleEffect(popScale)
             .opacity(iconOpacity)
             .onAppear(perform: animateIconSwap)
-            .onChange(of: isProcessing) { _ in
+            .onChange(of: isProcessing) { _, _ in
                 animateIconSwap()
             }
     }

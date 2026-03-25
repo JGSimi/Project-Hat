@@ -546,6 +546,11 @@ struct ContentView: View {
                     MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Análise") {
                         AnalysisWindowManager.shared.showWindow()
                     }
+                    MaeTooltipButton(icon: "square.and.arrow.up", helpText: "Exportar conversa") {
+                        exportConversation()
+                    }
+                    .disabled(viewModel.messages.isEmpty)
+                    .opacity(viewModel.messages.isEmpty ? 0.35 : 1.0)
                     MaeTooltipButton(icon: "trash", helpText: "Limpar") {
                         withAnimation { viewModel.clearHistory() }
                     }
@@ -818,6 +823,51 @@ struct ContentView: View {
         return nil
     }
 
+    private func exportConversation() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        let dateString = formatter.string(from: Date())
+
+        formatter.dateFormat = "HH:mm"
+
+        // Build markdown document
+        var lines: [String] = [
+            "# Conversa com Hat",
+            "**Exportado em:** \(dateString)",
+            "",
+            "---",
+            ""
+        ]
+
+        for message in viewModel.messages {
+            let time = formatter.string(from: message.timestamp)
+            if message.isUser {
+                lines.append("**Você** · \(time)")
+            } else {
+                lines.append("**Hat** · \(time)")
+            }
+            lines.append("")
+            lines.append(message.content)
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+        }
+
+        let markdown = lines.joined(separator: "\n")
+
+        let panel = NSSavePanel()
+        panel.title = "Exportar conversa"
+        panel.nameFieldStringValue = "conversa-hat-\(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none).replacingOccurrences(of: "/", with: "-")).md"
+        if let mdType = UTType(filenameExtension: "md") {
+            panel.allowedContentTypes = [mdType]
+        }
+        panel.canCreateDirectories = true
+
+        if panel.runModal() == .OK, let url = panel.url {
+            try? markdown.write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
@@ -858,6 +908,17 @@ struct EmptyStateSuggestion: View {
                     .animation(Theme.Animation.hover, value: isHovered)
 
                 Spacer()
+
+                // Shortcut badge — always visible to help users discover keyboard shortcuts
+                Text(shortcut)
+                    .font(.system(size: 9, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.8 : 0.45))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Theme.Colors.surfaceSecondary)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
+                    .animation(Theme.Animation.hover, value: isHovered)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)

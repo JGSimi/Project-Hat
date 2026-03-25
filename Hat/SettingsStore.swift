@@ -116,7 +116,8 @@ struct SettingsManager {
     static var apiEndpoint: String { UserDefaults.standard.string(forKey: "apiEndpoint") ?? "https://api.openai.com/v1/chat/completions" }
     static var apiModelName: String { UserDefaults.standard.string(forKey: "apiModelName") ?? "gpt-4o-mini" }
     static var apiKey: String { KeychainManager.shared.loadKey(for: selectedProvider) ?? "" }
-    static var systemPrompt: String { UserDefaults.standard.string(forKey: "systemPrompt") ?? "Resposta direta. Pergunta: " }
+    static let defaultSystemPrompt = "Você é Hat, um assistente de IA conciso e prestativo. Responda de forma direta e clara, usando Markdown quando apropriado."
+    static var systemPrompt: String { UserDefaults.standard.string(forKey: "systemPrompt") ?? SettingsManager.defaultSystemPrompt }
     static var playNotifications: Bool { UserDefaults.standard.object(forKey: "playNotifications") as? Bool ?? true }
 
     static var globalTotalTokens: Int {

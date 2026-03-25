@@ -228,6 +228,8 @@ class AssistantViewModel: ObservableObject {
         
         guard let screenImage = captureScreen() else {
             print("Failed to capture screen")
+            self.analysisResult = "Não foi possível capturar a tela. Verifique a permissão de Gravação de Tela nas Preferências do Sistema."
+            AnalysisWindowManager.shared.showWindow()
             return
         }
 
@@ -271,7 +273,7 @@ class AssistantViewModel: ObservableObject {
             }
 
         } catch {
-            self.analysisResult = "Erro: \(error.localizedDescription)"
+            self.analysisResult = classifyError(error)
             print("Error processing AI: \(error)")
         }
     }
@@ -389,16 +391,16 @@ class AssistantViewModel: ObservableObject {
             }
 
         } catch {
-            let errorMsg = ChatMessage(content: "Erro: \(error.localizedDescription)", images: nil, isUser: false)
+            let errorMsg = ChatMessage(content: classifyError(error), images: nil, isUser: false)
             messages.append(errorMsg)
             print("Error processing AI: \(error)")
         }
     }
-    
+
     private func sendNotification(text: String) async {
         let content = UNMutableNotificationContent()
         content.title = "Hat"
-        content.body = text
+        content.body = text.count > 200 ? String(text.prefix(200)) + "…" : text
         content.sound = .default
 
         let request = UNNotificationRequest(
@@ -414,6 +416,50 @@ class AssistantViewModel: ObservableObject {
         messages.removeAll()
         conversationInputTokens = 0
         conversationOutputTokens = 0
+    }
+
+    /// Classifies an error into a user-friendly, actionable message.
+    private func classifyError(_ error: Error) -> String {
+        let nsError = error as NSError
+        let description = error.localizedDescription.lowercased()
+
+        // Network unreachable / no internet
+        if nsError.domain == NSURLErrorDomain {
+            switch nsError.code {
+            case NSURLErrorNotConnectedToInternet, NSURLErrorNetworkConnectionLost:
+                return "Sem conexão com a internet. Verifique sua rede."
+            case NSURLErrorTimedOut:
+                return "A requisição demorou muito. Tente novamente."
+            case NSURLErrorCannotConnectToHost, NSURLErrorCannotFindHost:
+                if description.contains("localhost") || description.contains("11434") {
+                    return "Ollama não está rodando. Inicie com `ollama serve` no Terminal."
+                }
+                return "Não foi possível conectar ao servidor. Verifique o endpoint nas configurações."
+            default:
+                break
+            }
+        }
+
+        // HTTP status code errors from AIAPIService
+        if nsError.domain == "AssistantAPIError" || nsError.domain == "AssistantLocalAPIError" {
+            switch nsError.code {
+            case 401, 403:
+                return "Chave de API inválida ou expirada. Verifique nas configurações."
+            case 429:
+                return "Limite de requisições atingido. Aguarde um momento e tente novamente."
+            case 500...599:
+                return "Erro no servidor do provedor. Tente novamente mais tarde."
+            default:
+                break
+            }
+        }
+
+        // Connection refused (Ollama)
+        if description.contains("connection refused") || description.contains("could not connect") {
+            return "Ollama não está rodando. Inicie com `ollama serve` no Terminal."
+        }
+
+        return "Erro: \(error.localizedDescription)"
     }
 }
 
@@ -458,6 +504,7 @@ struct ContentView: View {
     @Namespace private var bottomID
     @State private var showSettings = false
     @State private var showOpacitySlider = false
+    @State private var showClearConfirmation = false
     @State private var hostWindow: NSWindow?
     @AppStorage("windowOpacity") private var windowOpacity: Double = 1.0
     @AppStorage("globalTotalTokens") private var globalTotalTokens: Int = 0
@@ -535,6 +582,17 @@ struct ContentView: View {
                     .foregroundStyle(Theme.Colors.textMuted)
                     .lineLimit(1)
 
+                if viewModel.conversationTotalTokens > 0 {
+                    Text(formatTokenCount(viewModel.conversationTotalTokens) + " tokens")
+                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Theme.Colors.surfaceSecondary)
+                        .clipShape(Capsule())
+                        .transition(.maeScaleFade)
+                }
+
                 Spacer()
 
                 HStack(spacing: 2) {
@@ -542,7 +600,10 @@ struct ContentView: View {
                         AnalysisWindowManager.shared.showWindow()
                     }
                     MaeTooltipButton(icon: "trash", helpText: "Limpar") {
-                        withAnimation { viewModel.clearHistory() }
+                        if viewModel.messages.isEmpty {
+                            return
+                        }
+                        showClearConfirmation = true
                     }
                     MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
                         withAnimation(Theme.Animation.smooth) {
@@ -590,6 +651,18 @@ struct ContentView: View {
                                 Text(greetingText)
                                     .font(Theme.Typography.heading)
                                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
+
+                                // Current mode/model indicator
+                                HStack(spacing: 6) {
+                                    Circle()
+                                        .fill(Theme.Colors.accentOrange.opacity(0.8))
+                                        .frame(width: 6, height: 6)
+                                    Text(inferenceMode == .local
+                                         ? "Local · \(localModelName)"
+                                         : "\(SettingsManager.selectedProvider.shortName) · \(apiModelName)")
+                                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                                        .foregroundStyle(Theme.Colors.textMuted)
+                                }
 
                                 // Quick action suggestions
                                 VStack(spacing: 6) {
@@ -761,6 +834,14 @@ struct ContentView: View {
             .zIndex(1)
         }
 
+        .alert("Limpar conversa?", isPresented: $showClearConfirmation) {
+            Button("Cancelar", role: .cancel) {}
+            Button("Limpar", role: .destructive) {
+                withAnimation { viewModel.clearHistory() }
+            }
+        } message: {
+            Text("Todas as mensagens serão apagadas. Esta ação não pode ser desfeita.")
+        }
         .onDrop(of: [.image, .fileURL], isTargeted: nil) { providers in
             for provider in providers {
                 if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {

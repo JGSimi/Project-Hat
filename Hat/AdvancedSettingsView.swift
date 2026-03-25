@@ -65,7 +65,7 @@ struct AdvancedSettingsView: View {
     
     @AppStorage("inferenceMode") var inferenceMode: InferenceMode = .local
     @AppStorage("selectedProvider") var selectedProvider: CloudProvider = .google
-    @AppStorage("systemPrompt") var systemPrompt: String = "Responda APENAS com a letra e o texto da alternativa. Sem introduções. Pergunta: "
+    @AppStorage("systemPrompt") var systemPrompt: String = SettingsManager.defaultSystemPrompt
     @AppStorage("localModelName") var localModelName: String = "gemma3:4b"
     @AppStorage("apiEndpoint") var apiEndpoint: String = "https://api.openai.com/v1/chat/completions"
     @AppStorage("apiModelName") var apiModelName: String = "gpt-4o-mini"

@@ -95,7 +95,16 @@ class AIAPIService {
         request.timeoutInterval = 120
 
         let apiKey = SettingsManager.apiKey
-        let isAnthropic = SettingsManager.selectedProvider == .anthropic
+        let provider = SettingsManager.selectedProvider
+        let isAnthropic = provider == .anthropic
+
+        guard !apiKey.isEmpty else {
+            throw NSError(
+                domain: "AssistantAPIError",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "Chave de API não configurada para \(provider.shortName). Configure em Configurações > Modelos & IA."]
+            )
+        }
 
         if !apiKey.isEmpty {
             switch SettingsManager.selectedProvider {

@@ -241,6 +241,26 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .maePressEffect()
+
+                    MaeGradientDivider()
+
+                    Button {
+                        NSApplication.shared.terminate(nil)
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "power")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.Colors.error)
+                            Text("Sair do Hat")
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.error.opacity(0.9))
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.plain)
+                    .maePressEffect()
                 }
                 .maeCleanCard()
                 .padding(.bottom, 14)

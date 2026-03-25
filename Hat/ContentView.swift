@@ -307,9 +307,11 @@ class AssistantViewModel: ObservableObject {
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("png")
         return await Task.detached(priority: .userInitiated) {
             let task = Process()
-            task.launchPath = "/usr/sbin/screencapture"
+            // Use executableURL + run() (modern API) so a launch failure becomes a
+            // Swift Error instead of an unhandled NSException that would crash the app.
+            task.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
             task.arguments = ["-x", tempURL.path] // -x = no sound
-            task.launch()
+            try? task.run()
             task.waitUntilExit()
 
             let image = NSImage(contentsOf: tempURL)

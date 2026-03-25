@@ -106,7 +106,7 @@ class QuickInputWindowManager {
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 300_000_000)
             guard let self else { return }
-            let image = AssistantViewModel.shared.captureScreen()
+            let image = await AssistantViewModel.shared.captureScreen()
 
             self.isCapturingScreen = false
 

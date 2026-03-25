@@ -294,7 +294,7 @@ struct QuickInputView: View {
                                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                                         .stroke(
                                             attachment.name == "Captura de Tela"
-                                                ? Theme.Colors.accentOrange.opacity(0.4)
+                                                ? Theme.Colors.accentPrimary.opacity(0.4)
                                                 : Theme.Colors.border,
                                             lineWidth: attachment.name == "Captura de Tela" ? 1 : 0.5
                                         )
@@ -304,7 +304,7 @@ struct QuickInputView: View {
                             VStack(spacing: 4) {
                                 Image(systemName: "doc.text.fill")
                                     .font(.system(size: 24))
-                                    .foregroundStyle(Theme.Colors.accentOrange)
+                                    .foregroundStyle(Theme.Colors.accentPrimary)
                                     .symbolEffect(.bounce, options: .nonRepeating)
                                 Text(attachment.name)
                                     .font(.system(size: 9))

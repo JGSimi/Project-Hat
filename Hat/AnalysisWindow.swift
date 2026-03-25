@@ -79,7 +79,7 @@ struct AnalysisView: View {
                                 if viewModel.isAnalyzingScreen {
                                     Text("Processando...")
                                         .font(Theme.Typography.micro)
-                                        .foregroundStyle(Theme.Colors.accentOrange)
+                                        .foregroundStyle(Theme.Colors.accentPrimary)
                                 }
                             }
                             
@@ -155,7 +155,7 @@ struct AnalysisView: View {
                                         }
                                     Image(systemName: "sparkles")
                                         .font(.system(size: 22, weight: .light))
-                                        .foregroundStyle(Theme.Colors.accentOrange)
+                                        .foregroundStyle(Theme.Colors.accentPrimary)
                                         .symbolEffect(.pulse.byLayer)
                                 }
 
@@ -179,7 +179,7 @@ struct AnalysisView: View {
 
                                 ZStack {
                                     Circle()
-                                        .fill(Theme.Colors.accentOrange.opacity(0.05))
+                                        .fill(Theme.Colors.accentPrimary.opacity(0.05))
                                         .frame(width: 80, height: 80)
                                     Image(systemName: "viewfinder")
                                         .font(.system(size: 32, weight: .ultraLight))

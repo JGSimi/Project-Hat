@@ -31,7 +31,7 @@ struct SettingsView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 16, height: 16)
-                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                 Text("Configurações")
                     .font(Theme.Typography.heading)
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
@@ -105,7 +105,7 @@ struct SettingsView: View {
                                                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                                                         .stroke(
                                                             selectedProvider == provider
-                                                                ? Theme.Colors.accentOrange.opacity(0.5)
+                                                                ? Theme.Colors.accentPrimary.opacity(0.5)
                                                                 : Theme.Colors.border,
                                                             lineWidth: 0.5
                                                         )
@@ -191,13 +191,13 @@ struct SettingsView: View {
                             Spacer()
                             HStack(spacing: 8) {
                                 HStack(spacing: 3) {
-                                    Circle().fill(Theme.Colors.accentOrange).frame(width: 5, height: 5)
+                                    Circle().fill(Theme.Colors.accentPrimary).frame(width: 5, height: 5)
                                     Text("In: " + formatTokenCount(globalInputTokens))
                                         .font(Theme.Typography.micro)
                                         .foregroundStyle(Theme.Colors.textMuted)
                                 }
                                 HStack(spacing: 3) {
-                                    Circle().fill(Theme.Colors.accentSand).frame(width: 5, height: 5)
+                                    Circle().fill(Theme.Colors.accentSecondary).frame(width: 5, height: 5)
                                     Text("Out: " + formatTokenCount(globalOutputTokens))
                                         .font(Theme.Typography.micro)
                                         .foregroundStyle(Theme.Colors.textMuted)

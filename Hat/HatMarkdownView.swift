@@ -39,7 +39,7 @@ extension MarkdownUI.Theme {
         .code {
             FontFamily(.custom("SFMono-Regular", defaultFamilyName: .monospaced))
             FontSize(12)
-            ForegroundColor(Theme.Colors.accentOrange)
+            ForegroundColor(Theme.Colors.accentPrimary)
             BackgroundColor(Theme.Colors.surfaceTertiary)
         }
         .codeBlock { configuration in
@@ -79,7 +79,7 @@ extension MarkdownUI.Theme {
             .markdownMargin(top: 8, bottom: 8)
         }
         .link {
-            ForegroundColor(Theme.Colors.accentOrange)
+            ForegroundColor(Theme.Colors.accentPrimary)
         }
         .strong {
             FontWeight(.semibold)
@@ -121,7 +121,7 @@ struct HatMarkdownView: View {
             } else {
                 Markdown(markdown)
                     .markdownTheme(.hat)
-                    .tint(Theme.Colors.accentOrange)
+                    .tint(Theme.Colors.accentPrimary)
                     .textSelection(.enabled)
             }
         }

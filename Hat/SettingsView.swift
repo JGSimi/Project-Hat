@@ -24,10 +24,27 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer().frame(height: 16)
+            // Panel header
+            HStack(spacing: 10) {
+                Image("hat-svgrepo-com")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
+                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
+                Text("Configurações")
+                    .font(Theme.Typography.heading)
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                Spacer()
+            }
+            .padding(.horizontal, Theme.Metrics.spacingLarge)
+            .padding(.top, 20)
+            .padding(.bottom, 4)
 
             ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 16) {
+                MaeSectionHeader(title: "Modo de Inferência")
+
                 // Mode Picker + Active Model
                 VStack(alignment: .leading, spacing: 12) {
                     Picker("", selection: $inferenceMode) {
@@ -38,11 +55,12 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
 
-                    Text(inferenceMode == .local ? localModelName : apiModelName)
-                        .font(Theme.Typography.bodyBold)
-                        .foregroundStyle(Theme.Colors.textPrimary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+                    HStack(spacing: 6) {
+                        MaeTag(
+                            label: inferenceMode == .local ? localModelName : apiModelName,
+                            icon: inferenceMode == .local ? "desktopcomputer" : "cloud.fill"
+                        )
+                    }
                 }
                 .padding(14)
                 .maeCleanCard()
@@ -163,12 +181,28 @@ struct SettingsView: View {
 
                 // Token Usage
                 if globalTotalTokens > 0 {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        MaeSectionHeader(title: "Uso de Tokens")
+
                         HStack {
                             Text(formatTokenCount(globalTotalTokens) + " tokens")
-                                .font(Theme.Typography.caption)
-                                .foregroundStyle(Theme.Colors.textSecondary)
+                                .font(Theme.Typography.captionBold)
+                                .foregroundStyle(Theme.Colors.textPrimary)
                             Spacer()
+                            HStack(spacing: 8) {
+                                HStack(spacing: 3) {
+                                    Circle().fill(Theme.Colors.accentOrange).frame(width: 5, height: 5)
+                                    Text("In: " + formatTokenCount(globalInputTokens))
+                                        .font(Theme.Typography.micro)
+                                        .foregroundStyle(Theme.Colors.textMuted)
+                                }
+                                HStack(spacing: 3) {
+                                    Circle().fill(Theme.Colors.accentSand).frame(width: 5, height: 5)
+                                    Text("Out: " + formatTokenCount(globalOutputTokens))
+                                        .font(Theme.Typography.micro)
+                                        .foregroundStyle(Theme.Colors.textMuted)
+                                }
+                            }
                             Button {
                                 SettingsManager.resetGlobalTokens()
                             } label: {
@@ -180,26 +214,15 @@ struct SettingsView: View {
                             .help("Resetar")
                         }
 
-                        // Ratio bar
-                        GeometryReader { geo in
-                            let inputRatio = globalTotalTokens > 0
-                                ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
-                                : 0.5
-                            HStack(spacing: 1) {
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Theme.Colors.accentOrange.opacity(0.7))
-                                    .frame(width: tokenBarAppeared ? max(4, geo.size.width * inputRatio) : 0)
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Theme.Colors.accentSand.opacity(0.5))
+                        let inputRatio = globalTotalTokens > 0
+                            ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
+                            : 0.5
+                        MaeProgressBar(value: tokenBarAppeared ? inputRatio : 0)
+                            .onAppear {
+                                withAnimation(Theme.Animation.expressive) {
+                                    tokenBarAppeared = true
+                                }
                             }
-                        }
-                        .frame(height: 3)
-                        .clipShape(RoundedRectangle(cornerRadius: 3))
-                        .onAppear {
-                            withAnimation(Theme.Animation.expressive) {
-                                tokenBarAppeared = true
-                            }
-                        }
                     }
                     .padding(14)
                     .maeCleanCard()

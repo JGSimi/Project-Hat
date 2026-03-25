@@ -74,7 +74,7 @@ struct AnalysisView: View {
                         HStack(spacing: 14) {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Análise de Tela")
-                                    .font(Theme.Typography.title)
+                                    .font(Theme.Typography.headingSerif)
                                     .foregroundStyle(Theme.Colors.textPrimary)
                                 if viewModel.isAnalyzingScreen {
                                     Text("Processando...")
@@ -134,19 +134,19 @@ struct AnalysisView: View {
                                 // Animated analysis indicator
                                 ZStack {
                                     Circle()
-                                        .stroke(Theme.Colors.border, lineWidth: 2)
-                                        .frame(width: 60, height: 60)
+                                        .stroke(Theme.Colors.border, lineWidth: 2.5)
+                                        .frame(width: 64, height: 64)
                                     Circle()
-                                        .trim(from: 0, to: 0.3)
+                                        .trim(from: 0, to: 0.35)
                                         .stroke(
                                             LinearGradient(
                                                 colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
                                                 startPoint: .topLeading,
                                                 endPoint: .bottomTrailing
                                             ),
-                                            style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                                            style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
                                         )
-                                        .frame(width: 60, height: 60)
+                                        .frame(width: 64, height: 64)
                                         .rotationEffect(.degrees(analysisSpinAngle))
                                         .onAppear {
                                             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
@@ -154,7 +154,7 @@ struct AnalysisView: View {
                                             }
                                         }
                                     Image(systemName: "sparkles")
-                                        .font(.system(size: 20, weight: .light))
+                                        .font(.system(size: 22, weight: .light))
                                         .foregroundStyle(Theme.Colors.accentOrange)
                                         .symbolEffect(.pulse.byLayer)
                                 }
@@ -224,10 +224,10 @@ struct AnalysisView: View {
                         } else {
                             ScrollView {
                                 HatMarkdownView(markdown: viewModel.analysisResult)
-                                    .font(Theme.Typography.bodySmall)
+                                    .font(Theme.Typography.body)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, Theme.Metrics.spacingXLarge)
-                                    .padding(.vertical, Theme.Metrics.spacingDefault)
+                                    .padding(.vertical, Theme.Metrics.spacingLarge)
                             }
                             .background(Theme.Colors.backgroundSecondary)
                             .transition(.maeFadeScale)
@@ -273,7 +273,7 @@ struct AnalysisView: View {
                             .transition(.maeSlideUp)
                         }
                     }
-                    .frame(width: min(max(360, geo.size.width * 0.38), geo.size.width * 0.55))
+                    .frame(width: min(max(380, geo.size.width * 0.45), geo.size.width * 0.55))
                     .background(Theme.Colors.backgroundSecondary)
                     
                     Divider()

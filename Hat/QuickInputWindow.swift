@@ -129,7 +129,7 @@ struct QuickInputView: View {
     @ObservedObject private var viewModel: AssistantViewModel
     @State private var inputText: String = ""
     @FocusState private var isInputFocused: Bool
-    @State private var isFocusedForBorder: Bool = false
+    // Focus state managed by FocusState
 
     init(viewModel: AssistantViewModel) {
         self.viewModel = viewModel
@@ -156,24 +156,11 @@ struct QuickInputView: View {
         .background(Theme.Colors.surface)
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
-        .maeMediumShadow()
-        .overlay(
-            Group {
-                if isFocusedForBorder {
-                    RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous)
-                        .stroke(.clear, lineWidth: 1)
-                        .maeGradientBorder(cornerRadius: Theme.Metrics.radiusLarge)
-                        .transition(.opacity)
-                }
-            }
-        )
-        .animation(Theme.Animation.smooth, value: isFocusedForBorder)
+        .maeElevatedShadow()
+        .maeGradientBorder(cornerRadius: Theme.Metrics.radiusLarge, lineWidth: 0.8)
         .frame(width: 680)
         .onAppear {
             isInputFocused = true
-            withAnimation(Theme.Animation.gentle.delay(0.3)) {
-                isFocusedForBorder = true
-            }
         }
 
     }
@@ -187,7 +174,7 @@ struct QuickInputView: View {
 
                 TextField("Pergunte algo à Hat...", text: $inputText, axis: .vertical)
                     .textFieldStyle(.plain)
-                    .font(Theme.Typography.body)
+                    .font(Theme.Typography.subheading)
                     .foregroundStyle(Theme.Colors.textPrimary)
                     .lineLimit(1...4)
                     .focused($isInputFocused)
@@ -257,10 +244,11 @@ struct QuickInputView: View {
             Text(key)
                 .font(.system(size: 9, weight: .semibold, design: .rounded))
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
-                .padding(.horizontal, 4)
+                .padding(.horizontal, 5)
                 .padding(.vertical, 2)
-                .background(Theme.Colors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: 3))
+                .background(Theme.Colors.surfaceTertiary)
+                .clipShape(Capsule())
+                .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
             Text(label)
                 .font(.system(size: 9, weight: .regular, design: .rounded))
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
@@ -300,31 +288,37 @@ struct QuickInputView: View {
                             Image(nsImage: img)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 60, height: 60)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
+                                .frame(width: 72, height: 72)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 .overlay(
-                                    attachment.name == "Captura de Tela"
-                                    ? RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall)
-                                        .stroke(Theme.Colors.accent.opacity(0.4), lineWidth: 1)
-                                    : nil
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .stroke(
+                                            attachment.name == "Captura de Tela"
+                                                ? Theme.Colors.accentOrange.opacity(0.4)
+                                                : Theme.Colors.border,
+                                            lineWidth: attachment.name == "Captura de Tela" ? 1 : 0.5
+                                        )
                                 )
-                                .shadow(radius: 2)
+                                .maeSoftShadow()
                         } else {
                             VStack(spacing: 4) {
                                 Image(systemName: "doc.text.fill")
                                     .font(.system(size: 24))
-                                    .foregroundStyle(Theme.Colors.accent)
+                                    .foregroundStyle(Theme.Colors.accentOrange)
                                     .symbolEffect(.bounce, options: .nonRepeating)
                                 Text(attachment.name)
                                     .font(.system(size: 9))
                                     .lineLimit(1)
                                     .truncationMode(.middle)
-                                    .frame(width: 50)
+                                    .frame(width: 60)
                             }
-                            .frame(width: 60, height: 60)
+                            .frame(width: 72, height: 72)
                             .background(Theme.Colors.surfaceSecondary)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
-                            .shadow(radius: 2)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            )
                         }
 
                         Button {

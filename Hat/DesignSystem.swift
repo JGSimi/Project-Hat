@@ -41,19 +41,19 @@ extension Color {
 
 enum Theme {
 
-    // MARK: Colors — Claude-inspired warm palette
+    // MARK: Colors — Claude-inspired warm palette (refined)
     enum Colors {
-        // Backgrounds — warm cream (light) / warm dark (dark)
+        // Backgrounds — warmer, richer tones
         static let background = Color.adaptive(
-            light: Color(NSColor(red: 0.98, green: 0.976, blue: 0.965, alpha: 1.0)),  // #FAF9F6
-            dark:  Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0))  // #1A1915
+            light: Color(NSColor(red: 0.98, green: 0.973, blue: 0.96, alpha: 1.0)),   // #FAF8F5
+            dark:  Color(NSColor(red: 0.11, green: 0.106, blue: 0.09, alpha: 1.0))    // #1C1B17
         )
         static let backgroundSecondary = Color.adaptive(
             light: Color(NSColor(red: 0.941, green: 0.929, blue: 0.902, alpha: 1.0)), // #F0EDE6
             dark:  Color(NSColor(red: 0.078, green: 0.075, blue: 0.059, alpha: 1.0))  // #14130F
         )
 
-        // Surfaces — flat, warm
+        // Surfaces — layered depth
         static let surface = Color.adaptive(
             light: Color.white,
             dark:  Color.white.opacity(0.05)
@@ -61,6 +61,10 @@ enum Theme {
         static let surfaceSecondary = Color.adaptive(
             light: Color(NSColor(red: 0.961, green: 0.949, blue: 0.922, alpha: 1.0)), // #F5F2EB
             dark:  Color.white.opacity(0.04)
+        )
+        static let surfaceTertiary = Color.adaptive(
+            light: Color(NSColor(red: 0.949, green: 0.937, blue: 0.91, alpha: 1.0)),  // #F2EFE8
+            dark:  Color.white.opacity(0.03)
         )
         static let surfaceElevated = Color.adaptive(
             light: Color.white,
@@ -76,19 +80,19 @@ enum Theme {
             light: Color.black.opacity(0.12),
             dark:  Color.white.opacity(0.12)
         )
-        static let borderFocused = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.4)) // #DA7756 @ 40%
+        static let borderFocused = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.45)) // deeper terracotta @ 45%
 
-        // Text — warm tones
+        // Text — warm tones with better contrast
         static let textPrimary = Color.adaptive(
             light: Color(NSColor(red: 0.102, green: 0.098, blue: 0.082, alpha: 1.0)), // #1A1915
             dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
         )
         static let textSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.420, green: 0.388, blue: 0.333, alpha: 1.0)), // #6B6355
+            light: Color(NSColor(red: 0.361, green: 0.333, blue: 0.286, alpha: 1.0)), // #5C5549 — improved WCAG AA
             dark:  Color(NSColor(red: 0.722, green: 0.678, blue: 0.620, alpha: 1.0))  // #B8AD9E
         )
         static let textMuted = Color.adaptive(
-            light: Color(NSColor(red: 0.612, green: 0.573, blue: 0.518, alpha: 1.0)), // #9C9284
+            light: Color(NSColor(red: 0.565, green: 0.529, blue: 0.478, alpha: 1.0)), // #90877A
             dark:  Color(NSColor(red: 0.478, green: 0.439, blue: 0.376, alpha: 1.0))  // #7A7060
         )
 
@@ -98,13 +102,20 @@ enum Theme {
             dark:  Color(NSColor(red: 0.961, green: 0.941, blue: 0.910, alpha: 1.0))  // #F5F0E8
         )
         static let accentSubtle = Color.adaptive(
-            light: Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.10)),
-            dark:  Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 0.15))
+            light: Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.10)),
+            dark:  Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 0.15))
         )
-        // Claude signature terracotta/orange
-        static let accentOrange = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 1.0)) // #DA7756
+        // Signature terracotta — deeper, more sophisticated
+        static let accentOrange = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 1.0))  // #D4714F
+        static let accentOrangeHover = Color(NSColor(red: 0.878, green: 0.545, blue: 0.416, alpha: 1.0)) // #E08B6A
         // Warm sand secondary
         static let accentSand = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0))   // #C4A882
+
+        // Input — dedicated input background
+        static let inputBackground = Color.adaptive(
+            light: Color(NSColor(red: 0.969, green: 0.957, blue: 0.937, alpha: 1.0)), // #F7F4EF
+            dark:  Color.white.opacity(0.045)
+        )
 
         // Semantic
         static let success = Color.adaptive(
@@ -121,17 +132,27 @@ enum Theme {
         )
 
         // Gradient helpers — orange to sand
-        static let gradientStart = Color(NSColor(red: 0.855, green: 0.467, blue: 0.337, alpha: 1.0)) // #DA7756
+        static let gradientStart = Color(NSColor(red: 0.831, green: 0.443, blue: 0.31, alpha: 1.0))  // #D4714F
         static let gradientEnd   = Color(NSColor(red: 0.769, green: 0.659, blue: 0.510, alpha: 1.0)) // #C4A882
         static let gradientSubtle = LinearGradient(
             colors: [gradientStart.opacity(0.04), gradientEnd.opacity(0.02)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
+        // Accent gradient for buttons and highlights
+        static let accentGradient = LinearGradient(
+            colors: [gradientStart, gradientEnd],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
-    // MARK: Typography — SF Pro Rounded (Apple native)
+    // MARK: Typography — SF Pro Rounded + Cormorant Garamond (decorative)
     enum Typography {
+        // Display — Cormorant Garamond for hero/decorative text
+        static let titleDisplay  = Font.cormorantGaramond(size: 32, weight: .bold)
+        static let headingSerif  = Font.cormorantGaramond(size: 20, weight: .semibold)
+        // UI — SF Pro Rounded
         static let largeTitle    = Font.system(size: 28, weight: .bold, design: .rounded)
         static let title         = Font.system(size: 22, weight: .bold, design: .rounded)
         static let heading       = Font.system(size: 17, weight: .semibold, design: .rounded)
@@ -142,25 +163,31 @@ enum Theme {
         static let caption       = Font.system(size: 11, weight: .regular, design: .rounded)
         static let captionBold   = Font.system(size: 11, weight: .semibold, design: .rounded)
         static let sectionHeader = Font.system(size: 11, weight: .semibold, design: .rounded)
-        static let micro         = Font.system(size: 9, weight: .medium, design: .rounded)
+        static let micro         = Font.system(size: 10, weight: .medium, design: .rounded)
+        // Code
+        static let codeBlock     = Font.system(size: 12, weight: .regular, design: .monospaced)
     }
 
     // MARK: Metrics — generous breathing room
     enum Metrics {
-        static let radiusSmall:  CGFloat = 8
-        static let radiusMedium: CGFloat = 14
-        static let radiusLarge:  CGFloat = 18
+        static let radiusSmall:   CGFloat = 8
+        static let radiusMedium:  CGFloat = 14
+        static let radiusLarge:   CGFloat = 18
+        static let radiusXLarge:  CGFloat = 24
 
-        static let spacingSmall:  CGFloat = 8
+        static let spacingXSmall:  CGFloat = 4
+        static let spacingSmall:   CGFloat = 8
         static let spacingDefault: CGFloat = 14
-        static let spacingLarge:  CGFloat = 20
-        static let spacingXLarge: CGFloat = 28
+        static let spacingLarge:   CGFloat = 20
+        static let spacingXLarge:  CGFloat = 28
+        static let spacingSection: CGFloat = 32
     }
 
     // MARK: Shadows
     enum Shadows {
-        static let soft   = (color: Color.black.opacity(0.08), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
-        static let medium = (color: Color.black.opacity(0.12), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
+        static let soft     = (color: Color.black.opacity(0.08), radius: CGFloat(5), x: CGFloat(0), y: CGFloat(2))
+        static let medium   = (color: Color.black.opacity(0.12), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
+        static let elevated = (color: Color.black.opacity(0.14), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(6))
     }
 
     // MARK: Animation
@@ -178,8 +205,10 @@ enum Theme {
         // Springs — Premium
         static let snappy     = SwiftUI.Animation.spring(response: 0.25, dampingFraction: 0.82)
         static let responsive = SwiftUI.Animation.spring(response: 0.3, dampingFraction: 0.75)
-        static let expressive = SwiftUI.Animation.spring(response: 0.5, dampingFraction: 0.7)
+        static let expressive = SwiftUI.Animation.spring(response: 0.45, dampingFraction: 0.7)
         static let microBounce = SwiftUI.Animation.spring(response: 0.28, dampingFraction: 0.65)
+        static let quickSnap  = SwiftUI.Animation.spring(response: 0.18, dampingFraction: 0.88)
+        static let slideIn    = SwiftUI.Animation.spring(response: 0.35, dampingFraction: 0.78)
 
         // Easing
         static let hover   = SwiftUI.Animation.easeInOut(duration: durationFast)
@@ -460,7 +489,7 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
-    /// Text input style — flat solid background
+    /// Text input style — warm input background
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -468,7 +497,7 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Theme.Colors.surfaceSecondary)
+            .background(Theme.Colors.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -476,7 +505,7 @@ extension View {
             )
     }
 
-    /// Opaque text input style (same as maeInputStyle in flat design)
+    /// Opaque text input style
     func maeInputStyleOpaque(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -484,7 +513,7 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Theme.Colors.surfaceSecondary)
+            .background(Theme.Colors.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
@@ -499,6 +528,11 @@ extension View {
 
     func maeMediumShadow() -> some View {
         let s = Theme.Shadows.medium
+        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
+    }
+
+    func maeElevatedShadow() -> some View {
+        let s = Theme.Shadows.elevated
         return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
 
@@ -765,25 +799,34 @@ struct MaeEmptyState: View {
     var subtitle: String? = nil
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accentOrange.opacity(0.04))
-                    .frame(width: 80, height: 80)
+                    .fill(Theme.Colors.accentOrange.opacity(0.03))
+                    .frame(width: 84, height: 84)
+                Circle()
+                    .stroke(
+                        LinearGradient(
+                            colors: [Theme.Colors.gradientStart.opacity(0.15), Theme.Colors.gradientEnd.opacity(0.08)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+                    .frame(width: 64, height: 64)
                 Circle()
                     .fill(Theme.Colors.surfaceSecondary)
                     .frame(width: 56, height: 56)
-                    .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
                 Image(systemName: icon)
                     .font(.system(size: 24, weight: .light))
-                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.5))
+                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.6))
             }
             .maeFloating(amplitude: 4, duration: 4.0)
 
             VStack(spacing: 6) {
                 Text(title)
                     .font(Theme.Typography.heading)
-                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
 
                 if let subtitle {
                     Text(subtitle)
@@ -810,14 +853,14 @@ struct MaeDateSeparator: View {
     }
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             capsuleLine
             Text(label)
-                .font(Theme.Typography.micro)
+                .font(.cormorantGaramond(size: 13, weight: .medium))
                 .foregroundStyle(Theme.Colors.textMuted)
             capsuleLine
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, 12)
         .padding(.horizontal, 24)
     }
 
@@ -831,7 +874,12 @@ struct MaeDateSeparator: View {
 struct MaeActionButton: View {
     let label: String
     var icon: String? = nil
+    var style: ActionButtonStyle = .primary
     let action: () -> Void
+
+    enum ActionButtonStyle {
+        case primary, accent
+    }
 
     var body: some View {
         Button(action: action) {
@@ -843,12 +891,15 @@ struct MaeActionButton: View {
                 Text(label)
                     .font(Theme.Typography.bodyBold)
             }
-            .foregroundStyle(Theme.Colors.background)
+            .foregroundStyle(style == .accent ? .white : Theme.Colors.background)
             .padding(.vertical, 10)
             .padding(.horizontal, 24)
             .background(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .fill(Theme.Colors.accent.opacity(0.9))
+                    .fill(style == .accent
+                        ? AnyShapeStyle(Theme.Colors.accentGradient)
+                        : AnyShapeStyle(Theme.Colors.accent.opacity(0.9))
+                    )
             )
         }
         .buttonStyle(.plain)
@@ -913,11 +964,11 @@ struct MaeTooltipButton: View {
                 .font(.system(size: size, weight: .regular))
                 .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                 .symbolEffect(.bounce, value: tapCount)
-                .frame(width: 28, height: 28)
+                .frame(width: 30, height: 30)
                 .contentShape(Rectangle())
                 .background(
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(isHovered ? Theme.Colors.surfaceSecondary : Color.clear)
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(isHovered ? Theme.Colors.surfaceTertiary : Color.clear)
                 )
         }
         .buttonStyle(.plain)
@@ -926,5 +977,91 @@ struct MaeTooltipButton: View {
         }
         .help(helpText)
         .accessibilityLabel(helpText)
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MARK: - 4. New Components (Redesign)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+struct MaeGradientText: View {
+    let text: String
+    var font: Font = Theme.Typography.heading
+
+    var body: some View {
+        Text(text)
+            .font(font)
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+    }
+}
+
+struct MaeProgressBar: View {
+    let value: CGFloat  // 0...1
+    var height: CGFloat = 4
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: height / 2)
+                    .fill(Theme.Colors.surfaceTertiary)
+                RoundedRectangle(cornerRadius: height / 2)
+                    .fill(Theme.Colors.accentGradient)
+                    .frame(width: max(height, geo.size.width * min(value, 1.0)))
+            }
+        }
+        .frame(height: height)
+        .clipShape(RoundedRectangle(cornerRadius: height / 2))
+    }
+}
+
+struct MaeTag: View {
+    let label: String
+    var icon: String? = nil
+    var color: Color = Theme.Colors.accentOrange
+
+    var body: some View {
+        HStack(spacing: 4) {
+            if let icon {
+                Image(systemName: icon)
+                    .font(.system(size: 8, weight: .semibold))
+            }
+            Text(label)
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .lineLimit(1)
+        }
+        .foregroundStyle(color)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+    }
+}
+
+struct MaeScrollToBottomButton: View {
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "chevron.down")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Theme.Colors.textSecondary)
+                .frame(width: 32, height: 32)
+                .background(Theme.Colors.surface)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
+                .scaleEffect(isHovered ? 1.05 : 1.0)
+                .maeSoftShadow()
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            withAnimation(Theme.Animation.quickSnap) { isHovered = hovering }
+        }
     }
 }

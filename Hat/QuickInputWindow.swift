@@ -313,7 +313,7 @@ struct QuickInputView: View {
                             VStack(spacing: 4) {
                                 Image(systemName: "doc.text.fill")
                                     .font(.system(size: 24))
-                                    .foregroundColor(Theme.Colors.accent)
+                                    .foregroundStyle(Theme.Colors.accent)
                                     .symbolEffect(.bounce, options: .nonRepeating)
                                 Text(attachment.name)
                                     .font(.system(size: 9))
@@ -334,8 +334,10 @@ struct QuickInputView: View {
                             }
                         } label: {
                             Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 20))
                                 .foregroundStyle(Theme.Colors.textPrimary, Theme.Colors.background)
                                 .symbolEffect(.bounce, options: .nonRepeating)
+                                .frame(width: 28, height: 28)
                         }
                         .buttonStyle(.plain)
                         .offset(x: 6, y: -6)

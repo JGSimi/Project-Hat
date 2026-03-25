@@ -162,10 +162,10 @@ struct AnalysisView: View {
                                 VStack(spacing: 6) {
                                     Text("Analisando...")
                                         .font(Theme.Typography.subheading)
-                                        .foregroundColor(Theme.Colors.textPrimary.opacity(0.8))
+                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
                                     Text("Processando captura de tela com IA")
                                         .font(Theme.Typography.caption)
-                                        .foregroundColor(Theme.Colors.textMuted)
+                                        .foregroundStyle(Theme.Colors.textMuted)
                                         .maeStaggered(index: 1, baseDelay: 0.15)
                                 }
 
@@ -183,30 +183,30 @@ struct AnalysisView: View {
                                         .frame(width: 80, height: 80)
                                     Image(systemName: "viewfinder")
                                         .font(.system(size: 32, weight: .ultraLight))
-                                        .foregroundColor(Theme.Colors.accent.opacity(0.3))
+                                        .foregroundStyle(Theme.Colors.accent.opacity(0.3))
                                         .symbolEffect(.breathe.plain)
                                 }
 
                                 VStack(spacing: 6) {
                                     Text("Nenhuma análise disponível")
                                         .font(Theme.Typography.subheading)
-                                        .foregroundColor(Theme.Colors.textSecondary)
+                                        .foregroundStyle(Theme.Colors.textSecondary)
                                         .maeStaggered(index: 1, baseDelay: 0.12)
 
                                     HStack(spacing: 4) {
                                         Text("Pressione")
                                             .font(Theme.Typography.caption)
-                                            .foregroundColor(Theme.Colors.textMuted)
+                                            .foregroundStyle(Theme.Colors.textMuted)
                                         Text("⌘⇧Z")
                                             .font(.system(size: 11, weight: .medium, design: .rounded))
-                                            .foregroundColor(Theme.Colors.textSecondary)
+                                            .foregroundStyle(Theme.Colors.textSecondary)
                                             .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
                                             .background(Theme.Colors.surfaceSecondary)
                                             .clipShape(RoundedRectangle(cornerRadius: 4))
                                         Text("para capturar")
                                             .font(Theme.Typography.caption)
-                                            .foregroundColor(Theme.Colors.textMuted)
+                                            .foregroundStyle(Theme.Colors.textMuted)
                                     }
                                     .maeStaggered(index: 2, baseDelay: 0.12)
                                 }
@@ -265,6 +265,7 @@ struct AnalysisView: View {
                                             .symbolEffect(.bounce, options: .nonRepeating)
                                     }
                                     .buttonStyle(.plain)
+                                    .maePressEffect()
                                 }
                                 .padding(.horizontal, Theme.Metrics.spacingXLarge)
                                 .padding(.vertical, Theme.Metrics.spacingDefault)
@@ -291,12 +292,12 @@ struct AnalysisView: View {
                             VStack(spacing: Theme.Metrics.spacingLarge) {
                                 Image(systemName: "photo.on.rectangle.angled")
                                     .font(.system(size: 60, weight: .ultraLight))
-                                    .foregroundColor(Theme.Colors.textMuted)
+                                    .foregroundStyle(Theme.Colors.textMuted)
                                     .symbolEffect(.pulse.byLayer)
                                     .accessibilityHidden(true)
                                 Text("Nenhuma captura de tela no momento.")
                                     .font(Theme.Typography.bodyBold)
-                                    .foregroundColor(Theme.Colors.textSecondary)
+                                    .foregroundStyle(Theme.Colors.textSecondary)
                             }
                             .maeAppearAnimation(animation: Theme.Animation.gentle)
                         }
@@ -339,7 +340,7 @@ struct AnalysisView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.top)
+        .ignoresSafeArea(.container, edges: .top)
         .onAppear {
             localImage = viewModel.analysisImage
             if !viewModel.analysisResult.isEmpty {

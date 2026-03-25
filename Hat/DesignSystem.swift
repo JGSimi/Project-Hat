@@ -540,8 +540,12 @@ extension View {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 struct MaeDivider: View {
+    // Uses Rectangle instead of Divider().background() — the latter doesn't reliably
+    // change the system separator color on macOS.
     var body: some View {
-        Divider().background(Theme.Colors.border)
+        Rectangle()
+            .fill(Theme.Colors.border)
+            .frame(height: 0.5)
     }
 }
 

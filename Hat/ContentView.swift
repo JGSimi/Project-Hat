@@ -552,7 +552,7 @@ struct ContentView: View {
                     .disabled(viewModel.messages.isEmpty)
                     .opacity(viewModel.messages.isEmpty ? 0.35 : 1.0)
                     MaeTooltipButton(icon: "trash", helpText: "Limpar") {
-                        withAnimation { viewModel.clearHistory() }
+                        withAnimation(Theme.Animation.smooth) { viewModel.clearHistory() }
                     }
                     MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
                         withAnimation(Theme.Animation.smooth) {
@@ -664,7 +664,7 @@ struct ContentView: View {
                                         VStack(spacing: 4) {
                                             Image(systemName: "doc.text.fill")
                                                 .font(.system(size: 24))
-                                                .foregroundColor(Theme.Colors.accent)
+                                                .foregroundStyle(Theme.Colors.accent)
                                                 .symbolEffect(.bounce, options: .nonRepeating)
                                             Text(attachment.name)
                                                 .font(.system(size: 9))
@@ -764,7 +764,7 @@ struct ContentView: View {
                         .transition(.maeScaleFade)
                     }
                 }
-                .padding(.horizontal, 14)
+                .padding(.horizontal, Theme.Metrics.spacingDefault)
                 .padding(.vertical, 10)
                 .background(Theme.Colors.surface)
             }

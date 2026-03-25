@@ -102,7 +102,8 @@ struct ChatBubble: View {
 
                 // Message content
                 if !message.content.isEmpty {
-                    ZStack(alignment: message.isUser ? .bottomTrailing : .bottomTrailing) {
+                    // Both user and assistant copy buttons are anchored to .bottomTrailing
+                ZStack(alignment: .bottomTrailing) {
                         if message.isUser {
                             Text(.init(message.content))
                                 .font(Theme.Typography.bodySmall)
@@ -167,13 +168,13 @@ struct ChatBubble: View {
                                 .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                             }
                             .buttonStyle(.plain)
-                            .offset(x: message.isUser ? -8 : -8, y: -8)
+                            .offset(x: -8, y: -8)
                             .transition(.maeScaleFade)
                         }
                     }
                 }
 
-                // Timestamp row
+                // Timestamp row — only visible on hover, hidden from VoiceOver
                 HStack(spacing: 4) {
                     Text(timeString)
                         .font(.system(size: 9, weight: .regular, design: .rounded))
@@ -181,6 +182,7 @@ struct ChatBubble: View {
                 }
                 .padding(.horizontal, 4)
                 .animation(Theme.Animation.hover, value: isHovered)
+                .accessibilityHidden(true)
             }
 
             if !message.isUser { Spacer(minLength: 50) }

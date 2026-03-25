@@ -247,11 +247,11 @@ struct WelcomeView: View {
                 VStack(spacing: 6) {
                     Text("Bem-vindo ao Hat")
                         .font(Theme.Typography.largeTitle)
-                        .foregroundColor(Theme.Colors.textPrimary)
+                        .foregroundStyle(Theme.Colors.textPrimary)
                         .maeStaggered(index: 1, baseDelay: 0.15)
                     Text("Seu assistente de IA na barra de menus")
                         .font(Theme.Typography.bodySmall)
-                        .foregroundColor(Theme.Colors.textSecondary)
+                        .foregroundStyle(Theme.Colors.textSecondary)
                         .maeStaggered(index: 2, baseDelay: 0.15)
                 }
             }
@@ -297,7 +297,7 @@ struct WelcomeView: View {
             .frame(maxHeight: .infinity)
         }
         .background(MaePageBackground(showGlow: true))
-        .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea()
         .frame(width: width, height: height)
     }
 }
@@ -325,11 +325,11 @@ struct FeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(Theme.Typography.bodyBold)
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .foregroundStyle(Theme.Colors.textPrimary)
 
                 Text(description)
                     .font(Theme.Typography.bodySmall)
-                    .foregroundColor(Theme.Colors.textSecondary)
+                    .foregroundStyle(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
@@ -367,11 +367,11 @@ struct PermissionRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(Theme.Typography.bodyBold)
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .foregroundStyle(Theme.Colors.textPrimary)
 
                 Text(description)
                     .font(Theme.Typography.bodySmall)
-                    .foregroundColor(Theme.Colors.textSecondary)
+                    .foregroundStyle(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
@@ -380,7 +380,7 @@ struct PermissionRowView: View {
             if isGranted {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 22))
-                    .foregroundColor(Theme.Colors.success)
+                    .foregroundStyle(Theme.Colors.success)
                     .transition(.maeScaleFade)
             } else {
                 Button(action: onGrant) {
@@ -440,12 +440,12 @@ struct PermissionsView: View {
 
                 Text("Permissões Necessárias")
                     .font(Theme.Typography.title)
-                    .foregroundColor(Theme.Colors.textPrimary)
+                    .foregroundStyle(Theme.Colors.textPrimary)
                     .maeStaggered(index: 1, baseDelay: 0.12)
 
                 Text("O Hat precisa das seguintes permissões para funcionar corretamente.")
                     .font(Theme.Typography.bodySmall)
-                    .foregroundColor(Theme.Colors.textSecondary)
+                    .foregroundStyle(Theme.Colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .maeStaggered(index: 2, baseDelay: 0.12)
@@ -489,7 +489,7 @@ struct PermissionsView: View {
                             Text("Já Concedi")
                                 .font(Theme.Typography.bodySmall)
                         }
-                        .foregroundColor(Theme.Colors.textSecondary)
+                        .foregroundStyle(Theme.Colors.textSecondary)
                     }
                     .buttonStyle(.plain)
                     .maeStaggered(index: 5, baseDelay: 0.12)
@@ -500,7 +500,8 @@ struct PermissionsView: View {
                 }) {
                     Text(allGranted ? "Continuar" : "Continuar mesmo assim")
                         .font(Theme.Typography.bodyBold)
-                        .foregroundColor(allGranted ? .black : Theme.Colors.textSecondary)
+                        // Uses Theme.Colors.background so text contrasts with the accent fill in both light and dark mode
+                        .foregroundStyle(allGranted ? Theme.Colors.background : Theme.Colors.textSecondary)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 32)
                         .background(
@@ -519,7 +520,7 @@ struct PermissionsView: View {
             .padding(.bottom, 30)
         }
         .background(MaePageBackground(showGlow: true))
-        .edgesIgnoringSafeArea(.all)
+        .ignoresSafeArea()
         .frame(width: width, height: height)
         .task {
             await refreshNotificationStatus()

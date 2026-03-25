@@ -83,6 +83,15 @@ struct SettingsView: View {
                                                         : Theme.Colors.surfaceSecondary
                                                 )
                                                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                        .stroke(
+                                                            selectedProvider == provider
+                                                                ? Theme.Colors.accentOrange.opacity(0.5)
+                                                                : Theme.Colors.border,
+                                                            lineWidth: 0.5
+                                                        )
+                                                )
                                         }
                                         .buttonStyle(.plain)
                                     }
@@ -92,8 +101,11 @@ struct SettingsView: View {
                             // Model quick selector
                             VStack(alignment: .leading, spacing: 8) {
                                 if isFetchingQuickModels {
-                                    ProgressView()
-                                        .controlSize(.mini)
+                                    HStack {
+                                        Spacer()
+                                        ProgressView().controlSize(.mini)
+                                        Spacer()
+                                    }
                                 }
 
                                 if quickModels.count > 5 {

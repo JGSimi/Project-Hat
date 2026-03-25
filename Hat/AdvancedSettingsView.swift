@@ -95,9 +95,9 @@ struct AdvancedSettingsView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 18, height: 18)
-                        .foregroundStyle(Theme.Colors.accent.opacity(0.7))
+                        .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
                     Text("Configurações")
-                        .font(Theme.Typography.heading)
+                        .font(Theme.Typography.headingSerif)
                         .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,14 +105,28 @@ struct AdvancedSettingsView: View {
                 .padding(.top, 28)
                 .padding(.bottom, 16)
 
+                MaeGradientDivider(tinted: true)
+                    .padding(.horizontal, 12)
+
                 List(selection: $selectedTab) {
                     ForEach(SettingsTab.allCases) { tab in
                         NavigationLink(value: tab) {
                             HStack(spacing: 10) {
+                                // Left accent bar
+                                RoundedRectangle(cornerRadius: 1.5)
+                                    .fill(selectedTab == tab
+                                        ? LinearGradient(colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd], startPoint: .top, endPoint: .bottom)
+                                        : LinearGradient(colors: [Color.clear], startPoint: .top, endPoint: .bottom)
+                                    )
+                                    .frame(width: 3, height: 24)
+
                                 ZStack {
-                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                        .fill(selectedTab == tab ? Theme.Colors.accentOrange.opacity(0.15) : .clear)
-                                        .frame(width: 28, height: 28)
+                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                        .fill(selectedTab == tab
+                                            ? LinearGradient(colors: [Theme.Colors.gradientStart.opacity(0.12), Theme.Colors.gradientEnd.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            : LinearGradient(colors: [Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                        )
+                                        .frame(width: 32, height: 32)
                                     Image(systemName: tab.icon)
                                         .font(.system(size: 13, weight: .medium))
                                         .foregroundStyle(selectedTab == tab ? Theme.Colors.accentOrange : Theme.Colors.textSecondary)
@@ -129,11 +143,19 @@ struct AdvancedSettingsView: View {
                 .scrollContentBackground(.hidden)
 
                 // Version footer
-                Text("Hat v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
-                    .frame(maxWidth: .infinity)
-                    .padding(.bottom, 12)
+                HStack(spacing: 5) {
+                    Image("hat-svgrepo-com")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 10, height: 10)
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                    Text("Hat v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 12)
             }
             .background(Theme.Colors.background)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
@@ -146,7 +168,7 @@ struct AdvancedSettingsView: View {
                     VStack(alignment: .leading, spacing: Theme.Metrics.spacingXLarge) {
                         
                         Text(selectedTab?.rawValue ?? "")
-                            .font(Theme.Typography.title)
+                            .font(Theme.Typography.headingSerif)
                             .foregroundStyle(Theme.Colors.textPrimary)
                             .padding(.top, 40)
                             .padding(.bottom, 8)

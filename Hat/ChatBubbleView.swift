@@ -3,6 +3,7 @@ import SwiftUI
 struct ChatBubble: View {
     let message: ChatMessage
     var animationIndex: Int = 0
+    var isGrouped: Bool = false  // consecutive messages from same sender
     @State private var isHovered = false
     @State private var showCopied = false
 
@@ -16,18 +17,34 @@ struct ChatBubble: View {
         HStack(alignment: .top, spacing: 8) {
             if message.isUser { Spacer(minLength: 50) }
 
-            // Assistant avatar
+            // Assistant avatar — hidden when grouped
             if !message.isUser {
-                Image("hat-svgrepo-com")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
-                    .padding(6)
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(Circle())
+                if isGrouped {
+                    Color.clear.frame(width: 28, height: 28)
+                } else {
+                    ZStack {
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.1)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                            .frame(width: 30, height: 30)
+                        Image("hat-svgrepo-com")
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                            .foregroundStyle(Theme.Colors.accentOrange.opacity(0.75))
+                            .padding(5)
+                            .background(Theme.Colors.surfaceSecondary)
+                            .clipShape(Circle())
+                    }
                     .padding(.top, 2)
+                }
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
@@ -43,7 +60,7 @@ struct ChatBubble: View {
                     .foregroundStyle(Theme.Colors.accentOrange)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentOrange.opacity(0.12))
+                    .background(Theme.Colors.accentOrange.opacity(0.1))
                     .clipShape(Capsule())
                 }
 
@@ -102,8 +119,7 @@ struct ChatBubble: View {
 
                 // Message content
                 if !message.content.isEmpty {
-                    // Both user and assistant copy buttons are anchored to .bottomTrailing
-                ZStack(alignment: .bottomTrailing) {
+                    VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                         if message.isUser {
                             Text(.init(message.content))
                                 .font(Theme.Typography.bodySmall)
@@ -111,8 +127,21 @@ struct ChatBubble: View {
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                                 .textSelection(.enabled)
-                                .background(Theme.Colors.accentOrange.opacity(0.08))
-                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 16, bottomLeadingRadius: 16, bottomTrailingRadius: 6, topTrailingRadius: 16, style: .continuous))
+                                .background(
+                                    LinearGradient(
+                                        colors: [
+                                            Theme.Colors.accentOrange.opacity(0.07),
+                                            Theme.Colors.accentSand.opacity(0.04)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous))
+                                .overlay(
+                                    UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous)
+                                        .stroke(Theme.Colors.accentOrange.opacity(0.08), lineWidth: 0.5)
+                                )
                         } else {
                             HatMarkdownView(markdown: message.content)
                                 .font(Theme.Typography.bodySmall)
@@ -124,19 +153,19 @@ struct ChatBubble: View {
                                 )
                                 .clipShape(
                                     UnevenRoundedRectangle(
-                                        topLeadingRadius: 6,
-                                        bottomLeadingRadius: 16,
-                                        bottomTrailingRadius: 16,
-                                        topTrailingRadius: 16,
+                                        topLeadingRadius: 8,
+                                        bottomLeadingRadius: 18,
+                                        bottomTrailingRadius: 18,
+                                        topTrailingRadius: 18,
                                         style: .continuous
                                     )
                                 )
                                 .overlay(
                                     UnevenRoundedRectangle(
-                                        topLeadingRadius: 6,
-                                        bottomLeadingRadius: 16,
-                                        bottomTrailingRadius: 16,
-                                        topTrailingRadius: 16,
+                                        topLeadingRadius: 8,
+                                        bottomLeadingRadius: 18,
+                                        bottomTrailingRadius: 18,
+                                        topTrailingRadius: 18,
                                         style: .continuous
                                     )
                                     .stroke(Theme.Colors.border, lineWidth: 0.5)
@@ -144,51 +173,54 @@ struct ChatBubble: View {
                                 .maeSoftShadow()
                         }
 
-                        // Copy button on hover
+                        // Copy button + timestamp — appear on hover
                         if isHovered && !message.content.isEmpty {
-                            Button {
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(message.content, forType: .string)
-                                withAnimation(Theme.Animation.snappy) { showCopied = true }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                    withAnimation(Theme.Animation.smooth) { showCopied = false }
-                                }
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: showCopied ? "checkmark" : "doc.on.doc")
-                                        .font(.system(size: 10, weight: .medium))
-                                    if showCopied {
-                                        Text("Copiado")
-                                            .font(.system(size: 9, weight: .medium, design: .rounded))
+                            HStack(spacing: 6) {
+                                // Timestamp
+                                Text(timeString)
+                                    .font(.system(size: 9, weight: .regular, design: .rounded))
+                                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+
+                                // Copy button
+                                Button {
+                                    NSPasteboard.general.clearContents()
+                                    NSPasteboard.general.setString(message.content, forType: .string)
+                                    withAnimation(Theme.Animation.snappy) { showCopied = true }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        withAnimation(Theme.Animation.smooth) { showCopied = false }
                                     }
+                                } label: {
+                                    HStack(spacing: 3) {
+                                        Image(systemName: showCopied ? "checkmark" : "doc.on.doc")
+                                            .font(.system(size: 9, weight: .medium))
+                                        if showCopied {
+                                            Text("Copiado")
+                                                .font(.system(size: 9, weight: .medium, design: .rounded))
+                                        }
+                                    }
+                                    .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textMuted)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 3)
+                                    .background(Theme.Colors.surfaceSecondary)
+                                    .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+                                    .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                                 }
-                                .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textSecondary)
-                                .padding(.horizontal, 7)
-                                .padding(.vertical, 4)
-                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
-                            .offset(x: -8, y: -8)
-                            .transition(.maeScaleFade)
+                            .transition(.opacity.combined(with: .offset(y: 2)))
                         }
                     }
                 }
-
-                // Timestamp row — only visible on hover, hidden from VoiceOver
-                HStack(spacing: 4) {
-                    Text(timeString)
-                        .font(.system(size: 9, weight: .regular, design: .rounded))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.7 : 0.0))
-                }
-                .padding(.horizontal, 4)
-                .animation(Theme.Animation.hover, value: isHovered)
-                .accessibilityHidden(true)
             }
 
             if !message.isUser { Spacer(minLength: 50) }
         }
         .padding(.horizontal, Theme.Metrics.spacingDefault)
-        .padding(.vertical, 4)
+        .padding(.vertical, isGrouped ? 2 : 6)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(isHovered ? Theme.Colors.accentOrange.opacity(0.015) : Color.clear)
+        )
         .onHover { hovering in
             withAnimation(Theme.Animation.hover) { isHovered = hovering }
         }

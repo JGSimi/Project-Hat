@@ -471,6 +471,8 @@ struct ContentView: View {
     @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
     @FocusState private var isInputFocused: Bool
     @State private var placeholderIndex: Int = 0
+    @State private var isInputFocusedForBorder: Bool = false
+    @State private var isAtBottom: Bool = true
     private let placeholders = ["Mensagem...", "Resuma este texto...", "Explique como...", "Me ajude com..."]
 
     init(viewModel: AssistantViewModel) {
@@ -527,52 +529,63 @@ struct ContentView: View {
         VStack(spacing: 0) {
             // ... (keeping previous header content)
             // Header
-            HStack(spacing: 10) {
-                Image("hat-svgrepo-com")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 18, height: 18)
-                    .foregroundStyle(Theme.Colors.accent.opacity(0.8))
+            VStack(spacing: 0) {
+                HStack(spacing: 10) {
+                    Image("hat-svgrepo-com")
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                        .foregroundStyle(Theme.Colors.accent.opacity(0.8))
 
-                Text(inferenceMode == .local ? localModelName : apiModelName)
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(Theme.Colors.textMuted)
-                    .lineLimit(1)
+                    MaeTag(
+                        label: inferenceMode == .local ? localModelName : apiModelName,
+                        icon: inferenceMode == .local ? "desktopcomputer" : "cloud.fill",
+                        color: Theme.Colors.textSecondary
+                    )
 
-                Spacer()
+                    Spacer()
 
-                HStack(spacing: 2) {
-                    MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Análise") {
-                        AnalysisWindowManager.shared.showWindow()
-                    }
-                    MaeTooltipButton(icon: "square.and.arrow.up", helpText: "Exportar conversa") {
-                        exportConversation()
-                    }
-                    .disabled(viewModel.messages.isEmpty)
-                    .opacity(viewModel.messages.isEmpty ? 0.35 : 1.0)
-                    MaeTooltipButton(icon: "trash", helpText: "Limpar") {
-                        withAnimation(Theme.Animation.smooth) { viewModel.clearHistory() }
-                    }
-                    MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
-                        withAnimation(Theme.Animation.smooth) {
-                            showOpacitySlider.toggle()
+                    HStack(spacing: 4) {
+                        MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Análise") {
+                            AnalysisWindowManager.shared.showWindow()
                         }
-                    }
-                    .popover(isPresented: $showOpacitySlider) {
-                        Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
-                            .frame(width: 160)
-                            .padding(12)
-                    }
-                    MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
-                        withAnimation(Theme.Animation.smooth) {
-                            showSettings = true
+                        MaeTooltipButton(icon: "square.and.arrow.up", helpText: "Exportar conversa") {
+                            exportConversation()
+                        }
+                        .disabled(viewModel.messages.isEmpty)
+                        .opacity(viewModel.messages.isEmpty ? 0.35 : 1.0)
+                        MaeTooltipButton(icon: "trash", helpText: "Limpar") {
+                            withAnimation(Theme.Animation.smooth) { viewModel.clearHistory() }
+                        }
+
+                        Rectangle()
+                            .fill(Theme.Colors.border)
+                            .frame(width: 0.5, height: 16)
+
+                        MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
+                            withAnimation(Theme.Animation.smooth) {
+                                showOpacitySlider.toggle()
+                            }
+                        }
+                        .popover(isPresented: $showOpacitySlider) {
+                            Slider(value: $windowOpacity, in: 0.3...1.0, step: 0.05)
+                                .tint(Theme.Colors.accentOrange)
+                                .frame(width: 160)
+                                .padding(12)
+                        }
+                        MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
+                            withAnimation(Theme.Animation.smooth) {
+                                showSettings = true
+                            }
                         }
                     }
                 }
+                .padding(.horizontal, Theme.Metrics.spacingLarge)
+                .padding(.vertical, 10)
+
+                MaeGradientDivider(tinted: true)
             }
-            .padding(.horizontal, Theme.Metrics.spacingLarge)
-            .padding(.vertical, 8)
             .background(Theme.Colors.surface)
             .zIndex(1)
 
@@ -582,24 +595,55 @@ struct ContentView: View {
                     LazyVStack(spacing: 0) {
                         if viewModel.messages.isEmpty {
                             VStack(spacing: 20) {
-                                Spacer().frame(height: 50)
+                                Spacer().frame(height: 40)
 
-                                // Icon
+                                // Accent glow behind greeting
                                 ZStack {
-                                    Circle()
-                                        .fill(Theme.Colors.surfaceSecondary)
-                                        .frame(width: 56, height: 56)
-                                    Image("sunglasses-2-svgrepo-com")
-                                        .renderingMode(.template)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
-                                        .foregroundStyle(Theme.Colors.accent.opacity(0.6))
-                                }
+                                    // Subtle radial glow
+                                    RadialGradient(
+                                        gradient: Gradient(colors: [Theme.Colors.accentOrange.opacity(0.04), .clear]),
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: 120
+                                    )
+                                    .frame(width: 240, height: 240)
 
-                                Text(greetingText)
-                                    .font(Theme.Typography.heading)
-                                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
+                                    VStack(spacing: 16) {
+                                        // Icon with gradient ring
+                                        ZStack {
+                                            Circle()
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [Theme.Colors.gradientStart.opacity(0.15), Theme.Colors.gradientEnd.opacity(0.08)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1.5
+                                                )
+                                                .frame(width: 64, height: 64)
+                                            Circle()
+                                                .fill(Theme.Colors.surfaceSecondary)
+                                                .frame(width: 56, height: 56)
+                                            Image("hat-svgrepo-com")
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 24, height: 24)
+                                                .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
+                                        }
+                                        .maeFloating(amplitude: 3, duration: 4.0)
+
+                                        VStack(spacing: 4) {
+                                            Text(greetingText)
+                                                .font(Theme.Typography.headingSerif)
+                                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+
+                                            Text("Como posso te ajudar?")
+                                                .font(Theme.Typography.bodySmall)
+                                                .foregroundStyle(Theme.Colors.textMuted)
+                                        }
+                                    }
+                                }
 
                                 // Quick action suggestions
                                 VStack(spacing: 6) {
@@ -626,7 +670,10 @@ struct ContentView: View {
                                     MaeDateSeparator(date: viewModel.messages[index].timestamp)
                                         .transition(.opacity)
                                 }
-                                ChatBubble(message: viewModel.messages[index], animationIndex: index)
+                                let isGrouped = index > 0
+                                    && viewModel.messages[index].isUser == viewModel.messages[index - 1].isUser
+                                    && Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp)
+                                ChatBubble(message: viewModel.messages[index], animationIndex: index, isGrouped: isGrouped)
                                     .id(viewModel.messages[index].id)
                                     .transition(.maePopIn)
                             }
@@ -637,9 +684,21 @@ struct ContentView: View {
                 }
                 .scrollContentBackground(.hidden)
                 .background(Theme.Colors.background)
+                .overlay(alignment: .bottom) {
+                    if !isAtBottom && !viewModel.messages.isEmpty {
+                        MaeScrollToBottomButton {
+                            withAnimation(Theme.Animation.responsive) {
+                                proxy.scrollTo(bottomID, anchor: .bottom)
+                            }
+                        }
+                        .padding(.bottom, 8)
+                        .transition(.maeScaleFade)
+                    }
+                }
                 .onChange(of: viewModel.messages.count) {
                     withAnimation(Theme.Animation.responsive) {
                         proxy.scrollTo(bottomID, anchor: .bottom)
+                        isAtBottom = true
                     }
                 }
             }
@@ -657,25 +716,32 @@ struct ContentView: View {
                                         Image(nsImage: img)
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
-                                            .frame(width: 60, height: 60)
-                                            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
-                                            .shadow(radius: 2)
+                                            .frame(width: 72, height: 72)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                            )
+                                            .maeSoftShadow()
                                     } else {
                                         VStack(spacing: 4) {
                                             Image(systemName: "doc.text.fill")
                                                 .font(.system(size: 24))
-                                                .foregroundStyle(Theme.Colors.accent)
+                                                .foregroundStyle(Theme.Colors.accentOrange)
                                                 .symbolEffect(.bounce, options: .nonRepeating)
                                             Text(attachment.name)
                                                 .font(.system(size: 9))
                                                 .lineLimit(1)
                                                 .truncationMode(.middle)
-                                                .frame(width: 50)
+                                                .frame(width: 60)
                                         }
-                                        .frame(width: 60, height: 60)
+                                        .frame(width: 72, height: 72)
                                         .background(Theme.Colors.surfaceSecondary)
-                                        .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall))
-                                        .shadow(radius: 2)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                        )
                                     }
                                     
                                     Button {
@@ -706,7 +772,7 @@ struct ContentView: View {
                 MaeGradientDivider()
 
                 HStack(alignment: .bottom, spacing: 8) {
-                    MaeTooltipButton(icon: "plus.circle.fill", size: 16, helpText: "Anexar arquivo/imagem") {
+                    MaeTooltipButton(icon: "plus.circle.fill", size: 17, helpText: "Anexar arquivo/imagem") {
                         let panel = NSOpenPanel()
                         panel.allowedContentTypes = [UTType.image, UTType.plainText, UTType.pdf, UTType.json, UTType.sourceCode, UTType.data]
                         panel.allowsMultipleSelection = true
@@ -724,13 +790,26 @@ struct ContentView: View {
                     }
 
                     TextField(placeholders[placeholderIndex], text: $viewModel.inputText, axis: .vertical)
-                        .maeInputStyleOpaque(cornerRadius: 18)
+                        .textFieldStyle(.plain)
+                        .font(Theme.Typography.bodySmall)
+                        .foregroundStyle(Theme.Colors.textPrimary)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .background(Theme.Colors.inputBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                .stroke(isInputFocusedForBorder ? Theme.Colors.borderFocused : Theme.Colors.border, lineWidth: isInputFocusedForBorder ? 1 : 0.5)
+                        )
                         .lineLimit(1...6)
                         .focused($isInputFocused)
                         .onSubmit {
                             Task { await viewModel.sendManualMessage() }
                         }
                         .disabled(viewModel.isProcessing)
+                        .onChange(of: isInputFocused) { _, focused in
+                            withAnimation(Theme.Animation.quickSnap) { isInputFocusedForBorder = focused }
+                        }
                         .onReceive(Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()) { _ in
                             if viewModel.inputText.isEmpty {
                                 withAnimation(Theme.Animation.fade) {
@@ -741,24 +820,22 @@ struct ContentView: View {
 
                     if viewModel.isProcessing {
                         MaeTypingDots()
-                            .frame(width: 30, height: 30)
+                            .frame(width: 32, height: 32)
                             .transition(.maeScaleFade)
                     } else {
+                        let hasContent = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !viewModel.pendingAttachments.isEmpty
                         Button {
                             Task { await viewModel.sendManualMessage() }
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 28))
-                                .foregroundStyle(
-                                    (viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
-                                    ? Theme.Colors.textMuted.opacity(0.4)
-                                    : Theme.Colors.accent
-                                )
+                                .foregroundStyle(hasContent ? Theme.Colors.accentOrange : Theme.Colors.textMuted.opacity(0.3))
                                 .background(Theme.Colors.background.clipShape(Circle()))
-                                .frame(width: 30, height: 30)
+                                .frame(width: 32, height: 32)
+                                .animation(Theme.Animation.quickSnap, value: hasContent)
                         }
                         .buttonStyle(.plain)
-                        .disabled(viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && viewModel.pendingAttachments.isEmpty)
+                        .disabled(!hasContent)
                         .keyboardShortcut(.defaultAction)
                         .maePressEffect()
                         .transition(.maeScaleFade)
@@ -895,35 +972,49 @@ struct EmptyStateSuggestion: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(isHovered ? Theme.Colors.accentOrange : Theme.Colors.accent.opacity(0.6))
-                    .frame(width: 20)
-                    .animation(Theme.Animation.hover, value: isHovered)
+            HStack(spacing: 0) {
+                // Left accent bar
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(
+                        LinearGradient(
+                            colors: [Theme.Colors.gradientStart.opacity(isHovered ? 0.6 : 0.2), Theme.Colors.gradientEnd.opacity(isHovered ? 0.4 : 0.1)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .frame(width: 2.5)
+                    .padding(.vertical, 6)
 
-                Text(label)
-                    .font(Theme.Typography.bodySmall)
-                    .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
-                    .animation(Theme.Animation.hover, value: isHovered)
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(isHovered ? Theme.Colors.accentOrange : Theme.Colors.accent.opacity(0.6))
+                        .frame(width: 20)
 
-                Spacer()
+                    Text(label)
+                        .font(Theme.Typography.bodySmall)
+                        .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
 
-                // Shortcut badge — always visible to help users discover keyboard shortcuts
-                Text(shortcut)
-                    .font(.system(size: 9, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.8 : 0.45))
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
-                    .animation(Theme.Animation.hover, value: isHovered)
+                    Spacer()
+
+                    Text(shortcut)
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.8 : 0.45))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 2)
+                        .background(Theme.Colors.surfaceTertiary)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
             .background(isHovered ? Theme.Colors.surfaceElevated : .clear)
             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
+                    .stroke(isHovered ? Theme.Colors.border : Color.clear, lineWidth: 0.5)
+            )
             .animation(Theme.Animation.hover, value: isHovered)
         }
         .buttonStyle(.plain)

@@ -113,8 +113,18 @@ private struct MenuBarIconView: View {
             .scaleEffect(popScale)
             .opacity(iconOpacity)
             .onAppear(perform: animateIconSwap)
-            .onChange(of: isProcessing) { _, _ in
+            .onChange(of: isProcessing) { _, newValue in
                 animateIconSwap()
+                // Subtle pulse during processing
+                if newValue {
+                    withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+                        iconOpacity = 0.7
+                    }
+                } else {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        iconOpacity = 1.0
+                    }
+                }
             }
     }
     
@@ -244,9 +254,9 @@ struct WelcomeView: View {
                     .frame(maxWidth: .infinity, maxHeight: 350)
                     .padding(.horizontal, 40)
 
-                VStack(spacing: 6) {
+                VStack(spacing: 8) {
                     Text("Bem-vindo ao Hat")
-                        .font(Theme.Typography.largeTitle)
+                        .font(Theme.Typography.titleDisplay)
                         .foregroundStyle(Theme.Colors.textPrimary)
                         .maeStaggered(index: 1, baseDelay: 0.15)
                     Text("Seu assistente de IA na barra de menus")
@@ -287,11 +297,15 @@ struct WelcomeView: View {
 
                 Spacer()
 
-                MaeActionButton(label: "Começar a Usar") {
+                MaeActionButton(label: "Começar a Usar", style: .accent) {
                     WelcomeWindowManager.shared.closeWindow()
                 }
                 .maeStaggered(index: 6, baseDelay: 0.10)
-                .padding(.bottom, 30)
+
+                Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                    .font(Theme.Typography.micro)
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                    .padding(.bottom, 20)
             }
             .padding(.top, 10)
             .frame(maxHeight: .infinity)
@@ -308,7 +322,20 @@ struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: Theme.Metrics.spacingLarge) {
+        HStack(alignment: .top, spacing: 0) {
+            // Gradient accent bar
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(
+                    LinearGradient(
+                        colors: [Theme.Colors.gradientStart.opacity(0.5), Theme.Colors.gradientEnd.opacity(0.3)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 2.5, height: 36)
+                .padding(.top, 2)
+                .padding(.trailing, 14)
+
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .light))
                 .foregroundStyle(
@@ -319,7 +346,7 @@ struct FeatureRow: View {
                     )
                 )
                 .frame(width: 36, height: 36)
-                .background(Theme.Colors.accentOrange.opacity(0.08))
+                .background(Theme.Colors.accentOrange.opacity(0.06))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -332,6 +359,8 @@ struct FeatureRow: View {
                     .foregroundStyle(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.leading, 14)
+
             Spacer()
         }
     }
@@ -422,12 +451,20 @@ struct PermissionsView: View {
             VStack(spacing: 10) {
                 ZStack {
                     Circle()
-                        .fill(Color.clear)
-                        .frame(width: 72, height: 72)
-                        .background(Theme.Colors.accentOrange.opacity(0.08))
-                        .clipShape(Circle())
-                    Image(systemName: "lock.shield")
-                        .font(.system(size: 32, weight: .light))
+                        .stroke(
+                            LinearGradient(
+                                colors: [Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .frame(width: 76, height: 76)
+                    Circle()
+                        .fill(Theme.Colors.accentOrange.opacity(0.06))
+                        .frame(width: 68, height: 68)
+                    Image(systemName: allGranted ? "lock.shield.fill" : "lock.shield")
+                        .font(.system(size: 30, weight: .light))
                         .foregroundStyle(
                             LinearGradient(
                                 colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
@@ -435,11 +472,12 @@ struct PermissionsView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
+                        .symbolEffect(.bounce, value: allGranted)
                 }
                 .maeStaggered(index: 0, baseDelay: 0.12)
 
                 Text("Permissões Necessárias")
-                    .font(Theme.Typography.title)
+                    .font(Theme.Typography.headingSerif)
                     .foregroundStyle(Theme.Colors.textPrimary)
                     .maeStaggered(index: 1, baseDelay: 0.12)
 
@@ -449,6 +487,23 @@ struct PermissionsView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .maeStaggered(index: 2, baseDelay: 0.12)
+
+                // Permission progress
+                HStack(spacing: 6) {
+                    let grantedCount = (screenRecordingGranted ? 1 : 0) + (notificationsGranted ? 1 : 0)
+                    Text("\(grantedCount)/2 permissões")
+                        .font(Theme.Typography.micro)
+                        .foregroundStyle(allGranted ? Theme.Colors.success : Theme.Colors.textMuted)
+                    if allGranted {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Theme.Colors.success)
+                            .transition(.maeScaleFade)
+                    }
+                }
+                .maeStaggered(index: 2, baseDelay: 0.12)
+                .animation(Theme.Animation.smooth, value: screenRecordingGranted)
+                .animation(Theme.Animation.smooth, value: notificationsGranted)
             }
             .padding(.top, 36)
             .padding(.bottom, 24)

@@ -453,6 +453,13 @@ extension View {
             )
     }
 
+    /// Clean card: background + rounded corners, no border stroke
+    func maeCleanCard(color: Color = Theme.Colors.surfaceSecondary, cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
+        self
+            .background(color)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+
     /// Text input style — flat solid background
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
@@ -570,11 +577,11 @@ struct MaeCardStyle: GroupBoxStyle {
 struct MaeSectionHeader: View {
     let title: String
     var body: some View {
-        Text(title.uppercased())
-            .font(Theme.Typography.sectionHeader)
-            .foregroundStyle(Theme.Colors.textSecondary)
+        Text(title)
+            .font(Theme.Typography.caption)
+            .foregroundStyle(Theme.Colors.textMuted)
             .padding(.bottom, 4)
-            .padding(.top, 16)
+            .padding(.top, 12)
             .padding(.horizontal, 4)
     }
 }

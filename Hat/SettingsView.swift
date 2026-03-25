@@ -24,90 +24,28 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack(spacing: 8) {
-                Image("sunglasses-2-svgrepo-com")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 18, height: 18)
-                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
-                Text("Configurações")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                Spacer()
-            }
-            .padding(.horizontal, Theme.Metrics.spacingLarge)
-            .padding(.top, 20)
-            .padding(.bottom, 16)
+            Spacer().frame(height: 16)
 
             ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 10) {
-                // Model Card
-                VStack(spacing: 0) {
-                    // Mode Picker
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("PROCESSAMENTO")
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Theme.Colors.textMuted)
-                            .tracking(0.5)
-
-                        Picker("", selection: $inferenceMode) {
-                            ForEach(InferenceMode.allCases) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
+            VStack(spacing: 16) {
+                // Mode Picker + Active Model
+                VStack(alignment: .leading, spacing: 12) {
+                    Picker("", selection: $inferenceMode) {
+                        ForEach(InferenceMode.allCases) { mode in
+                            Text(mode.rawValue).tag(mode)
                         }
-                        .pickerStyle(.segmented)
-                        .labelsHidden()
-
                     }
-                    .padding(14)
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
 
-                    MaeGradientDivider()
-
-                    // Active Model
-                    HStack {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("MODELO ATIVO")
-                                .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                .foregroundStyle(Theme.Colors.textMuted)
-                                .tracking(0.5)
-
-                            HStack(spacing: 8) {
-                                Circle()
-                                    .fill(Theme.Colors.success.opacity(0.9))
-                                    .frame(width: 6, height: 6)
-                                    .shadow(color: Theme.Colors.success.opacity(0.5), radius: 3)
-                                    .maePulse(duration: 2.0)
-
-                                Text(inferenceMode == .local ? localModelName : apiModelName)
-                                    .font(Theme.Typography.bodyBold)
-                                    .foregroundStyle(Theme.Colors.textPrimary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                            }
-
-                            if inferenceMode == .api {
-                                Text(selectedProvider.rawValue)
-                                    .font(Theme.Typography.micro)
-                                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.8))
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Theme.Colors.accentOrange.opacity(0.1))
-                                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
-                            }
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(14)
+                    Text(inferenceMode == .local ? localModelName : apiModelName)
+                        .font(Theme.Typography.bodyBold)
+                        .foregroundStyle(Theme.Colors.textPrimary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                 }
-                .background(Theme.Colors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Theme.Colors.border, lineWidth: 0.5)
-                )
-                .maeStaggered(index: 0, baseDelay: 0.06)
+                .padding(14)
+                .maeCleanCard()
 
                 // Provider Quick Switch (only in API mode, only providers with saved keys)
                 if inferenceMode == .api {
@@ -116,70 +54,46 @@ struct SettingsView: View {
                     }
 
                     if providersWithKeys.count > 1 {
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 12) {
                             // Provider chips
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("TROCAR PROVEDOR")
-                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                    .foregroundStyle(Theme.Colors.textMuted)
-                                    .tracking(0.5)
-
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 6) {
-                                        ForEach(providersWithKeys) { provider in
-                                            Button {
-                                                selectedProvider.saveLastModel(apiModelName)
-                                                selectedProvider = provider
-                                                quickModelSearchText = ""
-                                                if let savedModel = provider.loadLastModel() {
-                                                    apiModelName = savedModel
-                                                }
-                                                loadQuickModels()
-                                            } label: {
-                                                Text(provider.shortName)
-                                                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                                                    .foregroundStyle(
-                                                        selectedProvider == provider
-                                                            ? Theme.Colors.background
-                                                            : Theme.Colors.textPrimary.opacity(0.9)
-                                                    )
-                                                    .padding(.horizontal, 10)
-                                                    .padding(.vertical, 6)
-                                                    .background(
-                                                        selectedProvider == provider
-                                                            ? Theme.Colors.accent
-                                                            : Theme.Colors.surfaceSecondary
-                                                    )
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                                                    .overlay(
-                                                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                                            .stroke(
-                                                                selectedProvider == provider
-                                                                    ? Theme.Colors.accent.opacity(0.5)
-                                                                    : Theme.Colors.border,
-                                                                lineWidth: 0.5
-                                                            )
-                                                    )
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(providersWithKeys) { provider in
+                                        Button {
+                                            selectedProvider.saveLastModel(apiModelName)
+                                            selectedProvider = provider
+                                            quickModelSearchText = ""
+                                            if let savedModel = provider.loadLastModel() {
+                                                apiModelName = savedModel
                                             }
-                                            .buttonStyle(.plain)
+                                            loadQuickModels()
+                                        } label: {
+                                            Text(provider.shortName)
+                                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                .foregroundStyle(
+                                                    selectedProvider == provider
+                                                        ? Theme.Colors.background
+                                                        : Theme.Colors.textPrimary.opacity(0.9)
+                                                )
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(
+                                                    selectedProvider == provider
+                                                        ? Theme.Colors.accent
+                                                        : Theme.Colors.surfaceSecondary
+                                                )
+                                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                         }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
 
-                            MaeGradientDivider()
-
                             // Model quick selector
                             VStack(alignment: .leading, spacing: 8) {
-                                HStack(spacing: 6) {
-                                    Text("MODELO")
-                                        .font(.system(size: 10, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                        .tracking(0.5)
-                                    if isFetchingQuickModels {
-                                        ProgressView()
-                                            .controlSize(.mini)
-                                    }
+                                if isFetchingQuickModels {
+                                    ProgressView()
+                                        .controlSize(.mini)
                                 }
 
                                 if quickModels.count > 5 {
@@ -213,15 +127,6 @@ struct SettingsView: View {
                                                                 : Theme.Colors.background.opacity(0.6)
                                                         )
                                                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-                                                        .overlay(
-                                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                                                .stroke(
-                                                                    apiModelName == model
-                                                                        ? Theme.Colors.accent.opacity(0.5)
-                                                                        : Theme.Colors.border,
-                                                                    lineWidth: 0.5
-                                                                )
-                                                        )
                                                 }
                                                 .buttonStyle(.plain)
                                             }
@@ -239,151 +144,105 @@ struct SettingsView: View {
                             }
                         }
                         .padding(14)
-                        .background(Theme.Colors.surfaceSecondary)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Theme.Colors.border, lineWidth: 0.5)
-                        )
-                        .maeStaggered(index: 1, baseDelay: 0.06)
+                        .maeCleanCard()
                         .onAppear { loadQuickModels() }
                     }
                 }
 
-                // Token Usage Card
+                // Token Usage
                 if globalTotalTokens > 0 {
-                    VStack(spacing: 0) {
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                Text("USO DE TOKENS")
-                                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text(formatTokenCount(globalTotalTokens) + " tokens")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Spacer()
+                            Button {
+                                SettingsManager.resetGlobalTokens()
+                            } label: {
+                                Image(systemName: "arrow.counterclockwise")
+                                    .font(.system(size: 9, weight: .medium))
                                     .foregroundStyle(Theme.Colors.textMuted)
-                                    .tracking(0.5)
-                                Spacer()
-                                Button {
-                                    SettingsManager.resetGlobalTokens()
-                                } label: {
-                                    Image(systemName: "arrow.counterclockwise")
-                                        .font(.system(size: 9, weight: .medium))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                        .padding(4)
-                                        .background(Theme.Colors.surface)
-                                        .clipShape(Circle())
-                                }
-                                .buttonStyle(.plain)
-                                .help("Resetar contadores")
                             }
+                            .buttonStyle(.plain)
+                            .help("Resetar")
+                        }
 
-                            // Visual ratio bar (animated)
-                            GeometryReader { geo in
-                                let inputRatio = globalTotalTokens > 0
-                                    ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
-                                    : 0.5
-                                HStack(spacing: 1) {
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Theme.Colors.accentOrange.opacity(0.8), Theme.Colors.accentOrange.opacity(0.5)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                        .frame(width: tokenBarAppeared ? max(4, geo.size.width * inputRatio) : 0)
-                                    RoundedRectangle(cornerRadius: 3)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Theme.Colors.accentSand.opacity(0.5), Theme.Colors.accentSand.opacity(0.7)],
-                                                startPoint: .leading,
-                                                endPoint: .trailing
-                                            )
-                                        )
-                                }
-                            }
-                            .frame(height: 4)
-                            .clipShape(RoundedRectangle(cornerRadius: 3))
-                            .onAppear {
-                                withAnimation(Theme.Animation.expressive) {
-                                    tokenBarAppeared = true
-                                }
-                            }
-
-                            let inputPct = globalTotalTokens > 0 ? Int(round(Double(globalInputTokens) / Double(globalTotalTokens) * 100)) : 0
-                            let outputPct = globalTotalTokens > 0 ? 100 - inputPct : 0
-
-                            HStack(spacing: 12) {
-                                TokenStat(label: "Total", value: formatTokenCount(globalTotalTokens), isPrimary: true)
-                                TokenStat(label: "Input \(inputPct)%", value: formatTokenCount(globalInputTokens), color: Theme.Colors.accentOrange)
-                                TokenStat(label: "Output \(outputPct)%", value: formatTokenCount(globalOutputTokens), color: Theme.Colors.accentSand)
-                                Spacer()
+                        // Ratio bar
+                        GeometryReader { geo in
+                            let inputRatio = globalTotalTokens > 0
+                                ? CGFloat(globalInputTokens) / CGFloat(globalTotalTokens)
+                                : 0.5
+                            HStack(spacing: 1) {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Theme.Colors.accentOrange.opacity(0.7))
+                                    .frame(width: tokenBarAppeared ? max(4, geo.size.width * inputRatio) : 0)
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Theme.Colors.accentSand.opacity(0.5))
                             }
                         }
-                        .padding(14)
+                        .frame(height: 3)
+                        .clipShape(RoundedRectangle(cornerRadius: 3))
+                        .onAppear {
+                            withAnimation(Theme.Animation.expressive) {
+                                tokenBarAppeared = true
+                            }
+                        }
                     }
-                    .background(Theme.Colors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 0.5)
-                    )
-                    .maeStaggered(index: 2, baseDelay: 0.06)
+                    .padding(14)
+                    .maeCleanCard()
                 }
 
                 Spacer(minLength: 0)
 
                 // Action Buttons
-                VStack(spacing: 6) {
-                    VStack(spacing: 0) {
-                        VStack(spacing: 6) {
-                            Button {
-                                UpdaterController.shared.checkForUpdates()
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "arrow.triangle.2.circlepath")
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundStyle(Theme.Colors.textSecondary)
-                                    Text("Verificar Atualizações")
-                                        .font(Theme.Typography.bodySmall)
-                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                                    Spacer(minLength: 0)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 11)
-                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .maePressEffect()
-                            .maeStaggered(index: 3, baseDelay: 0.06)
-
-                            Button {
-                                withAnimation {
-                                    isPresented = false
-                                }
-                                NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
-                                AdvancedSettingsWindowManager.shared.showWindow()
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundStyle(Theme.Colors.textSecondary)
-                                    Text("Configurações Avançadas")
-                                        .font(Theme.Typography.bodySmall)
-                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                                    Spacer(minLength: 0)
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 10, weight: .medium))
-                                        .foregroundStyle(Theme.Colors.textMuted)
-                                }
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 11)
-                                .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
-                            }
-                            .buttonStyle(.plain)
-                            .maePressEffect()
-                            .maeStaggered(index: 4, baseDelay: 0.06)
+                VStack(spacing: 0) {
+                    Button {
+                        UpdaterController.shared.checkForUpdates()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Text("Atualizações")
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                            Spacer(minLength: 0)
                         }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
                     }
-                    .background(Theme.Colors.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)).overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+                    .buttonStyle(.plain)
+                    .maePressEffect()
+
+                    MaeGradientDivider()
+
+                    Button {
+                        withAnimation {
+                            isPresented = false
+                        }
+                        NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
+                        AdvancedSettingsWindowManager.shared.showWindow()
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textSecondary)
+                            Text("Avançado")
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                        }
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.plain)
+                    .maePressEffect()
                 }
+                .maeCleanCard()
                 .padding(.bottom, 14)
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)

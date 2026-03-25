@@ -16,25 +16,18 @@ struct ChatBubble: View {
         HStack(alignment: .top, spacing: 8) {
             if message.isUser { Spacer(minLength: 50) }
 
-            // Assistant accent bar + avatar
+            // Assistant avatar
             if !message.isUser {
-                VStack(spacing: 0) {
-                    Image("hat-svgrepo-com")
-                        .renderingMode(.template)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 16, height: 16)
-                        .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
-                        .padding(6)
-                        .background(Theme.Colors.surfaceSecondary)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
-                    RoundedRectangle(cornerRadius: 1)
-                        .fill(Theme.Colors.accentOrange.opacity(0.25))
-                        .frame(width: 2)
-                        .padding(.top, 4)
-                }
-                .padding(.top, 2)
+                Image("hat-svgrepo-com")
+                    .renderingMode(.template)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 16, height: 16)
+                    .foregroundStyle(Theme.Colors.accentOrange.opacity(0.7))
+                    .padding(6)
+                    .background(Theme.Colors.surfaceSecondary)
+                    .clipShape(Circle())
+                    .padding(.top, 2)
             }
 
             VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
@@ -184,7 +177,7 @@ struct ChatBubble: View {
                 HStack(spacing: 4) {
                     Text(timeString)
                         .font(.system(size: 9, weight: .regular, design: .rounded))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.8 : 0.5))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.7 : 0.0))
                 }
                 .padding(.horizontal, 4)
                 .animation(Theme.Animation.hover, value: isHovered)

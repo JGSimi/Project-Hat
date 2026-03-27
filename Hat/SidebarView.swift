@@ -33,7 +33,7 @@ struct SidebarView: View {
                 // New conversation button
                 Button {
                     withAnimation(Theme.Animation.smooth) {
-                        conversationManager.createConversation()
+                        _ = conversationManager.createConversation()
                     }
                 } label: {
                     HStack(spacing: 8) {

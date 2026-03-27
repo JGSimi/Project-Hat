@@ -161,7 +161,7 @@ struct SidebarView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
         }
-        .background(Theme.Colors.surface.opacity(0.5))
+        .background(Color(Theme.Colors.surface).opacity(0.5))
     }
 }
 

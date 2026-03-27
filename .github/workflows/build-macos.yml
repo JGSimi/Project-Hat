@@ -64,17 +64,38 @@ jobs:
             CODE_SIGNING_ALLOWED=YES \
             2>&1 | tee build.log
 
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-error-log
+          path: build.log
+
       - name: Show build errors on failure
         if: failure()
         run: |
+          {
+            echo "## Build Errors"
+            echo '```'
+            grep -A 3 "error:" build.log | head -80 || true
+            echo '```'
+            echo ""
+            echo "## Build Failed Details"
+            echo '```'
+            grep -B 2 -A 10 "BUILD FAILED" build.log || true
+            echo '```'
+            echo ""
+            echo "## Last 80 Lines"
+            echo '```'
+            tail -80 build.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
           echo "=== COMPILATION ERRORS ==="
           grep -A 5 "error:" build.log || true
           echo ""
-          echo "=== BUILD FAILED DETAILS ==="
-          grep -B 2 -A 10 "BUILD FAILED" build.log || true
-          echo ""
-          echo "=== LAST 60 LINES ==="
-          tail -60 build.log || true
+          echo "=== LAST 80 LINES ==="
+          tail -80 build.log || true
 
       - name: Package App to ZIP
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

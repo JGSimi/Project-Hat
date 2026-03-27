@@ -13,6 +13,8 @@ struct SidebarView: View {
     @Binding var showSidebar: Bool
     @State private var searchText = ""
     @State private var hoveredConversationId: UUID?
+    @State private var conversationToDelete: UUID?
+    @State private var settingsHovered = false
 
     private var filteredGroups: [(group: ConversationManager.ConversationGroup, items: [Conversation])] {
         let groups = conversationManager.groupedConversations
@@ -56,6 +58,8 @@ struct SidebarView: View {
                 .buttonStyle(.plain)
                 .maePressEffect()
                 .keyboardShortcut("n", modifiers: .command)
+                .accessibilityLabel("Criar nova conversa")
+                .accessibilityHint("Atalho: Comando N")
 
                 // Search (show when >10 conversations)
                 if conversationManager.conversations.count > 10 {
@@ -66,6 +70,7 @@ struct SidebarView: View {
                         TextField("Buscar...", text: $searchText)
                             .textFieldStyle(.plain)
                             .font(Theme.Typography.caption)
+                            .accessibilityLabel("Buscar conversas")
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
@@ -83,20 +88,37 @@ struct SidebarView: View {
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0, pinnedViews: []) {
                     if filteredGroups.isEmpty {
-                        VStack(spacing: 12) {
+                        // Empty state with CTA
+                        VStack(spacing: 14) {
                             Image(systemName: "bubble.left.and.bubble.right")
-                                .font(.system(size: 24))
-                                .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                                .font(.system(size: 28, weight: .light))
+                                .foregroundStyle(Theme.Colors.textMuted.opacity(0.3))
+                                .maeStaggered(index: 0, baseDelay: 0.10)
+
                             Text("Nenhuma conversa")
                                 .font(Theme.Typography.caption)
                                 .foregroundStyle(Theme.Colors.textMuted)
+                                .maeStaggered(index: 1, baseDelay: 0.10)
+
+                            Button {
+                                withAnimation(Theme.Animation.smooth) {
+                                    _ = conversationManager.createConversation()
+                                }
+                            } label: {
+                                Text("Criar primeira conversa")
+                                    .font(Theme.Typography.caption)
+                                    .foregroundStyle(Theme.Colors.accentPrimary)
+                            }
+                            .buttonStyle(.plain)
+                            .maeStaggered(index: 2, baseDelay: 0.10)
+                            .accessibilityLabel("Criar primeira conversa")
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.top, 40)
                     } else {
                         ForEach(filteredGroups, id: \.group) { section in
                             // Section header
-                            HStack {
+                            HStack(spacing: 0) {
                                 Text(section.group.rawValue)
                                     .font(Theme.Typography.micro)
                                     .foregroundStyle(Theme.Colors.textMuted)
@@ -106,6 +128,7 @@ struct SidebarView: View {
                             .padding(.horizontal, 16)
                             .padding(.top, 14)
                             .padding(.bottom, 4)
+                            .accessibilityAddTraits(.isHeader)
 
                             // Conversation rows
                             ForEach(section.items) { conversation in
@@ -119,9 +142,7 @@ struct SidebarView: View {
                                         }
                                     },
                                     onDelete: {
-                                        withAnimation(Theme.Animation.smooth) {
-                                            conversationManager.deleteConversation(id: conversation.id)
-                                        }
+                                        conversationToDelete = conversation.id
                                     },
                                     onPin: {
                                         withAnimation(Theme.Animation.smooth) {
@@ -148,22 +169,50 @@ struct SidebarView: View {
                 } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 12))
-                        .foregroundStyle(Theme.Colors.textMuted)
+                        .foregroundStyle(settingsHovered ? Theme.Colors.textPrimary : Theme.Colors.textMuted)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                                .fill(settingsHovered ? Theme.Colors.surfaceHover : Color.clear)
+                        )
                 }
                 .buttonStyle(.plain)
+                .onHover { hovering in
+                    withAnimation(Theme.Animation.hover) { settingsHovered = hovering }
+                }
                 .help("Configuracoes avancadas")
+                .accessibilityLabel("Configuracoes avancadas")
 
                 Spacer()
 
                 Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                     .font(Theme.Typography.micro)
                     .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                    .accessibilityLabel("Versao do app")
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
         }
         .background {
             (Theme.Colors.surface.opacity(0.5) as Color)
+        }
+        .alert("Apagar conversa?", isPresented: Binding(
+            get: { conversationToDelete != nil },
+            set: { if !$0 { conversationToDelete = nil } }
+        )) {
+            Button("Cancelar", role: .cancel) {
+                conversationToDelete = nil
+            }
+            Button("Apagar", role: .destructive) {
+                if let id = conversationToDelete {
+                    withAnimation(Theme.Animation.smooth) {
+                        conversationManager.deleteConversation(id: id)
+                    }
+                }
+                conversationToDelete = nil
+            }
+        } message: {
+            Text("Esta acao nao pode ser desfeita.")
         }
     }
 }
@@ -197,6 +246,7 @@ private struct ConversationRow: View {
                             Image(systemName: "pin.fill")
                                 .font(.system(size: 8))
                                 .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                                .accessibilityHidden(true)
                         }
                         Text(conversation.title)
                             .font(Theme.Typography.bodySmall)
@@ -218,17 +268,29 @@ private struct ConversationRow: View {
                             Image(systemName: conversation.isPinned ? "pin.slash" : "pin")
                                 .font(.system(size: 9))
                                 .foregroundStyle(Theme.Colors.textMuted)
+                                .frame(width: 20, height: 20)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(Theme.Colors.surfaceHover)
+                                )
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(conversation.isPinned ? "Desafixar conversa" : "Fixar conversa")
 
                         Button(action: onDelete) {
                             Image(systemName: "trash")
                                 .font(.system(size: 9))
                                 .foregroundStyle(Theme.Colors.error.opacity(0.7))
+                                .frame(width: 20, height: 20)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(Theme.Colors.error.opacity(0.06))
+                                )
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Apagar conversa")
                     }
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
                 } else {
                     Text(relativeTime)
                         .font(.system(size: 9, weight: .regular))
@@ -249,6 +311,10 @@ private struct ConversationRow: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 8)
         .animation(Theme.Animation.hover, value: isHovered)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(conversation.title). \(conversation.preview)")
+        .accessibilityHint(isActive ? "Conversa ativa" : "Toque para selecionar")
+        .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 }
 

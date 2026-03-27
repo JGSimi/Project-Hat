@@ -34,6 +34,7 @@ struct ChatBubble: View {
                             .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                     }
                     .padding(.top, 2)
+                    .accessibilityHidden(true)
                 }
             }
 
@@ -160,6 +161,7 @@ struct ChatBubble: View {
                                     .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel(showCopied ? "Copiado" : "Copiar mensagem")
                             }
                             .transition(.opacity.combined(with: .offset(y: 2)))
                         }
@@ -175,5 +177,7 @@ struct ChatBubble: View {
             withAnimation(Theme.Animation.hover) { isHovered = hovering }
         }
         .maeStaggered(index: animationIndex, baseDelay: 0.05)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(message.isUser ? "Voce" : "Hat"): \(message.content)")
     }
 }

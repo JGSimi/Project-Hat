@@ -11,20 +11,27 @@ import Combine
 struct MenuBarPopoverView: View {
     @ObservedObject private var viewModel = AssistantViewModel.shared
     @FocusState private var isInputFocused: Bool
-    @State private var isInputFocusedForBorder: Bool = false
+    @State private var sendHovered = false
     @Namespace private var bottomAnchor
+    @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
+    @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
+    @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
+
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:  return "Bom dia"
+        case 12..<18: return "Boa tarde"
+        case 18..<23: return "Boa noite"
+        default:      return "Ola"
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             popoverHeader
-
             MaeDivider()
-
-            // Chat area
             popoverChatArea
-
-            // Input
             popoverInput
         }
         .frame(width: 380, height: 480)
@@ -42,24 +49,32 @@ struct MenuBarPopoverView: View {
                 .scaledToFit()
                 .frame(width: 14, height: 14)
                 .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                .accessibilityHidden(true)
 
-            Text("Hat")
+            Text(greetingText)
                 .font(Theme.Typography.bodyBold)
                 .foregroundStyle(Theme.Colors.textPrimary)
+                .maeStaggered(index: 0, baseDelay: 0.08)
+
+            MaeTag(
+                label: inferenceMode == .local ? localModelName : apiModelName,
+                icon: inferenceMode == .local ? "desktopcomputer" : "cloud.fill",
+                color: Theme.Colors.textSecondary
+            )
+            .maeStaggered(index: 1, baseDelay: 0.08)
 
             Spacer()
 
-            // Clear chat
             if !viewModel.messages.isEmpty {
-                MaeTooltipButton(icon: "trash", helpText: "Limpar") {
+                MaeTooltipButton(icon: "trash", helpText: "Limpar conversa") {
                     withAnimation(Theme.Animation.smooth) {
                         viewModel.clearHistory()
                     }
                 }
+                .transition(.maeScaleFade)
             }
 
-            // Open full window
-            MaeTooltipButton(icon: "arrow.up.left.and.arrow.down.right", helpText: "Abrir janela") {
+            MaeTooltipButton(icon: "arrow.up.left.and.arrow.down.right", helpText: "Abrir janela completa") {
                 MainWindowManager.shared.showWindow()
             }
         }
@@ -105,44 +120,65 @@ struct MenuBarPopoverView: View {
     // MARK: - Empty State
 
     private var popoverEmptyState: some View {
-        VStack(spacing: 16) {
-            Spacer().frame(height: 60)
+        VStack(spacing: 20) {
+            Spacer().frame(height: 40)
 
+            // Floating hat icon
             ZStack {
                 Circle()
                     .fill(Theme.Colors.accentPrimary.opacity(0.06))
-                    .frame(width: 48, height: 48)
+                    .frame(width: 56, height: 56)
+                Circle()
+                    .fill(Theme.Colors.accentPrimary.opacity(0.03))
+                    .frame(width: 72, height: 72)
                 Image("hat-svgrepo-com")
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 22, height: 22)
-                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.5))
+                    .frame(width: 24, height: 24)
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
             }
+            .maeFloating()
+            .maeStaggered(index: 0, baseDelay: 0.10)
+            .accessibilityHidden(true)
 
-            VStack(spacing: 4) {
-                Text("Pergunte algo")
-                    .font(Theme.Typography.body)
-                    .foregroundStyle(Theme.Colors.textSecondary)
+            VStack(spacing: 6) {
+                Text(greetingText)
+                    .font(Theme.Typography.title)
+                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                    .maeStaggered(index: 1, baseDelay: 0.10)
 
-                Text("ou abra a janela completa")
-                    .font(Theme.Typography.micro)
+                Text("Chat rapido pelo menu bar")
+                    .font(Theme.Typography.bodySmall)
                     .foregroundStyle(Theme.Colors.textMuted)
+                    .maeStaggered(index: 2, baseDelay: 0.10)
             }
+            .accessibilityElement(children: .combine)
 
             // Quick actions
-            HStack(spacing: 8) {
-                PopoverQuickAction(icon: "doc.on.clipboard", label: "Clipboard", shortcut: "⌘⇧X") {
+            HStack(spacing: 10) {
+                PopoverQuickAction(
+                    icon: "doc.on.clipboard",
+                    label: "Analisar clipboard",
+                    shortcut: "⌘⇧X",
+                    index: 3
+                ) {
                     Task { await viewModel.processarIA() }
                 }
-                PopoverQuickAction(icon: "camera.viewfinder", label: "Tela", shortcut: "⌘⇧Z") {
+                PopoverQuickAction(
+                    icon: "camera.viewfinder",
+                    label: "Analisar tela",
+                    shortcut: "⌘⇧Z",
+                    index: 4
+                ) {
                     Task { await viewModel.processarScreen() }
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 20)
 
             Spacer()
         }
+        .maeAppearAnimation(animation: Theme.Animation.smooth)
     }
 
     // MARK: - Input
@@ -162,11 +198,14 @@ struct MenuBarPopoverView: View {
                         Task { await viewModel.sendManualMessage() }
                     }
                     .disabled(viewModel.isProcessing)
+                    .accessibilityLabel("Campo de mensagem")
+                    .accessibilityHint("Enter para enviar")
 
                 if viewModel.isProcessing {
                     MaeTypingDots()
                         .frame(width: 24, height: 24)
                         .transition(.maeScaleFade)
+                        .accessibilityLabel("Processando resposta")
                 } else {
                     let hasContent = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     Button {
@@ -175,16 +214,27 @@ struct MenuBarPopoverView: View {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 22))
                             .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                            .scaleEffect(sendHovered && hasContent ? 1.1 : 1.0)
+                            .animation(Theme.Animation.quickSnap, value: sendHovered)
                     }
                     .buttonStyle(.plain)
                     .disabled(!hasContent)
                     .keyboardShortcut(.defaultAction)
+                    .onHover { sendHovered = $0 }
                     .transition(.maeScaleFade)
+                    .accessibilityLabel("Enviar mensagem")
                 }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(Theme.Colors.surface)
+            .background(Theme.Colors.surfaceSecondary)
+
+            // Hint
+            Text("Enter para enviar")
+                .font(.system(size: 9, weight: .regular))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
+                .padding(.vertical, 4)
+                .accessibilityHidden(true)
         }
     }
 }
@@ -195,36 +245,50 @@ private struct PopoverQuickAction: View {
     let icon: String
     let label: String
     let shortcut: String
+    var index: Int = 0
     let action: () -> Void
     @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(isHovered ? Theme.Colors.accentPrimary.opacity(0.1) : Theme.Colors.surfaceTertiary)
+                        .frame(width: 40, height: 40)
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .regular))
+                        .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
+                }
 
-                Text(label)
-                    .font(Theme.Typography.micro)
-                    .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                VStack(spacing: 2) {
+                    Text(label)
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
 
-                Text(shortcut)
-                    .font(.system(size: 9, weight: .medium, design: .rounded))
-                    .foregroundStyle(Theme.Colors.textMuted)
+                    Text(shortcut)
+                        .font(.system(size: 9, weight: .medium, design: .rounded))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .fill(isHovered ? Theme.Colors.surfaceHover : Theme.Colors.surfaceSecondary)
+                    .fill(isHovered ? Theme.Colors.surfaceHover : Theme.Colors.surface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                    .stroke(isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border, lineWidth: 0.5)
             )
+            .scaleEffect(isHovered ? 1.02 : 1.0)
         }
         .buttonStyle(.plain)
-        .onHover { isHovered = $0 }
+        .onHover { hovering in
+            withAnimation(Theme.Animation.hover) { isHovered = hovering }
+        }
+        .maeStaggered(index: index, baseDelay: 0.10)
+        .accessibilityLabel(label)
+        .accessibilityHint("Atalho: \(shortcut)")
     }
 }

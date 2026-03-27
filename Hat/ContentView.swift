@@ -515,6 +515,7 @@ struct ContentView: View {
                     .scaledToFit()
                     .frame(width: 14, height: 14)
                     .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                    .accessibilityHidden(true)
 
                 MaeTag(
                     label: inferenceMode == .local ? localModelName : apiModelName,
@@ -756,11 +757,14 @@ struct ContentView: View {
                             Task { await viewModel.sendManualMessage() }
                         }
                         .disabled(viewModel.isProcessing)
+                        .accessibilityLabel("Campo de mensagem")
+                        .accessibilityHint("Comando Enter para enviar")
 
                     if viewModel.isProcessing {
                         MaeTypingDots()
                             .frame(width: 28, height: 28)
                             .transition(.maeScaleFade)
+                            .accessibilityLabel("Processando resposta")
                     } else {
                         let hasContent = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !viewModel.pendingAttachments.isEmpty
                         Button {
@@ -777,6 +781,7 @@ struct ContentView: View {
                         .keyboardShortcut(.defaultAction)
                         .maePressEffect()
                         .transition(.maeScaleFade)
+                        .accessibilityLabel("Enviar mensagem")
                     }
                 }
                 .padding(.horizontal, 14)
@@ -955,6 +960,8 @@ struct SuggestionCard: View {
         .onHover { hovering in isHovered = hovering }
         .maePressEffect()
         .maeStaggered(index: index, baseDelay: 0.08)
+        .accessibilityLabel(title)
+        .accessibilityHint(shortcut != nil ? "Atalho: \(shortcut!)" : "")
     }
 }
 

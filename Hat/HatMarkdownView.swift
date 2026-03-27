@@ -37,7 +37,7 @@ extension MarkdownUI.Theme {
                 .markdownMargin(top: 12, bottom: 4)
         }
         .code {
-            FontFamily(.custom("SFMono-Regular", defaultFamilyName: .monospaced))
+            FontFamily(.custom("SFMono-Regular"))
             FontSize(12)
             ForegroundColor(Theme.Colors.textPrimary)
             BackgroundColor(Theme.Colors.surfaceTertiary)
@@ -45,7 +45,7 @@ extension MarkdownUI.Theme {
         .codeBlock { configuration in
             configuration.label
                 .markdownTextStyle {
-                    FontFamily(.custom("SFMono-Regular", defaultFamilyName: .monospaced))
+                    FontFamily(.custom("SFMono-Regular"))
                     FontSize(12)
                     ForegroundColor(Theme.Colors.textPrimary)
                 }

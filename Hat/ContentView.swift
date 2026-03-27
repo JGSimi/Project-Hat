@@ -627,14 +627,14 @@ struct ContentView: View {
             VStack(spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Theme.Colors.accentPrimary.opacity(0.06))
+                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 1.5)
                         .frame(width: 64, height: 64)
                     Image("hat-svgrepo-com")
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 28, height: 28)
-                        .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                        .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                 }
                 .maeStaggered(index: 0, baseDelay: 0.10)
 
@@ -653,16 +653,16 @@ struct ContentView: View {
 
             // Grid 2x2 suggestions
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                SuggestionCard(icon: "doc.on.clipboard", title: "Analisar clipboard", shortcut: "⌘⇧X", index: 3) {
+                SuggestionCard(icon: "doc.on.clipboard", title: "Analisar clipboard", shortcut: "⌘⇧X", color: Theme.Colors.accentPrimary, index: 3) {
                     Task { await viewModel.processarIA() }
                 }
-                SuggestionCard(icon: "camera.viewfinder", title: "Analisar tela", shortcut: "⌘⇧Z", index: 4) {
+                SuggestionCard(icon: "camera.viewfinder", title: "Analisar tela", shortcut: "⌘⇧Z", color: Theme.Colors.success, index: 4) {
                     Task { await viewModel.processarScreen() }
                 }
-                SuggestionCard(icon: "bolt.fill", title: "Entrada rapida", shortcut: "⌘⇧Space", index: 5) {
+                SuggestionCard(icon: "bolt.fill", title: "Entrada rapida", shortcut: "⌘⇧Space", color: Theme.Colors.warning, index: 5) {
                     QuickInputWindowManager.shared.toggleWindow()
                 }
-                SuggestionCard(icon: "text.bubble", title: "Fazer uma pergunta", shortcut: nil, index: 6) {
+                SuggestionCard(icon: "text.bubble", title: "Fazer uma pergunta", shortcut: nil, color: Theme.Colors.textSecondary, index: 6) {
                     isInputFocused = true
                 }
             }
@@ -916,16 +916,23 @@ struct SuggestionCard: View {
     let icon: String
     let title: String
     let shortcut: String?
+    var color: Color = Theme.Colors.textSecondary
     var index: Int = 0
     let action: () -> Void
     @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
+            VStack(alignment: .leading, spacing: 10) {
+                // Colored icon circle
+                ZStack {
+                    Circle()
+                        .fill(isHovered ? color.opacity(0.18) : color.opacity(0.1))
+                        .frame(width: 32, height: 32)
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(color)
+                }
 
                 Text(title)
                     .font(Theme.Typography.bodySmall)
@@ -937,22 +944,22 @@ struct SuggestionCard: View {
                     Spacer(minLength: 0)
                     Text(shortcut)
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Theme.Colors.surfaceTertiary)
+                        .background(Theme.Colors.surfaceSecondary)
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .frame(minHeight: 90)
+            .frame(minHeight: 95)
             .background(isHovered ? Theme.Colors.surfaceHover : Theme.Colors.surface)
             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .stroke(isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border, lineWidth: 0.5)
+                    .stroke(isHovered ? color.opacity(0.25) : Theme.Colors.border, lineWidth: isHovered ? 1 : 0.5)
             )
             .animation(Theme.Animation.hover, value: isHovered)
         }

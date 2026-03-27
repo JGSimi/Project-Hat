@@ -109,15 +109,13 @@ struct HatMarkdownView: View {
     }
 
     var body: some View {
-        Group {
-            if trimmedMarkdown.isEmpty {
-                Text("")
-            } else {
-                Markdown(markdown)
-                    .markdownTheme(.hat)
-                    .tint(Theme.Colors.accentPrimary)
-                    .textSelection(.enabled)
-            }
+        if trimmedMarkdown.isEmpty {
+            EmptyView()
+        } else {
+            Markdown(markdown)
+                .markdownTheme(.hat)
+                .tint(Theme.Colors.accentPrimary)
+                .textSelection(.enabled)
         }
     }
 }

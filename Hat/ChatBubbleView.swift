@@ -50,7 +50,7 @@ struct ChatBubble: View {
                     .foregroundStyle(Theme.Colors.accentPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentPrimary.opacity(0.08))
+                    .background { (Theme.Colors.accentPrimary.opacity(0.08) as Color) }
                     .clipShape(Capsule())
                 }
 
@@ -116,7 +116,7 @@ struct ChatBubble: View {
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                                 .textSelection(.enabled)
-                                .background(Theme.Colors.accentPrimary.opacity(0.08))
+                                .background { (Theme.Colors.accentPrimary.opacity(0.08) as Color) }
                                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)

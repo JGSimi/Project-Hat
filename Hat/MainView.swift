@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct MainView: View {
     @StateObject private var conversationManager = ConversationManager.shared

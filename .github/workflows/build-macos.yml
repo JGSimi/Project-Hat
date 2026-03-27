@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -73,24 +74,26 @@ jobs:
 
       - name: Post build errors to PR
         if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let log = '';
-            try { log = fs.readFileSync('build.log', 'utf8'); } catch(e) { log = 'Could not read build.log'; }
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ERRORS=$(grep -A 3 "error:" build.log 2>/dev/null | head -100 || echo "No error lines found")
+          LAST_LINES=$(tail -80 build.log 2>/dev/null || echo "No build log")
+          BODY=$(cat <<EOFCOMMENT
+          ## Build Failed
 
-            const errors = log.split('\n').filter(l => l.includes('error:') || l.includes('warning:') && l.includes('.swift')).slice(0, 40).join('\n');
-            const lastLines = log.split('\n').slice(-80).join('\n');
+          ### Compilation Errors
+          \`\`\`
+          ${ERRORS}
+          \`\`\`
 
-            const body = `## Build Failed ❌\n\n### Compilation Errors\n\`\`\`\n${errors || 'No error: lines found'}\n\`\`\`\n\n### Last 80 lines of build log\n\`\`\`\n${lastLines}\n\`\`\``;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: body.substring(0, 65000)
-            });
+          ### Last 80 lines
+          \`\`\`
+          ${LAST_LINES}
+          \`\`\`
+          EOFCOMMENT
+          )
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "${BODY}" || echo "Failed to post comment"
 
       - name: Show build errors on failure
         if: failure()

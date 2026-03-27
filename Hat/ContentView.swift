@@ -645,7 +645,7 @@ struct ContentView: View {
                         .transition(.maeScaleFade)
                     }
                 }
-                .onChange(of: viewModel.messages.count) {
+                .onChange(of: viewModel.messages.count) { _, _ in
                     withAnimation(Theme.Animation.smooth) {
                         proxy.scrollTo(bottomID, anchor: .bottom)
                         isAtBottom = true

@@ -120,47 +120,44 @@ struct MenuBarPopoverView: View {
     // MARK: - Empty State
 
     private var popoverEmptyState: some View {
-        VStack(spacing: 20) {
-            Spacer().frame(height: 40)
+        VStack(spacing: 18) {
+            Spacer().frame(height: 28)
 
-            // Floating hat icon
+            // Single clean circle with hat icon
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accentPrimary.opacity(0.06))
-                    .frame(width: 56, height: 56)
-                Circle()
-                    .fill(Theme.Colors.accentPrimary.opacity(0.03))
-                    .frame(width: 72, height: 72)
+                    .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 1)
+                    .frame(width: 48, height: 48)
                 Image("hat-svgrepo-com")
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                    .frame(width: 22, height: 22)
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
             }
-            .maeFloating()
             .maeStaggered(index: 0, baseDelay: 0.10)
             .accessibilityHidden(true)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 4) {
                 Text(greetingText)
                     .font(Theme.Typography.title)
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                     .maeStaggered(index: 1, baseDelay: 0.10)
 
-                Text("Chat rapido pelo menu bar")
+                Text("Como posso ajudar?")
                     .font(Theme.Typography.bodySmall)
                     .foregroundStyle(Theme.Colors.textMuted)
                     .maeStaggered(index: 2, baseDelay: 0.10)
             }
             .accessibilityElement(children: .combine)
 
-            // Quick actions
+            // Quick actions with color
             HStack(spacing: 10) {
                 PopoverQuickAction(
                     icon: "doc.on.clipboard",
                     label: "Analisar clipboard",
                     shortcut: "⌘⇧X",
+                    color: Theme.Colors.accentPrimary,
                     index: 3
                 ) {
                     Task { await viewModel.processarIA() }
@@ -169,6 +166,7 @@ struct MenuBarPopoverView: View {
                     icon: "camera.viewfinder",
                     label: "Analisar tela",
                     shortcut: "⌘⇧Z",
+                    color: Theme.Colors.success,
                     index: 4
                 ) {
                     Task { await viewModel.processarScreen() }
@@ -225,16 +223,16 @@ struct MenuBarPopoverView: View {
                     .accessibilityLabel("Enviar mensagem")
                 }
             }
-            .padding(.horizontal, 14)
+            .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(Theme.Colors.surfaceSecondary)
-
-            // Hint
-            Text("Enter para enviar")
-                .font(.system(size: 9, weight: .regular))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
-                .padding(.vertical, 4)
-                .accessibilityHidden(true)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+            )
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
         }
     }
 }
@@ -245,6 +243,7 @@ private struct PopoverQuickAction: View {
     let icon: String
     let label: String
     let shortcut: String
+    let color: Color
     var index: Int = 0
     let action: () -> Void
     @State private var isHovered = false
@@ -254,11 +253,11 @@ private struct PopoverQuickAction: View {
             VStack(spacing: 8) {
                 ZStack {
                     Circle()
-                        .fill(isHovered ? Theme.Colors.accentPrimary.opacity(0.1) : Theme.Colors.surfaceTertiary)
+                        .fill(isHovered ? color.opacity(0.18) : color.opacity(0.1))
                         .frame(width: 40, height: 40)
                     Image(systemName: icon)
-                        .font(.system(size: 18, weight: .regular))
-                        .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(color)
                 }
 
                 VStack(spacing: 2) {
@@ -268,7 +267,7 @@ private struct PopoverQuickAction: View {
 
                     Text(shortcut)
                         .font(.system(size: 9, weight: .medium, design: .rounded))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                 }
             }
             .frame(maxWidth: .infinity)
@@ -279,7 +278,7 @@ private struct PopoverQuickAction: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .stroke(isHovered ? Theme.Colors.borderHighlight : Theme.Colors.border, lineWidth: 0.5)
+                    .stroke(isHovered ? color.opacity(0.3) : Theme.Colors.border, lineWidth: isHovered ? 1 : 0.5)
             )
             .scaleEffect(isHovered ? 1.02 : 1.0)
         }

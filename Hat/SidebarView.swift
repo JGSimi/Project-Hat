@@ -118,7 +118,10 @@ struct SidebarView: View {
                     } else {
                         ForEach(filteredGroups, id: \.group) { section in
                             // Section header
-                            HStack(spacing: 0) {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(Theme.Colors.accentPrimary.opacity(0.4))
+                                    .frame(width: 3, height: 3)
                                 Text(section.group.rawValue)
                                     .font(Theme.Typography.micro)
                                     .foregroundStyle(Theme.Colors.textMuted)
@@ -249,7 +252,7 @@ private struct ConversationRow: View {
                                 .accessibilityHidden(true)
                         }
                         Text(conversation.title)
-                            .font(Theme.Typography.bodySmall)
+                            .font(isActive ? Theme.Typography.captionBold : Theme.Typography.bodySmall)
                             .foregroundStyle(isActive ? Theme.Colors.textPrimary : Theme.Colors.textPrimary.opacity(0.85))
                             .lineLimit(1)
                     }
@@ -301,11 +304,11 @@ private struct ConversationRow: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(isActive ? Theme.Colors.accentPrimary.opacity(0.08) : (isHovered ? Theme.Colors.surfaceHover : Color.clear))
+                    .fill(isActive ? Theme.Colors.accentPrimary.opacity(0.12) : (isHovered ? Theme.Colors.surfaceHover : Color.clear))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .stroke(isActive ? Theme.Colors.accentPrimary.opacity(0.15) : Color.clear, lineWidth: 0.5)
+                    .stroke(isActive ? Theme.Colors.accentPrimary.opacity(0.25) : Color.clear, lineWidth: 0.5)
             )
         }
         .buttonStyle(.plain)

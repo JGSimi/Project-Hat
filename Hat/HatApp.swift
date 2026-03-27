@@ -78,21 +78,11 @@ struct HatApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            Button("Abrir Hat") {
-                MainWindowManager.shared.showWindow()
-            }
-            .keyboardShortcut("o", modifiers: .command)
-
-            Divider()
-
-            Button("Sair") {
-                NSApp.terminate(nil)
-            }
-            .keyboardShortcut("q", modifiers: .command)
+            MenuBarPopoverView()
         } label: {
             MenuBarIconView(isProcessing: viewModel.isProcessing)
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }
 

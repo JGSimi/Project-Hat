@@ -580,7 +580,7 @@ struct MaeActionRow: View {
                     .foregroundStyle(iconColor)
                     .symbolEffect(.bounce, value: appeared)
                     .frame(width: 28, height: 28)
-                    .background(iconColor.opacity(0.08))
+                    .background { (iconColor.opacity(0.08) as Color) }
                     .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                     .accessibilityHidden(true)
                     .onAppear { appeared = true }
@@ -877,7 +877,7 @@ struct MaeTag: View {
         .foregroundStyle(color)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .background(color.opacity(0.08))
+        .background { (color.opacity(0.08) as Color) }
         .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 }

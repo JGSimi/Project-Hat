@@ -78,21 +78,11 @@ struct HatApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            Button("Abrir Hat") {
-                MainWindowManager.shared.showWindow()
-            }
-            .keyboardShortcut("o", modifiers: .command)
-
-            Divider()
-
-            Button("Sair") {
-                NSApp.terminate(nil)
-            }
-            .keyboardShortcut("q", modifiers: .command)
+            MenuBarPopoverView()
         } label: {
             MenuBarIconView(isProcessing: viewModel.isProcessing)
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }
 
@@ -367,7 +357,7 @@ struct FeatureRow: View {
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(Theme.Colors.accentPrimary)
                 .frame(width: 32, height: 32)
-                .background(Theme.Colors.accentPrimary.opacity(0.06))
+                .background { (Theme.Colors.accentPrimary.opacity(0.06) as Color) }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {
@@ -402,7 +392,9 @@ struct PermissionRowView: View {
                 .font(.system(size: 16, weight: .regular))
                 .foregroundStyle(isGranted ? Theme.Colors.success : Theme.Colors.accentPrimary)
                 .frame(width: 32, height: 32)
-                .background(isGranted ? Theme.Colors.success.opacity(0.08) : Theme.Colors.accentPrimary.opacity(0.06))
+                .background {
+                    (isGranted ? Theme.Colors.success.opacity(0.08) : Theme.Colors.accentPrimary.opacity(0.06)) as Color
+                }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {

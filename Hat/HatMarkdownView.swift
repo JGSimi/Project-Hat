@@ -12,8 +12,8 @@ extension MarkdownUI.Theme {
         .heading1 { configuration in
             configuration.label
                 .markdownTextStyle {
-                    FontFamily(.custom("CormorantGaramond-Bold"))
-                    FontSize(22)
+                    FontWeight(.bold)
+                    FontSize(20)
                     ForegroundColor(Theme.Colors.textPrimary)
                 }
                 .markdownMargin(top: 16, bottom: 8)
@@ -21,8 +21,8 @@ extension MarkdownUI.Theme {
         .heading2 { configuration in
             configuration.label
                 .markdownTextStyle {
-                    FontFamily(.custom("CormorantGaramond-SemiBold"))
-                    FontSize(18)
+                    FontWeight(.semibold)
+                    FontSize(17)
                     ForegroundColor(Theme.Colors.textPrimary)
                 }
                 .markdownMargin(top: 14, bottom: 6)
@@ -39,7 +39,7 @@ extension MarkdownUI.Theme {
         .code {
             FontFamily(.custom("SFMono-Regular", defaultFamilyName: .monospaced))
             FontSize(12)
-            ForegroundColor(Theme.Colors.accentPrimary)
+            ForegroundColor(Theme.Colors.textPrimary)
             BackgroundColor(Theme.Colors.surfaceTertiary)
         }
         .codeBlock { configuration in
@@ -61,14 +61,8 @@ extension MarkdownUI.Theme {
         .blockquote { configuration in
             HStack(spacing: 0) {
                 RoundedRectangle(cornerRadius: 1.5)
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.gradientStart.opacity(0.6), Theme.Colors.gradientEnd.opacity(0.4)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: 3)
+                    .fill(Theme.Colors.accentPrimary.opacity(0.4))
+                    .frame(width: 2.5)
                 configuration.label
                     .markdownTextStyle {
                         ForegroundColor(Theme.Colors.textSecondary)

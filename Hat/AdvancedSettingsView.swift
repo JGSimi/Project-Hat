@@ -16,7 +16,7 @@ class AdvancedSettingsWindowManager {
         }
 
         let contentView = AdvancedSettingsView()
-        
+
         let windowRect = NSRect(x: 0, y: 0, width: 700, height: 500)
         let newWindow = NSWindow(
             contentRect: windowRect,
@@ -24,13 +24,13 @@ class AdvancedSettingsWindowManager {
             backing: .buffered,
             defer: false
         )
-        
+
         newWindow.titlebarAppearsTransparent = true
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
         newWindow.center()
-        
+
         newWindow.contentView = NSHostingView(rootView: contentView)
         self.window = newWindow
         newWindow.makeKeyAndOrderFront(nil)
@@ -45,9 +45,9 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case models = "Modelos & IA"
     case prompt = "Comportamento"
     case shortcuts = "Atalhos"
-    
+
     var id: String { self.rawValue }
-    
+
     var icon: String {
         switch self {
         case .general:   return "slider.horizontal.3"
@@ -62,15 +62,15 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
 struct AdvancedSettingsView: View {
     @State private var selectedTab: SettingsTab? = .general
-    
+
     @AppStorage("inferenceMode") var inferenceMode: InferenceMode = .local
     @AppStorage("selectedProvider") var selectedProvider: CloudProvider = .google
-    @AppStorage("systemPrompt") var systemPrompt: String = "Responda APENAS com a letra e o texto da alternativa. Sem introduções. Pergunta: "
+    @AppStorage("systemPrompt") var systemPrompt: String = "Responda APENAS com a letra e o texto da alternativa. Sem introducoes. Pergunta: "
     @AppStorage("localModelName") var localModelName: String = "gemma3:4b"
     @AppStorage("apiEndpoint") var apiEndpoint: String = "https://api.openai.com/v1/chat/completions"
     @AppStorage("apiModelName") var apiModelName: String = "gpt-4o-mini"
     @AppStorage("playNotifications") var playNotifications: Bool = true
-    
+
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
     @State private var fetchedModels: [String] = []
@@ -94,10 +94,10 @@ struct AdvancedSettingsView: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 18, height: 18)
-                        .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
-                    Text("Configurações")
-                        .font(Theme.Typography.headingSerif)
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                    Text("Configuracoes")
+                        .font(Theme.Typography.heading)
                         .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -105,30 +105,22 @@ struct AdvancedSettingsView: View {
                 .padding(.top, 28)
                 .padding(.bottom, 16)
 
-                MaeGradientDivider(tinted: true)
+                MaeDivider()
                     .padding(.horizontal, 12)
 
                 List(selection: $selectedTab) {
                     ForEach(SettingsTab.allCases) { tab in
                         NavigationLink(value: tab) {
                             HStack(spacing: 10) {
-                                // Left accent bar
-                                RoundedRectangle(cornerRadius: 1.5)
-                                    .fill(selectedTab == tab
-                                        ? LinearGradient(colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd], startPoint: .top, endPoint: .bottom)
-                                        : LinearGradient(colors: [Color.clear], startPoint: .top, endPoint: .bottom)
-                                    )
-                                    .frame(width: 3, height: 24)
-
                                 ZStack {
-                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
                                         .fill(selectedTab == tab
-                                            ? LinearGradient(colors: [Theme.Colors.gradientStart.opacity(0.12), Theme.Colors.gradientEnd.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                                            : LinearGradient(colors: [Color.clear], startPoint: .topLeading, endPoint: .bottomTrailing)
+                                            ? Theme.Colors.accentPrimary.opacity(0.1)
+                                            : Color.clear
                                         )
-                                        .frame(width: 32, height: 32)
+                                        .frame(width: 28, height: 28)
                                     Image(systemName: tab.icon)
-                                        .font(.system(size: 13, weight: .medium))
+                                        .font(.system(size: 12, weight: .medium))
                                         .foregroundStyle(selectedTab == tab ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
                                         .symbolEffect(.bounce, value: selectedTab == tab)
                                 }
@@ -136,7 +128,7 @@ struct AdvancedSettingsView: View {
                                     .font(Theme.Typography.bodySmall)
                                     .foregroundStyle(selectedTab == tab ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 3)
                         }
                     }
                 }
@@ -149,30 +141,30 @@ struct AdvancedSettingsView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 10, height: 10)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
                     Text("Hat v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                         .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 12)
             }
             .background(Theme.Colors.background)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
-            
+
         } detail: {
             ZStack {
                 Theme.Colors.backgroundSecondary.ignoresSafeArea()
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: Theme.Metrics.spacingXLarge) {
-                        
+
                         Text(selectedTab?.rawValue ?? "")
-                            .font(Theme.Typography.headingSerif)
+                            .font(Theme.Typography.title)
                             .foregroundStyle(Theme.Colors.textPrimary)
                             .padding(.top, 40)
                             .padding(.bottom, 8)
-                        
+
                         switch selectedTab {
                         case .general:   generalSettings.maeStaggered(index: 0)
                         case .models:    modelSettings.maeStaggered(index: 0)
@@ -187,9 +179,9 @@ struct AdvancedSettingsView: View {
                     .padding(.bottom, 40)
                     .frame(maxWidth: 600, alignment: .leading)
                 }
-                .id(selectedTab)  // Force re-render for animation
+                .id(selectedTab)
             }
-            .animation(Theme.Animation.responsive, value: selectedTab)
+            .animation(Theme.Animation.smooth, value: selectedTab)
             .task {
                 await reloadModels()
             }
@@ -199,17 +191,17 @@ struct AdvancedSettingsView: View {
             }
         }
     }
-    
+
     // MARK: - General
-    
+
     private var generalSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
-            MaeSectionHeader(title: "Sistema & Notificações")
-            
+            MaeSectionHeader(title: "Sistema & Notificacoes")
+
             GroupBox {
                 VStack(spacing: 0) {
                     HStack {
-                        MaeActionRow(title: "Início Automático", subtitle: "Abrir a Hat junto com o Mac", icon: "macwindow", iconColor: Theme.Colors.accentPrimary)
+                        MaeActionRow(title: "Inicio Automatico", subtitle: "Abrir a Hat junto com o Mac", icon: "macwindow", iconColor: Theme.Colors.accentPrimary)
                         Toggle("", isOn: $launchAtLogin)
                             .toggleStyle(.switch)
                     }
@@ -223,44 +215,42 @@ struct AdvancedSettingsView: View {
                             launchAtLogin = !newValue
                         }
                     }
-                    
+
                     MaeDivider()
-                    
+
                     HStack {
                         MaeActionRow(title: "Sons e Alertas", subtitle: "Tocar som quando a resposta terminar", icon: "bell.fill", iconColor: Theme.Colors.accentPrimary)
                         Toggle("", isOn: $playNotifications)
                             .toggleStyle(.switch)
                     }
                     .padding(Theme.Metrics.spacingLarge)
-                    
+
                     MaeDivider()
-                    
+
                     Button {
                         WelcomeWindowManager.shared.showWindow()
                     } label: {
                         HStack {
-                            MaeActionRow(title: "Tela de Boas Vindas", subtitle: "Rever apresentação do aplicativo", icon: "hand.wave.fill", iconColor: Theme.Colors.accentPrimary)
+                            MaeActionRow(title: "Tela de Boas Vindas", subtitle: "Rever apresentacao do aplicativo", icon: "hand.wave.fill", iconColor: Theme.Colors.accentPrimary)
                             Image(systemName: "chevron.right")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textMuted)
-                                .symbolEffect(.bounce, options: .nonRepeating)
                         }
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .padding(Theme.Metrics.spacingLarge)
-                    
+
                     MaeDivider()
-                    
+
                     Button {
                         UpdaterController.shared.checkForUpdates()
                     } label: {
                         HStack {
-                            MaeActionRow(title: "Atualizações", subtitle: "Buscar nova versão da Hat", icon: "arrow.triangle.2.circlepath", iconColor: Theme.Colors.accentPrimary)
+                            MaeActionRow(title: "Atualizacoes", subtitle: "Buscar nova versao da Hat", icon: "arrow.triangle.2.circlepath", iconColor: Theme.Colors.accentPrimary)
                             Image(systemName: "chevron.right")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textMuted)
-                                .symbolEffect(.bounce, options: .nonRepeating)
                         }
                         .contentShape(Rectangle())
                     }
@@ -271,15 +261,15 @@ struct AdvancedSettingsView: View {
             .groupBoxStyle(MaeCardStyle())
         }
     }
-    
+
     // MARK: - Models
-    
+
     private var modelSettings: some View {
         VStack(alignment: .leading, spacing: 20) {
-            
+
             VStack(alignment: .leading, spacing: 0) {
-                MaeSectionHeader(title: "Modo de Inferência")
-                
+                MaeSectionHeader(title: "Modo de Inferencia")
+
                 GroupBox {
                     Picker("", selection: $inferenceMode) {
                         ForEach(InferenceMode.allCases) { mode in
@@ -289,15 +279,15 @@ struct AdvancedSettingsView: View {
                     .pickerStyle(.radioGroup)
                     .labelsHidden()
                     .padding(Theme.Metrics.spacingLarge)
-                    .accessibilityLabel("Modo de Inferência")
+                    .accessibilityLabel("Modo de Inferencia")
                 }
                 .groupBoxStyle(MaeCardStyle())
             }
-            
+
             if inferenceMode == .local {
                 VStack(alignment: .leading, spacing: 0) {
                     MaeSectionHeader(title: "Ollama (Local)")
-                    
+
                     GroupBox {
                         VStack(spacing: 0) {
                             HStack {
@@ -313,11 +303,11 @@ struct AdvancedSettingsView: View {
                     }
                     .groupBoxStyle(MaeCardStyle())
                 }
-                
+
             } else {
                 VStack(alignment: .leading, spacing: 0) {
                     MaeSectionHeader(title: "Cloud API")
-                    
+
                     GroupBox {
                         VStack(spacing: 0) {
                             HStack {
@@ -351,9 +341,9 @@ struct AdvancedSettingsView: View {
                                     await reloadModels()
                                 }
                             }
-                            
+
                             MaeDivider()
-                            
+
                             if selectedProvider == .custom {
                                 VStack(spacing: 12) {
                                     HStack {
@@ -374,15 +364,15 @@ struct AdvancedSettingsView: View {
                                     }
                                 }
                                 .padding(Theme.Metrics.spacingLarge)
-                                
+
                             } else {
                                 HStack {
                                     MaeActionRow(title: "Modelo", icon: "server.rack", iconColor: Theme.Colors.accentPrimary)
-                                    
+
                                     if isFetchingModels {
                                         ProgressView().controlSize(.small).padding(.trailing, 8)
                                     }
-                                    
+
                                     Picker("", selection: $apiModelName) {
                                         ForEach(filteredDisplayModels, id: \.self) { model in
                                             Text(model).tag(model)
@@ -410,12 +400,12 @@ struct AdvancedSettingsView: View {
                                     .padding(.bottom, Theme.Metrics.spacingDefault)
                                 }
                             }
-                            
+
                             MaeDivider()
-                            
+
                             VStack(alignment: .leading, spacing: 12) {
-                                MaeActionRow(title: "Chave de API (Autenticação)", icon: "key.fill", iconColor: Theme.Colors.accentPrimary)
-                                
+                                MaeActionRow(title: "Chave de API (Autenticacao)", icon: "key.fill", iconColor: Theme.Colors.accentPrimary)
+
                                 SecureField("Cole sua API Key...", text: $apiKey)
                                     .maeInputStyle(cornerRadius: Theme.Metrics.radiusSmall)
                                     .accessibilityLabel("Chave de API")
@@ -437,18 +427,18 @@ struct AdvancedSettingsView: View {
             }
         }
     }
-    
+
     // MARK: - Prompt
-    
+
     private var promptSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
             MaeSectionHeader(title: "System Prompt")
-            
+
             Text("Defina a personalidade e regras de resposta da IA.")
                 .font(Theme.Typography.bodySmall)
                 .foregroundStyle(Theme.Colors.textSecondary)
                 .padding(.bottom, 12)
-            
+
             TextEditor(text: $systemPrompt)
                 .font(Theme.Typography.bodySmall)
                 .foregroundStyle(Theme.Colors.textPrimary)
@@ -459,17 +449,17 @@ struct AdvancedSettingsView: View {
                 .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium))
                 .overlay(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium)
-                        .stroke(Theme.Colors.border, lineWidth: 1)
+                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                 )
         }
     }
-    
+
     // MARK: - Shortcuts
-    
+
     private var shortcutSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
-            MaeSectionHeader(title: "Ações Globais")
-            
+            MaeSectionHeader(title: "Acoes Globais")
+
             GroupBox {
                 VStack(spacing: 0) {
                     HStack {
@@ -478,20 +468,20 @@ struct AdvancedSettingsView: View {
                         KeyboardShortcuts.Recorder(for: .processClipboard)
                     }
                     .padding(Theme.Metrics.spacingLarge)
-                    
+
                     MaeDivider()
-                    
+
                     HStack {
-                        MaeActionRow(title: "Analisar Tela", subtitle: "Tira print contínuo e analisa a tela", icon: "viewfinder", iconColor: Theme.Colors.accentPrimary)
+                        MaeActionRow(title: "Analisar Tela", subtitle: "Tira print continuo e analisa a tela", icon: "viewfinder", iconColor: Theme.Colors.accentPrimary)
                         Spacer()
                         KeyboardShortcuts.Recorder(for: .processScreen)
                     }
                     .padding(Theme.Metrics.spacingLarge)
-                    
+
                     MaeDivider()
-                    
+
                     HStack {
-                        MaeActionRow(title: "Input Rápido", subtitle: "Abre overlay para perguntar sem abrir o chat", icon: "text.cursor", iconColor: Theme.Colors.accentPrimary)
+                        MaeActionRow(title: "Input Rapido", subtitle: "Abre overlay para perguntar sem abrir o chat", icon: "text.cursor", iconColor: Theme.Colors.accentPrimary)
                         Spacer()
                         KeyboardShortcuts.Recorder(for: .quickInput)
                     }
@@ -501,14 +491,14 @@ struct AdvancedSettingsView: View {
             .groupBoxStyle(MaeCardStyle())
         }
     }
-    
+
     // MARK: - Helpers
-    
+
     private func reloadModels() async {
         guard selectedProvider.modelsEndpoint != nil, !apiKey.isEmpty else { return }
         isFetchingModels = true
         defer { isFetchingModels = false }
-        
+
         do {
             let models = try await ModelFetcher.shared.fetchModels(for: selectedProvider, apiKey: apiKey)
             guard !Task.isCancelled else { return }

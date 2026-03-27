@@ -21,26 +21,26 @@ class AnalysisWindowManager {
         }
 
         let contentView = AnalysisView()
-        
+
         let newWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 1000, height: 700),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
-        
+
         newWindow.titlebarAppearsTransparent = true
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
         newWindow.center()
-        
+
         newWindow.contentView = NSHostingView(rootView: contentView)
         self.window = newWindow
         newWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
-    
+
     func closeWindow() {
         window?.close()
         window = nil
@@ -63,7 +63,7 @@ struct AnalysisView: View {
     init() {
         self.viewModel = AssistantViewModel.shared
     }
-    
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -73,8 +73,8 @@ struct AnalysisView: View {
                         // Header
                         HStack(spacing: 14) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Análise de Tela")
-                                    .font(Theme.Typography.headingSerif)
+                                Text("Analise de Tela")
+                                    .font(Theme.Typography.heading)
                                     .foregroundStyle(Theme.Colors.textPrimary)
                                 if viewModel.isAnalyzingScreen {
                                     Text("Processando...")
@@ -82,16 +82,16 @@ struct AnalysisView: View {
                                         .foregroundStyle(Theme.Colors.accentPrimary)
                                 }
                             }
-                            
+
                             Spacer()
-                            
+
                             if !viewModel.analysisResult.isEmpty && !viewModel.isAnalyzingScreen {
                                 HStack(spacing: 8) {
                                     MaeIconButton(
                                         icon: "arrow.trianglehead.2.counterclockwise.rotate.90",
                                         color: Theme.Colors.accent,
                                         bgColor: Theme.Colors.accentSubtle,
-                                        helpText: "Nova análise de tela"
+                                        helpText: "Nova analise de tela"
                                     ) {
                                         Task { await viewModel.processarScreen() }
                                     }
@@ -101,9 +101,9 @@ struct AnalysisView: View {
                                         icon: "bubble.left.and.bubble.right.fill",
                                         color: Theme.Colors.accent,
                                         bgColor: Theme.Colors.accentSubtle,
-                                        helpText: "Transferir análise para o chat principal"
+                                        helpText: "Transferir analise para o chat principal"
                                     ) {
-                                        withAnimation(Theme.Animation.bouncy) {
+                                        withAnimation(Theme.Animation.smooth) {
                                             showConfirmation = true
                                         }
                                         Task { @MainActor in
@@ -125,28 +125,23 @@ struct AnalysisView: View {
                         .padding(.top, 30)
                         .padding(.bottom, 12)
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
-                            
+
                         // Content
                         if viewModel.isAnalyzingScreen {
                             VStack(spacing: 20) {
                                 Spacer()
 
-                                // Animated analysis indicator
                                 ZStack {
                                     Circle()
-                                        .stroke(Theme.Colors.border, lineWidth: 2.5)
-                                        .frame(width: 64, height: 64)
+                                        .stroke(Theme.Colors.border, lineWidth: 2)
+                                        .frame(width: 56, height: 56)
                                     Circle()
-                                        .trim(from: 0, to: 0.35)
+                                        .trim(from: 0, to: 0.3)
                                         .stroke(
-                                            LinearGradient(
-                                                colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            ),
-                                            style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
+                                            Theme.Colors.accentPrimary,
+                                            style: StrokeStyle(lineWidth: 2, lineCap: .round)
                                         )
-                                        .frame(width: 64, height: 64)
+                                        .frame(width: 56, height: 56)
                                         .rotationEffect(.degrees(analysisSpinAngle))
                                         .onAppear {
                                             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
@@ -154,7 +149,7 @@ struct AnalysisView: View {
                                             }
                                         }
                                     Image(systemName: "sparkles")
-                                        .font(.system(size: 22, weight: .light))
+                                        .font(.system(size: 20, weight: .light))
                                         .foregroundStyle(Theme.Colors.accentPrimary)
                                         .symbolEffect(.pulse.byLayer)
                                 }
@@ -179,16 +174,16 @@ struct AnalysisView: View {
 
                                 ZStack {
                                     Circle()
-                                        .fill(Theme.Colors.accentPrimary.opacity(0.05))
-                                        .frame(width: 80, height: 80)
+                                        .fill(Theme.Colors.accentPrimary.opacity(0.04))
+                                        .frame(width: 72, height: 72)
                                     Image(systemName: "viewfinder")
-                                        .font(.system(size: 32, weight: .ultraLight))
+                                        .font(.system(size: 28, weight: .ultraLight))
                                         .foregroundStyle(Theme.Colors.accent.opacity(0.3))
                                         .symbolEffect(.breathe.plain)
                                 }
 
                                 VStack(spacing: 6) {
-                                    Text("Nenhuma análise disponível")
+                                    Text("Nenhuma analise disponivel")
                                         .font(Theme.Typography.subheading)
                                         .foregroundStyle(Theme.Colors.textSecondary)
                                         .maeStaggered(index: 1, baseDelay: 0.12)
@@ -197,8 +192,8 @@ struct AnalysisView: View {
                                         Text("Pressione")
                                             .font(Theme.Typography.caption)
                                             .foregroundStyle(Theme.Colors.textMuted)
-                                        Text("⌘⇧Z")
-                                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                                        Text("Cmd+Shift+Z")
+                                            .font(.system(size: 10, weight: .medium))
                                             .foregroundStyle(Theme.Colors.textSecondary)
                                             .padding(.horizontal, 5)
                                             .padding(.vertical, 2)
@@ -220,7 +215,7 @@ struct AnalysisView: View {
                                 Spacer()
                             }
                             .frame(maxWidth: .infinity)
-                            .maeAppearAnimation(animation: Theme.Animation.expressive)
+                            .maeAppearAnimation(animation: Theme.Animation.smooth)
                         } else {
                             ScrollView {
                                 HatMarkdownView(markdown: viewModel.analysisResult)
@@ -232,14 +227,14 @@ struct AnalysisView: View {
                             .background(Theme.Colors.backgroundSecondary)
                             .transition(.maeFadeScale)
                         }
-                        
+
                         // Follow-up input area
                         if !viewModel.analysisResult.isEmpty && !viewModel.isAnalyzingScreen {
                             VStack(spacing: 0) {
                                 MaeDivider()
-                                
+
                                 HStack(spacing: 10) {
-                                    TextField("Perguntar algo sobre a análise...", text: $followUpText, axis: .vertical)
+                                    TextField("Perguntar algo sobre a analise...", text: $followUpText, axis: .vertical)
                                         .maeInputStyleOpaque(cornerRadius: Theme.Metrics.radiusSmall)
                                         .lineLimit(1...4)
                                         .focused($isFollowUpFocused)
@@ -250,19 +245,18 @@ struct AnalysisView: View {
                                                 AnalysisWindowManager.shared.closeWindow()
                                             }
                                         }
-                                    
+
                                     Button {
                                         viewModel.continueWithAnalysis(followUp: followUpText)
                                         followUpText = ""
                                         AnalysisWindowManager.shared.closeWindow()
                                     } label: {
                                         Image(systemName: "arrow.up.circle.fill")
-                                            .font(.system(size: 24))
+                                            .font(.system(size: 22))
                                             .foregroundStyle(
                                                 followUpText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                                                 ? Theme.Colors.textMuted : Theme.Colors.accent
                                             )
-                                            .symbolEffect(.bounce, options: .nonRepeating)
                                     }
                                     .buttonStyle(.plain)
                                     .maePressEffect()
@@ -275,9 +269,9 @@ struct AnalysisView: View {
                     }
                     .frame(width: min(max(380, geo.size.width * 0.45), geo.size.width * 0.55))
                     .background(Theme.Colors.backgroundSecondary)
-                    
+
                     Divider()
-                    
+
                     // Right Panel: Image
                     VStack {
                         if let image = localImage {
@@ -285,13 +279,12 @@ struct AnalysisView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .padding(Theme.Metrics.spacingXLarge)
-                                .maeMediumShadow()
-                                .maeAppearAnimation(animation: Theme.Animation.expressive, scale: 0.94)
-                                .accessibilityLabel("Captura de tela atual para análise")
+                                .maeAppearAnimation(animation: Theme.Animation.smooth, scale: 0.96)
+                                .accessibilityLabel("Captura de tela atual para analise")
                         } else {
                             VStack(spacing: Theme.Metrics.spacingLarge) {
                                 Image(systemName: "photo.on.rectangle.angled")
-                                    .font(.system(size: 60, weight: .ultraLight))
+                                    .font(.system(size: 52, weight: .ultraLight))
                                     .foregroundStyle(Theme.Colors.textMuted)
                                     .symbolEffect(.pulse.byLayer)
                                     .accessibilityHidden(true)
@@ -305,22 +298,21 @@ struct AnalysisView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Theme.Colors.background)
                 }
-                
+
                 // Confirmation Toast Overlay
                 if showConfirmation {
                     VStack {
                         Spacer()
                         HStack(spacing: 10) {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.system(size: 18))
                                 .foregroundStyle(Theme.Colors.success)
-                                .symbolEffect(.bounce, options: .nonRepeating)
                             Text("Conversa transferida para o chat!")
                                 .font(Theme.Typography.bodyBold)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                         }
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
-                        .padding(.vertical, 14)
+                        .padding(.vertical, 12)
                         .background(Theme.Colors.surface)
                         .clipShape(Capsule())
                         .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
@@ -330,9 +322,9 @@ struct AnalysisView: View {
                     .transition(
                         .asymmetric(
                             insertion: .move(edge: .bottom)
-                                .combined(with: .scale(scale: 0.8))
+                                .combined(with: .scale(scale: 0.85))
                                 .combined(with: .opacity),
-                            removal: .scale(scale: 0.9)
+                            removal: .scale(scale: 0.95)
                                 .combined(with: .opacity)
                         )
                     )
@@ -365,7 +357,7 @@ struct AnalysisView: View {
 struct VisualEffectView: NSViewRepresentable {
     let material: NSVisualEffectView.Material
     let blendingMode: NSVisualEffectView.BlendingMode
-    
+
     func makeNSView(context: Context) -> NSVisualEffectView {
         let view = NSVisualEffectView()
         view.material = material
@@ -373,7 +365,7 @@ struct VisualEffectView: NSViewRepresentable {
         view.state = .active
         return view
     }
-    
+
     func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
         nsView.material = material
         nsView.blendingMode = blendingMode

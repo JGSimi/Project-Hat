@@ -14,23 +14,23 @@ struct ChatBubble: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            if message.isUser { Spacer(minLength: 48) }
+        HStack(alignment: .top, spacing: 10) {
+            if message.isUser { Spacer(minLength: 60) }
 
             // Assistant avatar
             if !message.isUser {
                 if isGrouped {
-                    Color.clear.frame(width: 26, height: 26)
+                    Color.clear.frame(width: 30, height: 30)
                 } else {
                     ZStack {
                         Circle()
                             .fill(Theme.Colors.surfaceSecondary)
-                            .frame(width: 26, height: 26)
+                            .frame(width: 30, height: 30)
                         Image("hat-svgrepo-com")
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 14, height: 14)
+                            .frame(width: 16, height: 16)
                             .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                     }
                     .padding(.top, 2)
@@ -109,6 +109,7 @@ struct ChatBubble: View {
                 if !message.content.isEmpty {
                     VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
                         if message.isUser {
+                            // User: subtle accent bubble
                             Text(.init(message.content))
                                 .font(Theme.Typography.bodySmall)
                                 .padding(.horizontal, 14)
@@ -122,19 +123,10 @@ struct ChatBubble: View {
                                         .stroke(Theme.Colors.accentPrimary.opacity(0.1), lineWidth: 0.5)
                                 )
                         } else {
+                            // AI: no bubble, direct markdown text (Claude.ai style)
                             HatMarkdownView(markdown: message.content)
                                 .font(Theme.Typography.bodySmall)
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .fill(Theme.Colors.surface)
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .stroke(Theme.Colors.border, lineWidth: 0.5)
-                                )
+                                .padding(.vertical, 4)
                         }
 
                         // Copy button + timestamp — appear on hover
@@ -175,14 +167,10 @@ struct ChatBubble: View {
                 }
             }
 
-            if !message.isUser { Spacer(minLength: 48) }
+            if !message.isUser { Spacer(minLength: 60) }
         }
         .padding(.horizontal, Theme.Metrics.spacingDefault)
-        .padding(.vertical, isGrouped ? 2 : 5)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isHovered ? Theme.Colors.surfaceHover : Color.clear)
-        )
+        .padding(.vertical, isGrouped ? 3 : 8)
         .onHover { hovering in
             withAnimation(Theme.Animation.hover) { isHovered = hovering }
         }

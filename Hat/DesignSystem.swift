@@ -139,6 +139,11 @@ enum Theme {
         static let spacingLarge:   CGFloat = 24
         static let spacingXLarge:  CGFloat = 32
         static let spacingSection: CGFloat = 40
+
+        // Layout
+        static let sidebarWidth:      CGFloat = 220
+        static let chatMaxWidth:      CGFloat = 680
+        static let inputCornerRadius: CGFloat = 16
     }
 
     // MARK: Shadows — subtle elevation

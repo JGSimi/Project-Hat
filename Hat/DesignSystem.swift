@@ -4,24 +4,8 @@ import Combine
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║                     Hat · Design System                        ║
 // ║  Single source of truth for all visual tokens and components.  ║
-// ║  Dark mode premium — vibrant violet & cyan accents.            ║
+// ║  Minimal, warm, refined — inspired by Notion, Linear, Raycast ║
 // ╚══════════════════════════════════════════════════════════════════╝
-
-// MARK: - Font Extension (Cormorant Garamond)
-
-extension Font {
-    static func cormorantGaramond(size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        let fontName: String
-        switch weight {
-        case .light:    fontName = "CormorantGaramond-Light"
-        case .medium:   fontName = "CormorantGaramond-Medium"
-        case .semibold: fontName = "CormorantGaramond-SemiBold"
-        case .bold:     fontName = "CormorantGaramond-Bold"
-        default:        fontName = "CormorantGaramond-Regular"
-        }
-        return .custom(fontName, size: size)
-    }
-}
 
 // MARK: - Adaptive Color Helper
 
@@ -41,177 +25,149 @@ extension Color {
 
 enum Theme {
 
-    // MARK: Colors — Dark mode premium with vibrant accents
+    // MARK: Colors — Warm neutrals + refined indigo accent
     enum Colors {
-        // Backgrounds — deep neutral blacks
+        // Backgrounds — warm blacks
         static let background = Color.adaptive(
-            light: Color(NSColor(red: 0.980, green: 0.980, blue: 0.980, alpha: 1.0)),   // #FAFAFA
-            dark:  Color(NSColor(red: 0.035, green: 0.035, blue: 0.043, alpha: 1.0))     // #09090B
+            light: Color(NSColor(red: 0.973, green: 0.973, blue: 0.969, alpha: 1.0)),   // #F8F8F7
+            dark:  Color(NSColor(red: 0.047, green: 0.047, blue: 0.055, alpha: 1.0))     // #0C0C0E
         )
         static let backgroundSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.957, green: 0.957, blue: 0.957, alpha: 1.0)),    // #F4F4F5
-            dark:  Color(NSColor(red: 0.059, green: 0.059, blue: 0.071, alpha: 1.0))     // #0F0F12
+            light: Color(NSColor(red: 0.949, green: 0.949, blue: 0.945, alpha: 1.0)),    // #F2F2F1
+            dark:  Color(NSColor(red: 0.067, green: 0.067, blue: 0.078, alpha: 1.0))     // #111114
         )
 
-        // Surfaces — layered depth with subtle blue undertone
+        // Surfaces — layered depth with warm undertone
         static let surface = Color.adaptive(
             light: Color.white,
-            dark:  Color(NSColor(red: 0.086, green: 0.086, blue: 0.102, alpha: 1.0))     // #16161A
+            dark:  Color(NSColor(red: 0.110, green: 0.110, blue: 0.118, alpha: 1.0))     // #1C1C1E
         )
         static let surfaceSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.941, green: 0.941, blue: 0.949, alpha: 1.0)),    // #F0F0F2
-            dark:  Color.white.opacity(0.06)
+            light: Color(NSColor(red: 0.953, green: 0.953, blue: 0.953, alpha: 1.0)),    // #F3F3F3
+            dark:  Color.white.opacity(0.055)
         )
         static let surfaceTertiary = Color.adaptive(
-            light: Color(NSColor(red: 0.910, green: 0.910, blue: 0.918, alpha: 1.0)),    // #E8E8EA
-            dark:  Color.white.opacity(0.04)
+            light: Color(NSColor(red: 0.929, green: 0.929, blue: 0.929, alpha: 1.0)),    // #EDEDED
+            dark:  Color.white.opacity(0.035)
         )
         static let surfaceElevated = Color.adaptive(
             light: Color.white,
-            dark:  Color.white.opacity(0.10)
-        )
-
-        // Borders
-        static let border = Color.adaptive(
-            light: Color.black.opacity(0.10),
             dark:  Color.white.opacity(0.08)
         )
-        static let borderHighlight = Color.adaptive(
-            light: Color.black.opacity(0.14),
-            dark:  Color.white.opacity(0.12)
+        static let surfaceHover = Color.adaptive(
+            light: Color.black.opacity(0.04),
+            dark:  Color.white.opacity(0.06)
         )
-        static let borderFocused = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.50)) // violet #8B5CF6 @ 50%
 
-        // Text — clean neutral tones
+        // Borders — subtle
+        static let border = Color.adaptive(
+            light: Color.black.opacity(0.08),
+            dark:  Color.white.opacity(0.07)
+        )
+        static let borderHighlight = Color.adaptive(
+            light: Color.black.opacity(0.12),
+            dark:  Color.white.opacity(0.10)
+        )
+        static let borderFocused = Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.50)) // indigo @ 50%
+
+        // Text — clean hierarchy
         static let textPrimary = Color.adaptive(
-            light: Color(NSColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1.0)),    // #18181B
-            dark:  Color(NSColor(red: 0.957, green: 0.957, blue: 0.961, alpha: 1.0))     // #F4F4F5
+            light: Color(NSColor(red: 0.106, green: 0.106, blue: 0.118, alpha: 1.0)),    // #1B1B1E
+            dark:  Color(NSColor(red: 0.933, green: 0.933, blue: 0.941, alpha: 1.0))     // #EEEEFO
         )
         static let textSecondary = Color.adaptive(
-            light: Color(NSColor(red: 0.322, green: 0.322, blue: 0.357, alpha: 1.0)),    // #52525B
-            dark:  Color(NSColor(red: 0.631, green: 0.631, blue: 0.667, alpha: 1.0))     // #A1A1AA
+            light: Color(NSColor(red: 0.376, green: 0.376, blue: 0.400, alpha: 1.0)),    // #606066
+            dark:  Color(NSColor(red: 0.600, green: 0.600, blue: 0.624, alpha: 1.0))     // #99999F
         )
         static let textMuted = Color.adaptive(
-            light: Color(NSColor(red: 0.443, green: 0.443, blue: 0.478, alpha: 1.0)),    // #71717A
-            dark:  Color(NSColor(red: 0.388, green: 0.388, blue: 0.400, alpha: 1.0))     // #636366
+            light: Color(NSColor(red: 0.502, green: 0.502, blue: 0.522, alpha: 1.0)),    // #808085
+            dark:  Color(NSColor(red: 0.400, green: 0.400, blue: 0.420, alpha: 1.0))     // #66666B
         )
 
         // Accent — adaptive for buttons (dark text on light, light text on dark)
         static let accent = Color.adaptive(
-            light: Color(NSColor(red: 0.094, green: 0.094, blue: 0.106, alpha: 1.0)),    // #18181B
-            dark:  Color(NSColor(red: 0.957, green: 0.957, blue: 0.961, alpha: 1.0))     // #F4F4F5
+            light: Color(NSColor(red: 0.106, green: 0.106, blue: 0.118, alpha: 1.0)),    // #1B1B1E
+            dark:  Color(NSColor(red: 0.933, green: 0.933, blue: 0.941, alpha: 1.0))     // #EEEEF0
         )
         static let accentSubtle = Color.adaptive(
-            light: Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.10)),   // violet @ 10%
-            dark:  Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 0.15))    // violet @ 15%
+            light: Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.08)),
+            dark:  Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.12))
         )
-        // Signature violet — vibrant primary accent
-        static let accentPrimary = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 1.0))      // #8B5CF6
-        static let accentPrimaryHover = Color(NSColor(red: 0.655, green: 0.545, blue: 0.980, alpha: 1.0)) // #A78BFA
-        // Cyan secondary accent
-        static let accentSecondary = Color(NSColor(red: 0.024, green: 0.714, blue: 0.831, alpha: 1.0))    // #06B6D4
+        // Indigo — refined primary accent
+        static let accentPrimary = Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 1.0))      // #6366F1
+        static let accentPrimaryHover = Color(NSColor(red: 0.506, green: 0.518, blue: 0.957, alpha: 1.0)) // #8184F4
 
         // Input — dedicated input background
         static let inputBackground = Color.adaptive(
-            light: Color(NSColor(red: 0.961, green: 0.961, blue: 0.961, alpha: 1.0)),    // #F5F5F5
-            dark:  Color.white.opacity(0.06)
+            light: Color(NSColor(red: 0.957, green: 0.957, blue: 0.957, alpha: 1.0)),    // #F4F4F4
+            dark:  Color.white.opacity(0.055)
         )
 
-        // Semantic — vivid
-        static let success = Color(NSColor(red: 0.204, green: 0.827, blue: 0.600, alpha: 1.0)) // #34D399
-        static let error   = Color(NSColor(red: 0.973, green: 0.443, blue: 0.443, alpha: 1.0)) // #F87171
-        static let warning = Color(NSColor(red: 0.984, green: 0.749, blue: 0.141, alpha: 1.0)) // #FBBF24
-
-        // Gradient helpers — violet to cyan
-        static let gradientStart = Color(NSColor(red: 0.545, green: 0.361, blue: 0.965, alpha: 1.0))   // #8B5CF6
-        static let gradientEnd   = Color(NSColor(red: 0.024, green: 0.714, blue: 0.831, alpha: 1.0))   // #06B6D4
-        static let gradientSubtle = LinearGradient(
-            colors: [gradientStart.opacity(0.06), gradientEnd.opacity(0.03)],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        // Accent gradient for buttons and highlights
-        static let accentGradient = LinearGradient(
-            colors: [gradientStart, gradientEnd],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        // Semantic — muted, professional
+        static let success = Color(NSColor(red: 0.204, green: 0.780, blue: 0.549, alpha: 1.0)) // #34C78C
+        static let error   = Color(NSColor(red: 0.937, green: 0.388, blue: 0.388, alpha: 1.0)) // #EF6363
+        static let warning = Color(NSColor(red: 0.949, green: 0.694, blue: 0.251, alpha: 1.0)) // #F2B140
     }
 
-    // MARK: Typography — SF Pro Rounded + Cormorant Garamond (decorative)
+    // MARK: Typography — SF Pro (default system)
     enum Typography {
-        // Display — Cormorant Garamond for hero/decorative text
-        static let titleDisplay  = Font.cormorantGaramond(size: 32, weight: .bold)
-        static let headingSerif  = Font.cormorantGaramond(size: 20, weight: .semibold)
-        // UI — SF Pro Rounded
-        static let largeTitle    = Font.system(size: 28, weight: .bold, design: .rounded)
-        static let title         = Font.system(size: 22, weight: .bold, design: .rounded)
-        static let heading       = Font.system(size: 17, weight: .semibold, design: .rounded)
-        static let subheading    = Font.system(size: 15, weight: .medium, design: .rounded)
-        static let bodyBold      = Font.system(size: 14, weight: .medium, design: .rounded)
-        static let body          = Font.system(size: 14, weight: .regular, design: .rounded)
-        static let bodySmall     = Font.system(size: 13, weight: .regular, design: .rounded)
-        static let caption       = Font.system(size: 11, weight: .regular, design: .rounded)
-        static let captionBold   = Font.system(size: 11, weight: .semibold, design: .rounded)
-        static let sectionHeader = Font.system(size: 11, weight: .semibold, design: .rounded)
-        static let micro         = Font.system(size: 10, weight: .medium, design: .rounded)
-        // Code
+        static let largeTitle    = Font.system(size: 26, weight: .bold)
+        static let title         = Font.system(size: 20, weight: .bold)
+        static let heading       = Font.system(size: 16, weight: .semibold)
+        static let subheading    = Font.system(size: 14, weight: .medium)
+        static let bodyBold      = Font.system(size: 13, weight: .medium)
+        static let body          = Font.system(size: 13, weight: .regular)
+        static let bodySmall     = Font.system(size: 12.5, weight: .regular)
+        static let bodyMono      = Font.system(size: 12, weight: .regular, design: .monospaced)
+        static let caption       = Font.system(size: 11, weight: .regular)
+        static let captionBold   = Font.system(size: 11, weight: .semibold)
+        static let sectionHeader = Font.system(size: 11, weight: .medium)
+        static let micro         = Font.system(size: 10, weight: .medium)
         static let codeBlock     = Font.system(size: 12, weight: .regular, design: .monospaced)
     }
 
     // MARK: Metrics — generous breathing room
     enum Metrics {
         static let radiusSmall:   CGFloat = 8
-        static let radiusMedium:  CGFloat = 14
-        static let radiusLarge:   CGFloat = 18
-        static let radiusXLarge:  CGFloat = 24
+        static let radiusMedium:  CGFloat = 12
+        static let radiusLarge:   CGFloat = 16
+        static let radiusXLarge:  CGFloat = 20
 
         static let spacingXSmall:  CGFloat = 4
         static let spacingSmall:   CGFloat = 8
-        static let spacingDefault: CGFloat = 14
-        static let spacingLarge:   CGFloat = 20
-        static let spacingXLarge:  CGFloat = 28
-        static let spacingSection: CGFloat = 32
+        static let spacingDefault: CGFloat = 16
+        static let spacingLarge:   CGFloat = 24
+        static let spacingXLarge:  CGFloat = 32
+        static let spacingSection: CGFloat = 40
     }
 
-    // MARK: Shadows
+    // MARK: Shadows — subtle elevation
     enum Shadows {
-        static let soft     = (color: Color.black.opacity(0.10), radius: CGFloat(5), x: CGFloat(0), y: CGFloat(2))
-        static let medium   = (color: Color.black.opacity(0.14), radius: CGFloat(6), x: CGFloat(0), y: CGFloat(3))
-        static let elevated = (color: Color.black.opacity(0.18), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(6))
-        // Premium glow shadows
-        static let accentGlow  = (color: Colors.accentPrimary.opacity(0.15), radius: CGFloat(12), x: CGFloat(0), y: CGFloat(4))
-        static let subtleGlow  = (color: Colors.accentPrimary.opacity(0.08), radius: CGFloat(8), x: CGFloat(0), y: CGFloat(2))
+        static let soft     = (color: Color.black.opacity(0.06), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
+        static let medium   = (color: Color.black.opacity(0.10), radius: CGFloat(8), x: CGFloat(0), y: CGFloat(3))
+        static let elevated = (color: Color.black.opacity(0.14), radius: CGFloat(16), x: CGFloat(0), y: CGFloat(6))
     }
 
-    // MARK: Animation
+    // MARK: Animation — refined, professional
     enum Animation {
-        // Durations
-        static let durationFast:   Double = 0.2
-        static let durationNormal: Double = 0.3
-        static let durationSlow:   Double = 0.5
+        static let durationFast:   Double = 0.15
+        static let durationNormal: Double = 0.25
+        static let durationSlow:   Double = 0.4
 
-        // Springs — Core
-        static let smooth  = SwiftUI.Animation.spring(response: 0.3, dampingFraction: 0.8)
-        static let gentle  = SwiftUI.Animation.spring(response: 0.4, dampingFraction: 0.8)
-        static let bouncy  = SwiftUI.Animation.spring(response: 0.35, dampingFraction: 0.6)
-
-        // Springs — Premium
-        static let snappy     = SwiftUI.Animation.spring(response: 0.25, dampingFraction: 0.82)
-        static let responsive = SwiftUI.Animation.spring(response: 0.3, dampingFraction: 0.75)
-        static let expressive = SwiftUI.Animation.spring(response: 0.45, dampingFraction: 0.7)
-        static let microBounce = SwiftUI.Animation.spring(response: 0.28, dampingFraction: 0.65)
-        static let quickSnap  = SwiftUI.Animation.spring(response: 0.18, dampingFraction: 0.88)
-        static let slideIn    = SwiftUI.Animation.spring(response: 0.35, dampingFraction: 0.78)
+        // Springs — Core set (high damping = professional, no bounce)
+        static let smooth  = SwiftUI.Animation.spring(response: 0.3, dampingFraction: 0.88)
+        static let snappy  = SwiftUI.Animation.spring(response: 0.22, dampingFraction: 0.9)
+        static let gentle  = SwiftUI.Animation.spring(response: 0.35, dampingFraction: 0.86)
+        static let quickSnap = SwiftUI.Animation.spring(response: 0.16, dampingFraction: 0.92)
 
         // Easing
         static let hover   = SwiftUI.Animation.easeInOut(duration: durationFast)
-        static let fade    = SwiftUI.Animation.easeOut(duration: 0.25)
-        static let slowFade = SwiftUI.Animation.easeInOut(duration: 0.6)
+        static let fade    = SwiftUI.Animation.easeOut(duration: 0.2)
+        static let slowFade = SwiftUI.Animation.easeInOut(duration: 0.5)
 
-        // Stagger helper — delay for item at index in a list
+        // Stagger helper
         static func staggerDelay(index: Int, base: Double = 0.04) -> SwiftUI.Animation {
-            Theme.Animation.responsive.delay(Double(index) * base)
+            Theme.Animation.smooth.delay(Double(index) * base)
         }
     }
 }
@@ -230,15 +186,13 @@ extension AnyTransition {
 
     static var maePopIn: AnyTransition {
         .asymmetric(
-            insertion: .scale(scale: 0.92)
-                .combined(with: .opacity)
-                .combined(with: .offset(y: 8)),
-            removal: .scale(scale: 0.95).combined(with: .opacity)
+            insertion: .scale(scale: 0.96).combined(with: .opacity),
+            removal: .scale(scale: 0.98).combined(with: .opacity)
         )
     }
 
     static var maeScaleFade: AnyTransition {
-        .scale(scale: 0.9).combined(with: .opacity)
+        .scale(scale: 0.94).combined(with: .opacity)
     }
 
     static var maeSlideUp: AnyTransition {
@@ -252,10 +206,14 @@ extension AnyTransition {
         .move(edge: .leading).combined(with: .opacity)
     }
 
+    static var maeFade: AnyTransition {
+        .opacity
+    }
+
     static var maeFadeScale: AnyTransition {
         .asymmetric(
-            insertion: .scale(scale: 0.96).combined(with: .opacity),
-            removal: .scale(scale: 1.02).combined(with: .opacity)
+            insertion: .scale(scale: 0.97).combined(with: .opacity),
+            removal: .scale(scale: 1.01).combined(with: .opacity)
         )
     }
 }
@@ -265,13 +223,12 @@ extension AnyTransition {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 struct MaeHoverEffect: ViewModifier {
-    var scale: CGFloat = 1.005
+    var scale: CGFloat = 1.0
     @State private var isHovered = false
 
     func body(content: Content) -> some View {
         content
             .scaleEffect(isHovered ? scale : 1.0)
-            .shadow(color: Theme.Colors.accent.opacity(isHovered ? 0.06 : 0), radius: 8)
             .onHover { hovering in
                 withAnimation(Theme.Animation.snappy) {
                     isHovered = hovering
@@ -282,7 +239,7 @@ struct MaeHoverEffect: ViewModifier {
 
 struct MaeAppearAnimation: ViewModifier {
     var animation: SwiftUI.Animation = Theme.Animation.gentle
-    var scale: CGFloat = 0.95
+    var scale: CGFloat = 0.97
     @State private var isVisible = false
 
     func body(content: Content) -> some View {
@@ -300,7 +257,7 @@ struct MaeAppearAnimation: ViewModifier {
 struct MaeStaggeredAppear: ViewModifier {
     var index: Int
     var baseDelay: Double = 0.04
-    var offsetY: CGFloat = 12
+    var offsetY: CGFloat = 8
     @State private var isVisible = false
 
     func body(content: Content) -> some View {
@@ -320,9 +277,9 @@ struct MaeButtonPressEffect: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .scaleEffect(isPressed ? 0.94 : 1.0)
-            .opacity(isPressed ? 0.85 : 1.0)
-            .animation(Theme.Animation.snappy, value: isPressed)
+            .scaleEffect(isPressed ? 0.96 : 1.0)
+            .opacity(isPressed ? 0.8 : 1.0)
+            .animation(Theme.Animation.quickSnap, value: isPressed)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in isPressed = true }
@@ -340,9 +297,9 @@ struct MaeShimmerEffect: ViewModifier {
                 LinearGradient(
                     colors: [
                         .clear,
-                        Theme.Colors.accentPrimary.opacity(0.06),
-                        Theme.Colors.accentPrimary.opacity(0.12),
-                        Theme.Colors.accentPrimary.opacity(0.06),
+                        Theme.Colors.accentPrimary.opacity(0.04),
+                        Theme.Colors.accentPrimary.opacity(0.08),
+                        Theme.Colors.accentPrimary.opacity(0.04),
                         .clear
                     ],
                     startPoint: .init(x: phase - 0.5, y: 0.5),
@@ -362,9 +319,9 @@ struct MaeShimmerEffect: ViewModifier {
 }
 
 struct MaePulseEffect: ViewModifier {
-    var minScale: CGFloat = 0.92
+    var minScale: CGFloat = 0.95
     var maxOpacity: Double = 1.0
-    var minOpacity: Double = 0.6
+    var minOpacity: Double = 0.65
     var duration: Double = 1.6
     @State private var isPulsing = false
 
@@ -384,7 +341,7 @@ struct MaePulseEffect: ViewModifier {
 }
 
 struct MaeFloatingEffect: ViewModifier {
-    var amplitude: CGFloat = 6
+    var amplitude: CGFloat = 4
     var duration: Double = 3.0
     @State private var isFloating = false
 
@@ -402,35 +359,18 @@ struct MaeFloatingEffect: ViewModifier {
     }
 }
 
-struct MaeGlowHoverEffect: ViewModifier {
-    var glowColor: Color = Theme.Colors.accentPrimary
-    var glowRadius: CGFloat = 12
-    @State private var isHovered = false
-
-    func body(content: Content) -> some View {
-        content
-            .scaleEffect(isHovered ? 1.03 : 1.0)
-            .shadow(color: glowColor.opacity(isHovered ? 0.25 : 0), radius: glowRadius)
-            .brightness(isHovered ? 0.03 : 0)
-            .animation(Theme.Animation.responsive, value: isHovered)
-            .onHover { hovering in
-                isHovered = hovering
-            }
-    }
-}
-
 struct MaeTypingDots: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 0.35)) { context in
             let activeIndex = Int(context.date.timeIntervalSinceReferenceDate / 0.35) % 3
 
-            HStack(spacing: 5) {
+            HStack(spacing: 4) {
                 ForEach(0..<3) { index in
                     Circle()
-                        .fill(Theme.Colors.accentPrimary.opacity(activeIndex == index ? 0.9 : 0.3))
-                        .frame(width: 6, height: 6)
-                        .scaleEffect(activeIndex == index ? 1.3 : 1.0)
-                        .animation(Theme.Animation.microBounce, value: activeIndex)
+                        .fill(Theme.Colors.accentPrimary.opacity(activeIndex == index ? 0.85 : 0.25))
+                        .frame(width: 5, height: 5)
+                        .scaleEffect(activeIndex == index ? 1.2 : 1.0)
+                        .animation(Theme.Animation.snappy, value: activeIndex)
                 }
             }
         }
@@ -443,7 +383,7 @@ struct MaeTypingDots: View {
 
 extension View {
 
-    /// Flat surface background — replaces glass effect
+    /// Clean surface background with subtle border
     func maeGlassBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .background(Theme.Colors.surface)
@@ -454,7 +394,7 @@ extension View {
             )
     }
 
-    /// Neutral surface with border (assistant bubbles, cards)
+    /// Neutral surface with border
     func maeSurfaceBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .background(Theme.Colors.surface)
@@ -472,7 +412,7 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 1)
+                    .stroke(Theme.Colors.border, lineWidth: 0.5)
             )
     }
 
@@ -483,14 +423,14 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 
-    /// Text input style — dedicated input background
+    /// Text input style
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
             .font(Theme.Typography.bodySmall)
             .foregroundStyle(Theme.Colors.textPrimary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
             .background(Theme.Colors.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
@@ -505,8 +445,8 @@ extension View {
             .textFieldStyle(.plain)
             .font(Theme.Typography.bodySmall)
             .foregroundStyle(Theme.Colors.textPrimary)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
             .background(Theme.Colors.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
@@ -530,11 +470,11 @@ extension View {
         return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
 
-    func maeHover(scale: CGFloat = 1.005) -> some View {
+    func maeHover(scale: CGFloat = 1.0) -> some View {
         self.modifier(MaeHoverEffect(scale: scale))
     }
 
-    func maeAppearAnimation(animation: SwiftUI.Animation = Theme.Animation.gentle, scale: CGFloat = 0.95) -> some View {
+    func maeAppearAnimation(animation: SwiftUI.Animation = Theme.Animation.gentle, scale: CGFloat = 0.97) -> some View {
         self.modifier(MaeAppearAnimation(animation: animation, scale: scale))
     }
 
@@ -554,22 +494,20 @@ extension View {
         self.modifier(MaePulseEffect(duration: duration))
     }
 
-    func maeFloating(amplitude: CGFloat = 6, duration: Double = 3.0) -> some View {
+    func maeFloating(amplitude: CGFloat = 4, duration: Double = 3.0) -> some View {
         self.modifier(MaeFloatingEffect(amplitude: amplitude, duration: duration))
     }
 
     func maeGlowHover(color: Color = Theme.Colors.accentPrimary) -> some View {
-        self.modifier(MaeGlowHoverEffect(glowColor: color))
+        self.modifier(MaeHoverEffect(scale: 1.01))
     }
 
     func maeAccentGlow() -> some View {
-        let s = Theme.Shadows.accentGlow
-        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
+        self
     }
 
     func maeSubtleGlow() -> some View {
-        let s = Theme.Shadows.subtleGlow
-        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
+        self
     }
 }
 
@@ -578,8 +516,6 @@ extension View {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 struct MaeDivider: View {
-    // Uses Rectangle instead of Divider().background() — the latter doesn't reliably
-    // change the system separator color on macOS.
     var body: some View {
         Rectangle()
             .fill(Theme.Colors.border)
@@ -591,14 +527,9 @@ struct MaeGradientDivider: View {
     var tinted: Bool = false
 
     var body: some View {
-        LinearGradient(
-            colors: tinted
-                ? [.clear, Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.2), .clear]
-                : [.clear, Theme.Colors.border, .clear],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-        .frame(height: 1)
+        Rectangle()
+            .fill(Theme.Colors.border)
+            .frame(height: 0.5)
     }
 }
 
@@ -611,7 +542,7 @@ struct MaeCardStyle: GroupBoxStyle {
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                .stroke(Theme.Colors.border, lineWidth: 1)
+                .stroke(Theme.Colors.border, lineWidth: 0.5)
         )
     }
 }
@@ -619,11 +550,12 @@ struct MaeCardStyle: GroupBoxStyle {
 struct MaeSectionHeader: View {
     let title: String
     var body: some View {
-        Text(title)
-            .font(Theme.Typography.caption)
+        Text(title.uppercased())
+            .font(Theme.Typography.micro)
             .foregroundStyle(Theme.Colors.textMuted)
-            .padding(.bottom, 4)
-            .padding(.top, 12)
+            .tracking(0.5)
+            .padding(.bottom, 6)
+            .padding(.top, 14)
             .padding(.horizontal, 4)
     }
 }
@@ -639,12 +571,12 @@ struct MaeActionRow: View {
         HStack(spacing: 12) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(Theme.Typography.bodyBold)
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(iconColor)
                     .symbolEffect(.bounce, value: appeared)
-                    .frame(width: 24, height: 24)
-                    .background(iconColor.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .frame(width: 28, height: 28)
+                    .background(iconColor.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                     .accessibilityHidden(true)
                     .onAppear { appeared = true }
             }
@@ -669,7 +601,7 @@ struct MaeActionRow: View {
 
 struct MaeIconButton: View {
     let icon: String
-    var size: CGFloat = 16
+    var size: CGFloat = 14
     var color: Color = Theme.Colors.textSecondary
     var bgColor: Color = .clear
     var helpText: String? = nil
@@ -687,7 +619,7 @@ struct MaeIconButton: View {
                 .symbolEffect(.bounce, value: tapCount)
                 .padding(bgColor == .clear ? 6 : 8)
                 .background(bgColor)
-                .frame(width: 36, height: 36)
+                .frame(width: 32, height: 32)
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
@@ -700,24 +632,7 @@ struct MaePageBackground: View {
     var showGlow: Bool = false
 
     var body: some View {
-        ZStack {
-            Theme.Colors.background.ignoresSafeArea()
-            if showGlow {
-                RadialGradient(
-                    gradient: Gradient(colors: [Theme.Colors.accentPrimary.opacity(0.06), Theme.Colors.accentSecondary.opacity(0.02), .clear]),
-                    center: .topLeading,
-                    startRadius: 0,
-                    endRadius: 400
-                )
-            } else {
-                RadialGradient(
-                    gradient: Gradient(colors: [Theme.Colors.accentSecondary.opacity(0.03), .clear]),
-                    center: .topLeading,
-                    startRadius: 0,
-                    endRadius: 400
-                )
-            }
-        }
+        Theme.Colors.background.ignoresSafeArea()
     }
 }
 
@@ -742,9 +657,8 @@ struct MaeStatusBadge: View {
     var body: some View {
         HStack(spacing: 5) {
             Circle()
-                .fill(color.opacity(isActive ? 0.9 : 0.4))
-                .frame(width: 6, height: 6)
-                .shadow(color: color.opacity(isActive ? 0.5 : 0), radius: 3)
+                .fill(color.opacity(isActive ? 0.85 : 0.35))
+                .frame(width: 5, height: 5)
                 .maePulse(duration: isActive ? 2.0 : 0)
 
             Text(label)
@@ -760,19 +674,6 @@ struct MaeStatusBadge: View {
     }
 }
 
-struct MaeAccentGradient: View {
-    var opacity: Double = 1.0
-
-    var body: some View {
-        LinearGradient(
-            colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .opacity(opacity)
-    }
-}
-
 struct MaeChip: View {
     let label: String
     var isSelected: Bool = false
@@ -781,16 +682,16 @@ struct MaeChip: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 11, weight: .medium, design: .rounded))
-                .foregroundStyle(isSelected ? Theme.Colors.background : Theme.Colors.textPrimary.opacity(0.9))
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(isSelected ? .white : Theme.Colors.textPrimary.opacity(0.85))
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(isSelected ? Theme.Colors.accentPrimary : Theme.Colors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(isSelected ? Theme.Colors.accentPrimary.opacity(0.5) : Theme.Colors.border, lineWidth: 0.5)
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .stroke(isSelected ? Color.clear : Theme.Colors.border, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
@@ -803,31 +704,17 @@ struct MaeEmptyState: View {
     var subtitle: String? = nil
 
     var body: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accentPrimary.opacity(0.03))
-                    .frame(width: 84, height: 84)
-                Circle()
-                    .stroke(
-                        LinearGradient(
-                            colors: [Theme.Colors.gradientStart.opacity(0.15), Theme.Colors.gradientEnd.opacity(0.08)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-                    .frame(width: 64, height: 64)
-                Circle()
-                    .fill(Theme.Colors.surfaceSecondary)
+                    .fill(Theme.Colors.accentPrimary.opacity(0.06))
                     .frame(width: 56, height: 56)
                 Image(systemName: icon)
-                    .font(.system(size: 24, weight: .light))
-                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                    .font(.system(size: 22, weight: .light))
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.65))
             }
-            .maeFloating(amplitude: 4, duration: 4.0)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 4) {
                 Text(title)
                     .font(Theme.Typography.heading)
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
@@ -835,7 +722,7 @@ struct MaeEmptyState: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
+                        .foregroundStyle(Theme.Colors.textMuted)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -860,11 +747,11 @@ struct MaeDateSeparator: View {
         HStack(spacing: 10) {
             capsuleLine
             Text(label)
-                .font(.cormorantGaramond(size: 13, weight: .medium))
+                .font(Theme.Typography.micro)
                 .foregroundStyle(Theme.Colors.textMuted)
             capsuleLine
         }
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .padding(.horizontal, 24)
     }
 
@@ -901,53 +788,13 @@ struct MaeActionButton: View {
             .background(
                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
                     .fill(style == .accent
-                        ? AnyShapeStyle(Theme.Colors.accentGradient)
+                        ? AnyShapeStyle(Theme.Colors.accentPrimary)
                         : AnyShapeStyle(Theme.Colors.accent.opacity(0.9))
                     )
             )
         }
         .buttonStyle(.plain)
-        .maeGlowHover()
         .maePressEffect()
-    }
-}
-
-struct MaeGradientBorderModifier: ViewModifier {
-    var cornerRadius: CGFloat = Theme.Metrics.radiusMedium
-    var lineWidth: CGFloat = 1.0
-    @State private var rotation: Double = 0
-
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(
-                        AngularGradient(
-                            colors: [
-                                Theme.Colors.gradientStart.opacity(0.4),
-                                Theme.Colors.gradientEnd.opacity(0.2),
-                                Theme.Colors.gradientStart.opacity(0.1),
-                                Theme.Colors.gradientEnd.opacity(0.4),
-                                Theme.Colors.gradientStart.opacity(0.4)
-                            ],
-                            center: .center,
-                            startAngle: .degrees(rotation),
-                            endAngle: .degrees(rotation + 360)
-                        ),
-                        lineWidth: lineWidth
-                    )
-            )
-            .onAppear {
-                withAnimation(.linear(duration: 4.0).repeatForever(autoreverses: false)) {
-                    rotation = 360
-                }
-            }
-    }
-}
-
-extension View {
-    func maeGradientBorder(cornerRadius: CGFloat = Theme.Metrics.radiusMedium, lineWidth: CGFloat = 1.0) -> some View {
-        self.modifier(MaeGradientBorderModifier(cornerRadius: cornerRadius, lineWidth: lineWidth))
     }
 }
 
@@ -968,11 +815,11 @@ struct MaeTooltipButton: View {
                 .font(.system(size: size, weight: .regular))
                 .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
                 .symbolEffect(.bounce, value: tapCount)
-                .frame(width: 30, height: 30)
+                .frame(width: 28, height: 28)
                 .contentShape(Rectangle())
                 .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(isHovered ? Theme.Colors.surfaceTertiary : Color.clear)
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(isHovered ? Theme.Colors.surfaceHover : Color.clear)
                 )
         }
         .buttonStyle(.plain)
@@ -985,29 +832,12 @@ struct MaeTooltipButton: View {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// MARK: - 4. New Components (Redesign)
+// MARK: - 4. Additional Components
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-struct MaeGradientText: View {
-    let text: String
-    var font: Font = Theme.Typography.heading
-
-    var body: some View {
-        Text(text)
-            .font(font)
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-    }
-}
 
 struct MaeProgressBar: View {
     let value: CGFloat  // 0...1
-    var height: CGFloat = 4
+    var height: CGFloat = 3
 
     var body: some View {
         GeometryReader { geo in
@@ -1015,7 +845,7 @@ struct MaeProgressBar: View {
                 RoundedRectangle(cornerRadius: height / 2)
                     .fill(Theme.Colors.surfaceTertiary)
                 RoundedRectangle(cornerRadius: height / 2)
-                    .fill(Theme.Colors.accentGradient)
+                    .fill(Theme.Colors.accentPrimary)
                     .frame(width: max(height, geo.size.width * min(value, 1.0)))
             }
         }
@@ -1027,22 +857,22 @@ struct MaeProgressBar: View {
 struct MaeTag: View {
     let label: String
     var icon: String? = nil
-    var color: Color = Theme.Colors.accentPrimary
+    var color: Color = Theme.Colors.textSecondary
 
     var body: some View {
         HStack(spacing: 4) {
             if let icon {
                 Image(systemName: icon)
-                    .font(.system(size: 8, weight: .semibold))
+                    .font(.system(size: 9, weight: .medium))
             }
             Text(label)
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(Theme.Typography.micro)
                 .lineLimit(1)
         }
         .foregroundStyle(color)
-        .padding(.horizontal, 7)
+        .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .background(color.opacity(0.1))
+        .background(color.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 }
@@ -1054,18 +884,29 @@ struct MaeScrollToBottomButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "chevron.down")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Theme.Colors.textSecondary)
-                .frame(width: 32, height: 32)
+                .frame(width: 28, height: 28)
                 .background(Theme.Colors.surface)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
-                .scaleEffect(isHovered ? 1.05 : 1.0)
+                .scaleEffect(isHovered ? 1.03 : 1.0)
                 .maeSoftShadow()
         }
         .buttonStyle(.plain)
         .onHover { hovering in
             withAnimation(Theme.Animation.quickSnap) { isHovered = hovering }
         }
+    }
+}
+
+// MARK: - Backward Compatibility (kept as no-ops or simplified)
+
+extension View {
+    func maeGradientBorder(cornerRadius: CGFloat = Theme.Metrics.radiusMedium, lineWidth: CGFloat = 1.0) -> some View {
+        self.overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(Theme.Colors.accentPrimary.opacity(0.2), lineWidth: lineWidth)
+        )
     }
 }

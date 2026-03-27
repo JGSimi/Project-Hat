@@ -3,7 +3,7 @@ import SwiftUI
 struct ChatBubble: View {
     let message: ChatMessage
     var animationIndex: Int = 0
-    var isGrouped: Bool = false  // consecutive messages from same sender
+    var isGrouped: Bool = false
     @State private var isHovered = false
     @State private var showCopied = false
 
@@ -15,33 +15,23 @@ struct ChatBubble: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
-            if message.isUser { Spacer(minLength: 50) }
+            if message.isUser { Spacer(minLength: 48) }
 
-            // Assistant avatar — hidden when grouped
+            // Assistant avatar
             if !message.isUser {
                 if isGrouped {
-                    Color.clear.frame(width: 28, height: 28)
+                    Color.clear.frame(width: 26, height: 26)
                 } else {
                     ZStack {
                         Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.1)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                            .frame(width: 30, height: 30)
+                            .fill(Theme.Colors.surfaceSecondary)
+                            .frame(width: 26, height: 26)
                         Image("hat-svgrepo-com")
                             .renderingMode(.template)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.75))
-                            .padding(5)
-                            .background(Theme.Colors.surfaceSecondary)
-                            .clipShape(Circle())
+                            .frame(width: 14, height: 14)
+                            .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                     }
                     .padding(.top, 2)
                 }
@@ -54,13 +44,13 @@ struct ChatBubble: View {
                         Image(systemName: "camera.viewfinder")
                             .font(.system(size: 10))
                             .symbolEffect(.pulse)
-                        Text("Análise de Tela")
-                            .font(.system(size: 10, weight: .medium, design: .rounded))
+                        Text("Analise de Tela")
+                            .font(.system(size: 10, weight: .medium))
                     }
                     .foregroundStyle(Theme.Colors.accentPrimary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Theme.Colors.accentPrimary.opacity(0.1))
+                    .background(Theme.Colors.accentPrimary.opacity(0.08))
                     .clipShape(Capsule())
                 }
 
@@ -71,18 +61,17 @@ struct ChatBubble: View {
                             Image(nsImage: img)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(maxHeight: 220)
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .frame(maxHeight: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
                                         .stroke(Theme.Colors.border, lineWidth: 0.5)
                                 )
-                                .maeSoftShadow()
                         } else if !attachment.isImage {
                             HStack(spacing: 8) {
                                 Image(systemName: "doc.text.fill")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.8))
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                                 Text(attachment.name)
                                     .font(Theme.Typography.caption)
                                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -107,13 +96,12 @@ struct ChatBubble: View {
                         Image(nsImage: images[index])
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .frame(maxHeight: 220)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .frame(maxHeight: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
                                     .stroke(Theme.Colors.border, lineWidth: 0.5)
                             )
-                            .maeSoftShadow()
                     }
                 }
 
@@ -127,20 +115,11 @@ struct ChatBubble: View {
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                                 .textSelection(.enabled)
-                                .background(
-                                    LinearGradient(
-                                        colors: [
-                                            Theme.Colors.accentPrimary.opacity(0.12),
-                                            Theme.Colors.accentSecondary.opacity(0.06)
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous))
+                                .background(Theme.Colors.accentPrimary.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .overlay(
-                                    UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18, bottomTrailingRadius: 8, topTrailingRadius: 18, style: .continuous)
-                                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 0.5)
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .stroke(Theme.Colors.accentPrimary.opacity(0.1), lineWidth: 0.5)
                                 )
                         } else {
                             HatMarkdownView(markdown: message.content)
@@ -148,40 +127,23 @@ struct ChatBubble: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
                                         .fill(Theme.Colors.surface)
                                 )
-                                .clipShape(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 8,
-                                        bottomLeadingRadius: 18,
-                                        bottomTrailingRadius: 18,
-                                        topTrailingRadius: 18,
-                                        style: .continuous
-                                    )
-                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .overlay(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 8,
-                                        bottomLeadingRadius: 18,
-                                        bottomTrailingRadius: 18,
-                                        topTrailingRadius: 18,
-                                        style: .continuous
-                                    )
-                                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .stroke(Theme.Colors.border, lineWidth: 0.5)
                                 )
-                                .maeSoftShadow()
                         }
 
                         // Copy button + timestamp — appear on hover
                         if isHovered && !message.content.isEmpty {
                             HStack(spacing: 6) {
-                                // Timestamp
                                 Text(timeString)
-                                    .font(.system(size: 9, weight: .regular, design: .rounded))
+                                    .font(.system(size: 9, weight: .regular))
                                     .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
 
-                                // Copy button
                                 Button {
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString(message.content, forType: .string)
@@ -195,7 +157,7 @@ struct ChatBubble: View {
                                             .font(.system(size: 9, weight: .medium))
                                         if showCopied {
                                             Text("Copiado")
-                                                .font(.system(size: 9, weight: .medium, design: .rounded))
+                                                .font(.system(size: 9, weight: .medium))
                                         }
                                     }
                                     .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textMuted)
@@ -213,13 +175,13 @@ struct ChatBubble: View {
                 }
             }
 
-            if !message.isUser { Spacer(minLength: 50) }
+            if !message.isUser { Spacer(minLength: 48) }
         }
         .padding(.horizontal, Theme.Metrics.spacingDefault)
-        .padding(.vertical, isGrouped ? 2 : 6)
+        .padding(.vertical, isGrouped ? 2 : 5)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(isHovered ? Theme.Colors.accentPrimary.opacity(0.015) : Color.clear)
+                .fill(isHovered ? Theme.Colors.surfaceHover : Color.clear)
         )
         .onHover { hovering in
             withAnimation(Theme.Animation.hover) { isHovered = hovering }

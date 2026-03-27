@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Binding var isPresented: Bool
-    
+
     @AppStorage("inferenceMode") var inferenceMode: InferenceMode = .local
     @AppStorage("selectedProvider") var selectedProvider: CloudProvider = .google
     @AppStorage("apiModelName") var apiModelName: String = "gpt-5.2"
@@ -30,22 +30,21 @@ struct SettingsView: View {
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
-                Text("Configurações")
+                    .frame(width: 14, height: 14)
+                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                Text("Configuracoes")
                     .font(Theme.Typography.heading)
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                 Spacer()
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
             .padding(.top, 20)
-            .padding(.bottom, 4)
+            .padding(.bottom, 6)
 
             ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: 16) {
-                MaeSectionHeader(title: "Modo de Inferência")
+            VStack(spacing: 14) {
+                MaeSectionHeader(title: "Modo de Inferencia")
 
-                // Mode Picker + Active Model
                 VStack(alignment: .leading, spacing: 12) {
                     Picker("", selection: $inferenceMode) {
                         ForEach(InferenceMode.allCases) { mode in
@@ -65,7 +64,7 @@ struct SettingsView: View {
                 .padding(14)
                 .maeCleanCard()
 
-                // Provider Quick Switch (only in API mode, only providers with saved keys)
+                // Provider Quick Switch
                 if inferenceMode == .api {
                     let providersWithKeys = CloudProvider.allCases.filter {
                         !(KeychainManager.shared.loadKey(for: $0) ?? "").isEmpty
@@ -73,7 +72,6 @@ struct SettingsView: View {
 
                     if providersWithKeys.count > 1 {
                         VStack(alignment: .leading, spacing: 12) {
-                            // Provider chips
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 6) {
                                     ForEach(providersWithKeys) { provider in
@@ -87,25 +85,25 @@ struct SettingsView: View {
                                             loadQuickModels()
                                         } label: {
                                             Text(provider.shortName)
-                                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                                .font(.system(size: 11, weight: .medium))
                                                 .foregroundStyle(
                                                     selectedProvider == provider
-                                                        ? Theme.Colors.background
-                                                        : Theme.Colors.textPrimary.opacity(0.9)
+                                                        ? .white
+                                                        : Theme.Colors.textPrimary.opacity(0.85)
                                                 )
                                                 .padding(.horizontal, 10)
                                                 .padding(.vertical, 6)
                                                 .background(
                                                     selectedProvider == provider
-                                                        ? Theme.Colors.accent
+                                                        ? Theme.Colors.accentPrimary
                                                         : Theme.Colors.surfaceSecondary
                                                 )
-                                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
                                                 .overlay(
-                                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
                                                         .stroke(
                                                             selectedProvider == provider
-                                                                ? Theme.Colors.accentPrimary.opacity(0.5)
+                                                                ? Color.clear
                                                                 : Theme.Colors.border,
                                                             lineWidth: 0.5
                                                         )
@@ -116,7 +114,6 @@ struct SettingsView: View {
                                 }
                             }
 
-                            // Model quick selector
                             VStack(alignment: .leading, spacing: 8) {
                                 if isFetchingQuickModels {
                                     HStack {
@@ -145,18 +142,22 @@ struct SettingsView: View {
                                                         .font(.system(size: 10, weight: .medium, design: .monospaced))
                                                         .foregroundStyle(
                                                             apiModelName == model
-                                                                ? Theme.Colors.background
-                                                                : Theme.Colors.textPrimary.opacity(0.9)
+                                                                ? .white
+                                                                : Theme.Colors.textPrimary.opacity(0.85)
                                                         )
                                                         .lineLimit(1)
                                                         .padding(.horizontal, 8)
                                                         .padding(.vertical, 5)
                                                         .background(
                                                             apiModelName == model
-                                                                ? Theme.Colors.accent
-                                                                : Theme.Colors.background.opacity(0.6)
+                                                                ? Theme.Colors.accentPrimary
+                                                                : Theme.Colors.surfaceSecondary
                                                         )
                                                         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                                        .overlay(
+                                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                                .stroke(apiModelName == model ? Color.clear : Theme.Colors.border, lineWidth: 0.5)
+                                                        )
                                                 }
                                                 .buttonStyle(.plain)
                                             }
@@ -197,7 +198,7 @@ struct SettingsView: View {
                                         .foregroundStyle(Theme.Colors.textMuted)
                                 }
                                 HStack(spacing: 3) {
-                                    Circle().fill(Theme.Colors.accentSecondary).frame(width: 5, height: 5)
+                                    Circle().fill(Theme.Colors.textSecondary).frame(width: 5, height: 5)
                                     Text("Out: " + formatTokenCount(globalOutputTokens))
                                         .font(Theme.Typography.micro)
                                         .foregroundStyle(Theme.Colors.textMuted)
@@ -219,7 +220,7 @@ struct SettingsView: View {
                             : 0.5
                         MaeProgressBar(value: tokenBarAppeared ? inputRatio : 0)
                             .onAppear {
-                                withAnimation(Theme.Animation.expressive) {
+                                withAnimation(Theme.Animation.smooth) {
                                     tokenBarAppeared = true
                                 }
                             }
@@ -239,7 +240,7 @@ struct SettingsView: View {
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Theme.Colors.textSecondary)
-                            Text("Atualizações")
+                            Text("Atualizacoes")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                             Spacer(minLength: 0)
@@ -250,7 +251,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .maePressEffect()
 
-                    MaeGradientDivider()
+                    MaeDivider()
 
                     Button {
                         withAnimation {
@@ -263,7 +264,7 @@ struct SettingsView: View {
                             Image(systemName: "gearshape.fill")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(Theme.Colors.textSecondary)
-                            Text("Avançado")
+                            Text("Avancado")
                                 .font(Theme.Typography.bodySmall)
                                 .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
                             Spacer(minLength: 0)
@@ -285,7 +286,7 @@ struct SettingsView: View {
         }
         .background(MaePageBackground())
         .overlay(alignment: .topTrailing) {
-            MaeIconButton(icon: "xmark", size: 12, color: Theme.Colors.textMuted, bgColor: .clear, helpText: "Fechar Configurações") {
+            MaeIconButton(icon: "xmark", size: 11, color: Theme.Colors.textMuted, bgColor: .clear, helpText: "Fechar Configuracoes") {
                 withAnimation(Theme.Animation.smooth) {
                     isPresented = false
                 }
@@ -302,7 +303,7 @@ struct SettingsView: View {
         quickModelTask = Task {
             let apiKey = KeychainManager.shared.loadKey(for: selectedProvider) ?? ""
             guard !apiKey.isEmpty, selectedProvider.modelsEndpoint != nil else {
-                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponível" }
+                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponivel" }
                 return
             }
             isFetchingQuickModels = true
@@ -315,7 +316,7 @@ struct SettingsView: View {
                 }
             } catch {
                 guard !Task.isCancelled else { return }
-                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponível" }
+                quickModels = selectedProvider.availableModels.filter { $0 != "API não disponivel" }
             }
         }
     }
@@ -345,7 +346,7 @@ private struct TokenStat: View {
                     .foregroundStyle(Theme.Colors.textMuted)
             }
             Text(value)
-                .font(.system(size: isPrimary ? 15 : 13, weight: isPrimary ? .semibold : .medium, design: .rounded))
+                .font(.system(size: isPrimary ? 15 : 13, weight: isPrimary ? .semibold : .medium))
                 .foregroundStyle(isPrimary ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
         }
     }

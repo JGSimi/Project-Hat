@@ -129,7 +129,6 @@ struct QuickInputView: View {
     @ObservedObject private var viewModel: AssistantViewModel
     @State private var inputText: String = ""
     @FocusState private var isInputFocused: Bool
-    // Focus state managed by FocusState
 
     init(viewModel: AssistantViewModel) {
         self.viewModel = viewModel
@@ -157,12 +156,10 @@ struct QuickInputView: View {
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
         .maeElevatedShadow()
-        .maeGradientBorder(cornerRadius: Theme.Metrics.radiusLarge, lineWidth: 0.8)
         .frame(width: 680)
         .onAppear {
             isInputFocused = true
         }
-
     }
 
     // MARK: - Input Bar
@@ -172,7 +169,7 @@ struct QuickInputView: View {
             HStack(alignment: .center, spacing: 10) {
                 actionButtons
 
-                TextField("Pergunte algo à Hat...", text: $inputText, axis: .vertical)
+                TextField("Pergunte algo a Hat...", text: $inputText, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(Theme.Typography.subheading)
                     .foregroundStyle(Theme.Colors.textPrimary)
@@ -184,16 +181,15 @@ struct QuickInputView: View {
 
                 if viewModel.isProcessing {
                     MaeTypingDots()
-                        .frame(width: 32, height: 32)
+                        .frame(width: 28, height: 28)
                         .transition(.maeScaleFade)
                 } else {
                     Button {
                         send()
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted.opacity(0.4))
-                            .symbolEffect(.bounce, options: .nonRepeating)
+                            .font(.system(size: 24))
+                            .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted.opacity(0.3))
                     }
                     .buttonStyle(.plain)
                     .disabled(!hasContent)
@@ -204,10 +200,8 @@ struct QuickInputView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
-            // Recent prompts + keyboard hints
             if inputText.isEmpty && viewModel.pendingAttachments.isEmpty {
                 VStack(spacing: 8) {
-                    // Recent prompt suggestions
                     let recentPrompts = Array(
                         viewModel.messages
                             .filter { $0.isUser && !$0.content.isEmpty && $0.content.count < 60 }
@@ -229,8 +223,8 @@ struct QuickInputView: View {
                     }
 
                     HStack(spacing: 12) {
-                        keyboardHint(key: "⏎", label: "enviar")
-                        keyboardHint(key: "esc", label: "fechar")
+                        keyboardHint(key: "Return", label: "enviar")
+                        keyboardHint(key: "Esc", label: "fechar")
                     }
                 }
                 .padding(.bottom, 10)
@@ -242,16 +236,16 @@ struct QuickInputView: View {
     private func keyboardHint(key: String, label: String) -> some View {
         HStack(spacing: 4) {
             Text(key)
-                .font(.system(size: 9, weight: .semibold, design: .rounded))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
                 .background(Theme.Colors.surfaceTertiary)
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
             Text(label)
-                .font(.system(size: 9, weight: .regular, design: .rounded))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                .font(.system(size: 9, weight: .regular))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
         }
     }
 
@@ -259,21 +253,21 @@ struct QuickInputView: View {
 
     private var actionButtons: some View {
         HStack(spacing: 2) {
-            MaeTooltipButton(icon: "plus.circle.fill", size: 18, helpText: "Anexar arquivo") {
+            MaeTooltipButton(icon: "plus.circle.fill", size: 16, helpText: "Anexar arquivo") {
                 attachFile()
             }
 
             MaeTooltipButton(
                 icon: "camera.viewfinder",
-                size: 18,
+                size: 16,
                 helpText: "Capturar tela"
             ) {
                 QuickInputWindowManager.shared.captureAndReopen()
             }
         }
         .background(Theme.Colors.surfaceSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
     }
 
     // MARK: - Attachments Preview
@@ -288,35 +282,33 @@ struct QuickInputView: View {
                             Image(nsImage: img)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 72, height: 72)
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .frame(width: 64, height: 64)
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
                                         .stroke(
                                             attachment.name == "Captura de Tela"
-                                                ? Theme.Colors.accentPrimary.opacity(0.4)
+                                                ? Theme.Colors.accentPrimary.opacity(0.3)
                                                 : Theme.Colors.border,
                                             lineWidth: attachment.name == "Captura de Tela" ? 1 : 0.5
                                         )
                                 )
-                                .maeSoftShadow()
                         } else {
                             VStack(spacing: 4) {
                                 Image(systemName: "doc.text.fill")
-                                    .font(.system(size: 24))
-                                    .foregroundStyle(Theme.Colors.accentPrimary)
-                                    .symbolEffect(.bounce, options: .nonRepeating)
+                                    .font(.system(size: 20))
+                                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                                 Text(attachment.name)
                                     .font(.system(size: 9))
                                     .lineLimit(1)
                                     .truncationMode(.middle)
-                                    .frame(width: 60)
+                                    .frame(width: 52)
                             }
-                            .frame(width: 72, height: 72)
+                            .frame(width: 64, height: 64)
                             .background(Theme.Colors.surfaceSecondary)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .overlay(
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
                                     .stroke(Theme.Colors.border, lineWidth: 0.5)
                             )
                         }
@@ -328,13 +320,12 @@ struct QuickInputView: View {
                             }
                         } label: {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.system(size: 18))
                                 .foregroundStyle(Theme.Colors.textPrimary, Theme.Colors.background)
-                                .symbolEffect(.bounce, options: .nonRepeating)
-                                .frame(width: 28, height: 28)
+                                .frame(width: 24, height: 24)
                         }
                         .buttonStyle(.plain)
-                        .offset(x: 6, y: -6)
+                        .offset(x: 5, y: -5)
                     }
                     .transition(.maeScaleFade)
                 }

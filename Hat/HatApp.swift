@@ -10,25 +10,21 @@ import KeyboardShortcuts
 import UserNotifications
 import CoreGraphics
 
-// MARK: - App Delegate para gerenciar notificações
+// MARK: - App Delegate
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Configura o delegado para capturar notificações em primeiro plano
         UNUserNotificationCenter.current().delegate = self
 
-        // Verifica primeiro acesso para mostrar a janela de boas vindas
         let hasSeenWelcome = UserDefaults.standard.bool(forKey: "hasSeenWelcome")
         if !hasSeenWelcome {
             WelcomeWindowManager.shared.showWindow()
             UserDefaults.standard.set(true, forKey: "hasSeenWelcome")
         }
 
-        // Verifica permissões a cada inicialização; abre tela de permissões se alguma estiver faltando
         Task {
             await checkAndShowPermissionsIfNeeded()
         }
 
-        // Verifica atualizações silenciosamente
         UpdaterController.shared.checkForUpdatesInBackground()
     }
 
@@ -43,48 +39,40 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
     }
-    
-    // Esta função permite que a notificação apareça mesmo que o app esteja focado
+
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Define que queremos mostrar o banner e tocar o som mesmo com o app aberto
         completionHandler([.banner, .sound])
     }
 }
 
 @main
 struct HatApp: App {
-    // Adaptador para usar o AppDelegate em SwiftUI
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var viewModel = AssistantViewModel.shared
 
     init() {
-        // Migra chave de API única para chaves por provedor (one-time)
         KeychainManager.migrateIfNeeded()
-
-        // Re-salva chaves com kSecAttrAccessibleWhenUnlocked para evitar
-        // prompt de permissão do Keychain a cada atualização do app
         KeychainManager.migrateToAccessibleWhenUnlocked()
 
-        // Registramos o listener global para o atalho quando o app inicia
         KeyboardShortcuts.onKeyDown(for: .processClipboard) {
             Task {
                 await AssistantViewModel.shared.processarIA()
             }
         }
-        
+
         KeyboardShortcuts.onKeyDown(for: .processScreen) {
             Task {
                 await AssistantViewModel.shared.processarScreen()
             }
         }
-        
+
         KeyboardShortcuts.onKeyDown(for: .quickInput) {
             QuickInputWindowManager.shared.toggleWindow()
         }
     }
-    
+
     var body: some Scene {
         MenuBarExtra {
             ContentView()
@@ -99,12 +87,11 @@ private struct MenuBarIconView: View {
     let isProcessing: Bool
     @State private var popScale: CGFloat = 1.0
     @State private var iconOpacity: Double = 1.0
-    
+
     private var iconSide: CGFloat {
-        // Usa a espessura real da menubar (em pontos) para escalar em qualquer resolução.
         max(13, NSStatusBar.system.thickness * 0.74)
     }
-    
+
     var body: some View {
         Image(nsImage: statusBarImage)
             .interpolation(.high)
@@ -115,7 +102,6 @@ private struct MenuBarIconView: View {
             .onAppear(perform: animateIconSwap)
             .onChange(of: isProcessing) { _, newValue in
                 animateIconSwap()
-                // Subtle pulse during processing
                 if newValue {
                     withAnimation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
                         iconOpacity = 0.7
@@ -127,7 +113,7 @@ private struct MenuBarIconView: View {
                 }
             }
     }
-    
+
     private var statusBarImage: NSImage {
         let imageName = isProcessing ? "sunglasses-2-svgrepo-com" : "hat-svgrepo-com"
         let name = NSImage.Name(imageName)
@@ -136,18 +122,18 @@ private struct MenuBarIconView: View {
         image.isTemplate = true
         return image
     }
-    
+
     private func animateIconSwap() {
-        popScale = 0.82
-        iconOpacity = 0.75
-        
-        withAnimation(.spring(response: 0.22, dampingFraction: 0.5, blendDuration: 0.05)) {
-            popScale = 1.18
+        popScale = 0.85
+        iconOpacity = 0.8
+
+        withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+            popScale = 1.1
             iconOpacity = 1.0
         }
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
-            withAnimation(.spring(response: 0.25, dampingFraction: 0.78, blendDuration: 0.05)) {
+            withAnimation(.spring(response: 0.22, dampingFraction: 0.85)) {
                 popScale = 1.0
             }
         }
@@ -212,28 +198,28 @@ class WelcomeWindowManager {
         let screenRect = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1200, height: 960)
         let width = screenRect.width * 0.5
         let height = screenRect.height * 0.5
-        
+
         let contentView = WelcomeView(width: width, height: height)
-        
+
         let newWindow = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: width, height: height),
             styleMask: [.titled, .closable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
-        
+
         newWindow.titlebarAppearsTransparent = true
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
         newWindow.center()
-        
+
         newWindow.contentView = NSHostingView(rootView: contentView)
         self.window = newWindow
         newWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
-    
+
     func closeWindow() {
         window?.close()
         window = nil
@@ -246,7 +232,6 @@ struct WelcomeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             VStack(spacing: Theme.Metrics.spacingLarge) {
                 Image("pc")
                     .resizable()
@@ -256,7 +241,7 @@ struct WelcomeView: View {
 
                 VStack(spacing: 8) {
                     Text("Bem-vindo ao Hat")
-                        .font(Theme.Typography.titleDisplay)
+                        .font(Theme.Typography.largeTitle)
                         .foregroundStyle(Theme.Colors.textPrimary)
                         .maeStaggered(index: 1, baseDelay: 0.15)
                     Text("Seu assistente de IA na barra de menus")
@@ -268,28 +253,26 @@ struct WelcomeView: View {
             .padding(.top, 50)
             .padding(.bottom, 20)
 
-            // Content
             VStack(spacing: Theme.Metrics.spacingXLarge) {
-
                 VStack(spacing: 16) {
                     FeatureRow(
                         icon: "arrow.up.to.line.compact",
                         title: "Sempre Pronto",
-                        description: "Clique no ícone na barra de menus no topo da tela (perto do relógio) para abrir o chat a qualquer momento."
+                        description: "Clique no icone na barra de menus no topo da tela (perto do relogio) para abrir o chat a qualquer momento."
                     )
                     .maeStaggered(index: 3, baseDelay: 0.10)
 
                     FeatureRow(
                         icon: "macwindow.badge.plus",
-                        title: "Análise de Tela Inteligente",
-                        description: "Pressione ⌘ + ⇧ + Z para capturar sua tela e receber ajuda contextual automática."
+                        title: "Analise de Tela Inteligente",
+                        description: "Pressione Cmd+Shift+Z para capturar sua tela e receber ajuda contextual automatica."
                     )
                     .maeStaggered(index: 4, baseDelay: 0.10)
 
                     FeatureRow(
                         icon: "doc.on.clipboard",
-                        title: "Análise de Área de Transferência",
-                        description: "Pressione ⌘ + ⇧ + X para que a IA analise imediatamente o que você copiou."
+                        title: "Analise de Area de Transferencia",
+                        description: "Pressione Cmd+Shift+X para que a IA analise imediatamente o que voce copiou."
                     )
                     .maeStaggered(index: 5, baseDelay: 0.10)
                 }
@@ -297,20 +280,20 @@ struct WelcomeView: View {
 
                 Spacer()
 
-                MaeActionButton(label: "Começar a Usar", style: .accent) {
+                MaeActionButton(label: "Comecar a Usar", style: .accent) {
                     WelcomeWindowManager.shared.closeWindow()
                 }
                 .maeStaggered(index: 6, baseDelay: 0.10)
 
                 Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
                     .padding(.bottom, 20)
             }
             .padding(.top, 10)
             .frame(maxHeight: .infinity)
         }
-        .background(MaePageBackground(showGlow: true))
+        .background(MaePageBackground())
         .ignoresSafeArea()
         .frame(width: width, height: height)
     }
@@ -322,32 +305,13 @@ struct FeatureRow: View {
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            // Gradient accent bar
-            RoundedRectangle(cornerRadius: 1.5)
-                .fill(
-                    LinearGradient(
-                        colors: [Theme.Colors.gradientStart.opacity(0.5), Theme.Colors.gradientEnd.opacity(0.3)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 2.5, height: 36)
-                .padding(.top, 2)
-                .padding(.trailing, 14)
-
+        HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .light))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 36, height: 36)
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(Theme.Colors.accentPrimary)
+                .frame(width: 32, height: 32)
                 .background(Theme.Colors.accentPrimary.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -359,7 +323,6 @@ struct FeatureRow: View {
                     .foregroundStyle(Theme.Colors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.leading, 14)
 
             Spacer()
         }
@@ -379,19 +342,11 @@ struct PermissionRowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Metrics.spacingLarge) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .light))
-                .foregroundStyle(
-                    isGranted
-                        ? AnyShapeStyle(Theme.Colors.success)
-                        : AnyShapeStyle(LinearGradient(
-                            colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                )
-                .frame(width: 36, height: 36)
-                .background(isGranted ? Theme.Colors.success.opacity(0.1) : Theme.Colors.accentPrimary.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .font(.system(size: 16, weight: .regular))
+                .foregroundStyle(isGranted ? Theme.Colors.success : Theme.Colors.accentPrimary)
+                .frame(width: 32, height: 32)
+                .background(isGranted ? Theme.Colors.success.opacity(0.08) : Theme.Colors.accentPrimary.opacity(0.06))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
@@ -408,23 +363,22 @@ struct PermissionRowView: View {
 
             if isGranted {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 22))
+                    .font(.system(size: 20))
                     .foregroundStyle(Theme.Colors.success)
                     .transition(.maeScaleFade)
             } else {
                 Button(action: onGrant) {
                     Text("Permitir")
                         .font(Theme.Typography.bodyBold)
-                        .foregroundStyle(Theme.Colors.background)
+                        .foregroundStyle(.white)
                         .padding(.vertical, 6)
                         .padding(.horizontal, 16)
                 }
                 .buttonStyle(.plain)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                        .fill(Theme.Colors.accent.opacity(0.9))
+                        .fill(Theme.Colors.accentPrimary)
                 )
-                .maeGlowHover()
                 .maePressEffect()
                 .transition(.maeScaleFade)
             }
@@ -447,51 +401,33 @@ struct PermissionsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            VStack(spacing: 10) {
+            VStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .stroke(
-                            LinearGradient(
-                                colors: [Theme.Colors.gradientStart.opacity(0.2), Theme.Colors.gradientEnd.opacity(0.1)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
-                        .frame(width: 76, height: 76)
-                    Circle()
                         .fill(Theme.Colors.accentPrimary.opacity(0.06))
-                        .frame(width: 68, height: 68)
+                        .frame(width: 64, height: 64)
                     Image(systemName: allGranted ? "lock.shield.fill" : "lock.shield")
-                        .font(.system(size: 30, weight: .light))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Theme.Colors.gradientStart, Theme.Colors.gradientEnd],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+                        .font(.system(size: 26, weight: .light))
+                        .foregroundStyle(Theme.Colors.accentPrimary)
                         .symbolEffect(.bounce, value: allGranted)
                 }
                 .maeStaggered(index: 0, baseDelay: 0.12)
 
-                Text("Permissões Necessárias")
-                    .font(Theme.Typography.headingSerif)
+                Text("Permissoes Necessarias")
+                    .font(Theme.Typography.title)
                     .foregroundStyle(Theme.Colors.textPrimary)
                     .maeStaggered(index: 1, baseDelay: 0.12)
 
-                Text("O Hat precisa das seguintes permissões para funcionar corretamente.")
+                Text("O Hat precisa das seguintes permissoes para funcionar corretamente.")
                     .font(Theme.Typography.bodySmall)
                     .foregroundStyle(Theme.Colors.textSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .maeStaggered(index: 2, baseDelay: 0.12)
 
-                // Permission progress
                 HStack(spacing: 6) {
                     let grantedCount = (screenRecordingGranted ? 1 : 0) + (notificationsGranted ? 1 : 0)
-                    Text("\(grantedCount)/2 permissões")
+                    Text("\(grantedCount)/2 permissoes")
                         .font(Theme.Typography.micro)
                         .foregroundStyle(allGranted ? Theme.Colors.success : Theme.Colors.textMuted)
                     if allGranted {
@@ -508,12 +444,11 @@ struct PermissionsView: View {
             .padding(.top, 36)
             .padding(.bottom, 24)
 
-            // Linhas de permissão
             VStack(spacing: 12) {
                 PermissionRowView(
                     icon: "rectangle.dashed.badge.record",
-                    title: "Gravação de Tela",
-                    description: "Necessária para o atalho ⌘+⇧+Z capturar a tela e enviar ao modelo de IA para análise.",
+                    title: "Gravacao de Tela",
+                    description: "Necessaria para o atalho Cmd+Shift+Z capturar a tela e enviar ao modelo de IA para analise.",
                     isGranted: screenRecordingGranted,
                     onGrant: requestScreenRecording,
                     index: 3
@@ -521,8 +456,8 @@ struct PermissionsView: View {
 
                 PermissionRowView(
                     icon: "bell.badge",
-                    title: "Notificações",
-                    description: "Usada para exibir as respostas da IA mesmo quando o app não está em foco.",
+                    title: "Notificacoes",
+                    description: "Usada para exibir as respostas da IA mesmo quando o app nao esta em foco.",
                     isGranted: notificationsGranted,
                     onGrant: requestNotifications,
                     index: 4
@@ -534,14 +469,13 @@ struct PermissionsView: View {
 
             Spacer()
 
-            // Rodapé
             VStack(spacing: 12) {
                 if !allGranted {
                     Button(action: recheckPermissions) {
                         HStack(spacing: 6) {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 12))
-                            Text("Já Concedi")
+                            Text("Ja Concedi")
                                 .font(Theme.Typography.bodySmall)
                         }
                         .foregroundStyle(Theme.Colors.textSecondary)
@@ -555,26 +489,24 @@ struct PermissionsView: View {
                 }) {
                     Text(allGranted ? "Continuar" : "Continuar mesmo assim")
                         .font(Theme.Typography.bodyBold)
-                        // Uses Theme.Colors.background so text contrasts with the accent fill in both light and dark mode
-                        .foregroundStyle(allGranted ? Theme.Colors.background : Theme.Colors.textSecondary)
+                        .foregroundStyle(allGranted ? .white : Theme.Colors.textSecondary)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 32)
                         .background(
                             allGranted
                                 ? RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                                    .fill(Theme.Colors.accent.opacity(0.85))
+                                    .fill(Theme.Colors.accentPrimary)
                                 : nil
                         )
                 }
                 .buttonStyle(.plain)
-                .maeGlowHover()
                 .maePressEffect()
                 .maeStaggered(index: 6, baseDelay: 0.12)
                 .animation(Theme.Animation.smooth, value: allGranted)
             }
             .padding(.bottom, 30)
         }
-        .background(MaePageBackground(showGlow: true))
+        .background(MaePageBackground())
         .ignoresSafeArea()
         .frame(width: width, height: height)
         .task {

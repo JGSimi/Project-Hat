@@ -45,7 +45,7 @@ struct ChatMessage: Identifiable {
     let isUser: Bool
     let source: MessageSource
     let timestamp = Date()
-    
+
     init(content: String, images: [NSImage]? = nil, attachments: [ChatAttachment]? = nil, isUser: Bool, source: MessageSource = .chat) {
         self.content = content
         self.images = images
@@ -79,24 +79,24 @@ extension NSImage {
               let imageSource = CGImageSourceCreateWithData(tiffData as CFData, nil) else {
             return nil
         }
-        
+
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
             kCGImageSourceThumbnailMaxPixelSize: maxDimension
         ]
-        
+
         guard let cgImage = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary) else {
             return nil
         }
-        
+
         let newImage = NSImage(cgImage: cgImage, size: .zero)
         guard let compressedTiff = newImage.tiffRepresentation,
               let bitmapImage = NSBitmapImageRep(data: compressedTiff),
               let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) else {
             return nil
         }
-        
+
         return jpegData.base64EncodedString()
     }
 }
@@ -105,23 +105,21 @@ extension NSImage {
 @MainActor
 class AssistantViewModel: ObservableObject {
     static let shared = AssistantViewModel()
-    
+
     @Published var isProcessing = false
     @Published var messages: [ChatMessage] = []
     @Published var inputText: String = ""
-    @Published var attachedImages: [NSImage] = [] // Deprecated logic soon
+    @Published var attachedImages: [NSImage] = []
     @Published var pendingAttachments: [ChatAttachment] = []
-    
-    // Análise de Tela - Novas Propriedades
+
     @Published var isAnalyzingScreen = false
     @Published var analysisResult: String = ""
     @Published var analysisImage: NSImage? = nil
 
-    // Token Counters - Conversa atual
     @Published var conversationInputTokens: Int = 0
     @Published var conversationOutputTokens: Int = 0
     var conversationTotalTokens: Int { conversationInputTokens + conversationOutputTokens }
-    
+
     private let pasteboard: PasteboardClient
 
     init(pasteboard: PasteboardClient = NSPasteboard.general) {
@@ -191,19 +189,18 @@ class AssistantViewModel: ObservableObject {
         }
         return nil
     }
-    
-    /// Chamado pelo atalho global (Processa Clipboard)
+
     func processarIA() async {
         guard !isProcessing else { return }
-        
+
         var textoClipboard = pasteboard.string(forType: .string) ?? ""
         var copiedImage: NSImage? = nil
-        
+
         if let objects = pasteboard.readObjects(forClasses: [NSImage.self], options: nil),
            let image = objects.first as? NSImage {
             copiedImage = image
         }
-        
+
         if copiedImage != nil {
             let lowercased = textoClipboard.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
             if lowercased.hasPrefix("data:image/") ||
@@ -219,29 +216,26 @@ class AssistantViewModel: ObservableObject {
         await executeRequest(prompt: textoClipboard, rawImages: copiedImage != nil ? [copiedImage!] : nil, attachments: nil)
     }
 
-    /// Chamado pelo atalho global (Intelligent Screen Analysis)
     func processarScreen() async {
         guard !isAnalyzingScreen else { return }
-        
-        // Ativar o app e trazer para frente
+
         NSApp.activate(ignoringOtherApps: true)
-        
+
         guard let screenImage = await captureScreen() else {
             print("Failed to capture screen")
             return
         }
 
-        // Abrir a nova janela de análise
         AnalysisWindowManager.shared.showWindow()
         self.analysisImage = screenImage
         self.analysisResult = ""
         self.isAnalyzingScreen = true
 
         let defaultPrompt = "Analise o que está na minha tela e me ajude de forma proativa. Não me pergunte o que fazer, apenas forneça a análise ou ajuda diretamente com base no contexto (por exemplo, se for um currículo, dê dicas; se for código, analise bugs, etc). Por favor, use formatação Markdown em sua resposta para garantir uma boa legibilidade."
-        
+
         await executeSilentRequest(prompt: defaultPrompt, rawImages: [screenImage])
     }
-    
+
     private func executeSilentRequest(prompt: String, rawImages: [NSImage]?) async {
         defer {
             self.isAnalyzingScreen = false
@@ -260,7 +254,6 @@ class AssistantViewModel: ObservableObject {
 
             self.analysisResult = aiResponse.text
 
-            // Acumula tokens apenas no contador global (análise de tela é fora do chat)
             if let usage = aiResponse.tokenUsage {
                 SettingsManager.addGlobalTokens(input: usage.inputTokens, output: usage.outputTokens)
             }
@@ -276,41 +269,33 @@ class AssistantViewModel: ObservableObject {
         }
     }
 
-    /// Transfere a análise atual para o chat principal
     func continueWithAnalysis(followUp: String? = nil) {
         guard !analysisResult.isEmpty else { return }
-        
-        let prompt = "📸 Análise de Tela"
-        
+
+        let prompt = "Análise de Tela"
+
         let userMsg = ChatMessage(content: prompt, images: analysisImage != nil ? [analysisImage!] : nil, attachments: nil, isUser: true, source: .screenAnalysis)
         let assistantMsg = ChatMessage(content: analysisResult, images: nil, attachments: nil, isUser: false, source: .screenAnalysis)
-        
+
         messages.append(userMsg)
         messages.append(assistantMsg)
-        
-        // Se houver follow-up, enviar como nova mensagem
+
         if let followUp = followUp, !followUp.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             Task {
                 await executeRequest(prompt: followUp, rawImages: nil, attachments: nil)
             }
         }
-        
-        // Limpa a análise atual após transferir
+
         analysisResult = ""
         analysisImage = nil
     }
-    
+
     func captureScreen() async -> NSImage? {
-        // Obsolete in macOS 15.0: CGDisplayCreateImage(CGMainDisplayID())
-        // Using screencapture CLI as a robust workaround that also triggers the permission prompt.
-        // Runs on a background thread to avoid blocking the main thread during capture.
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("png")
         return await Task.detached(priority: .userInitiated) {
             let task = Process()
-            // Use executableURL + run() (modern API) so a launch failure becomes a
-            // Swift Error instead of an unhandled NSException that would crash the app.
             task.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
-            task.arguments = ["-x", tempURL.path] // -x = no sound
+            task.arguments = ["-x", tempURL.path]
             try? task.run()
             task.waitUntilExit()
 
@@ -320,20 +305,19 @@ class AssistantViewModel: ObservableObject {
         }.value
     }
 
-    /// Chamado pela interface via TextField
     func sendManualMessage() async {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         let attachmentsToProcess = pendingAttachments
-        
+
         guard !isProcessing && (!text.isEmpty || !attachmentsToProcess.isEmpty) else { return }
-        
+
         inputText = ""
         pendingAttachments.removeAll()
         attachedImages.removeAll()
-        
+
         var finalPrompt = text
         var extractedImages: [NSImage] = []
-        
+
         for attachment in attachmentsToProcess {
             if attachment.isImage, let img = attachment.image {
                 extractedImages.append(img)
@@ -341,7 +325,7 @@ class AssistantViewModel: ObservableObject {
                 finalPrompt += "\n\n[Arquivo: \(attachment.name)]\n\(content)"
             }
         }
-        
+
         await executeRequest(prompt: finalPrompt, rawImages: extractedImages.isEmpty ? nil : extractedImages, attachments: attachmentsToProcess.isEmpty ? nil : attachmentsToProcess)
     }
 
@@ -350,16 +334,12 @@ class AssistantViewModel: ObservableObject {
         defer { isProcessing = false }
 
         let systemPrompt = SettingsManager.systemPrompt
-
-        // Convert to Base64 for processing but store the raw `NSImage` locally
         let base64Images = rawImages?.compactMap { $0.resizedAndCompressedBase64() }
 
-        // Build history from all existing messages BEFORE appending current user message
         let history = messages.map { msg in
             ConversationTurn(role: msg.isUser ? "user" : "assistant", textContent: msg.content)
         }
 
-        // Adiciona a pergunta ao histórico
         let userMsg = ChatMessage(content: prompt, images: rawImages, attachments: attachments, isUser: true)
         messages.append(userMsg)
 
@@ -373,18 +353,15 @@ class AssistantViewModel: ObservableObject {
 
             let finalResponse = aiResponse.text
 
-            // Acumula tokens
             if let usage = aiResponse.tokenUsage {
                 conversationInputTokens += usage.inputTokens
                 conversationOutputTokens += usage.outputTokens
                 SettingsManager.addGlobalTokens(input: usage.inputTokens, output: usage.outputTokens)
             }
 
-            // Adiciona a resposta ao histórico
             let assistantMsg = ChatMessage(content: finalResponse, images: nil, isUser: false)
             messages.append(assistantMsg)
 
-            // Update Clipboard and Notify
             pasteboard.clearContents()
             pasteboard.copyString(finalResponse, forType: .string)
 
@@ -399,7 +376,7 @@ class AssistantViewModel: ObservableObject {
             print("Error processing AI: \(error)")
         }
     }
-    
+
     private func sendNotification(text: String) async {
         let content = UNMutableNotificationContent()
         content.title = "Hat"
@@ -411,7 +388,7 @@ class AssistantViewModel: ObservableObject {
             content: content,
             trigger: nil
         )
-        
+
         _ = try? await UNUserNotificationCenter.current().add(request)
     }
 
@@ -423,7 +400,6 @@ class AssistantViewModel: ObservableObject {
 }
 
 // MARK: - Window Accessor
-/// Captures the hosting NSWindow reference from SwiftUI.
 struct WindowAccessor: NSViewRepresentable {
     var onChange: (NSWindow?) -> Void
 
@@ -435,7 +411,6 @@ struct WindowAccessor: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
-        // Use viewDidMoveToWindow via KVO-like approach: observe once view is in window hierarchy
         DispatchQueue.main.async {
             guard let window = view.window else { return }
             configureIfNeeded(window: window, coordinator: context.coordinator)
@@ -457,6 +432,8 @@ struct WindowAccessor: NSViewRepresentable {
     }
 }
 
+// MARK: - ContentView
+
 @MainActor
 struct ContentView: View {
     @ObservedObject private var viewModel: AssistantViewModel
@@ -470,10 +447,8 @@ struct ContentView: View {
     @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
     @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
     @FocusState private var isInputFocused: Bool
-    @State private var placeholderIndex: Int = 0
     @State private var isInputFocusedForBorder: Bool = false
     @State private var isAtBottom: Bool = true
-    private let placeholders = ["Mensagem...", "Resuma este texto...", "Explique como...", "Me ajude com..."]
 
     init(viewModel: AssistantViewModel) {
         self.viewModel = viewModel
@@ -487,10 +462,10 @@ struct ContentView: View {
         ZStack {
             chatView
                 .opacity(showSettings ? 0.0 : 1.0)
-                .offset(x: showSettings ? -30 : 0)
-                .blur(radius: showSettings ? 3 : 0)
-                .scaleEffect(showSettings ? 0.97 : 1.0)
-                .animation(Theme.Animation.responsive, value: showSettings)
+                .offset(x: showSettings ? -20 : 0)
+                .blur(radius: showSettings ? 2 : 0)
+                .scaleEffect(showSettings ? 0.98 : 1.0)
+                .animation(Theme.Animation.smooth, value: showSettings)
                 .zIndex(1)
 
             if showSettings {
@@ -507,7 +482,7 @@ struct ContentView: View {
                 window.alphaValue = windowOpacity
             }
         })
-        .maeAppearAnimation(animation: Theme.Animation.expressive, scale: 0.92)
+        .maeAppearAnimation(animation: Theme.Animation.smooth, scale: 0.96)
         .onAppear {
             isInputFocused = true
             hostWindow?.alphaValue = windowOpacity
@@ -527,7 +502,6 @@ struct ContentView: View {
 
     private var chatView: some View {
         VStack(spacing: 0) {
-            // ... (keeping previous header content)
             // Header
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
@@ -535,8 +509,8 @@ struct ContentView: View {
                         .renderingMode(.template)
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 18, height: 18)
-                        .foregroundStyle(Theme.Colors.accent.opacity(0.8))
+                        .frame(width: 16, height: 16)
+                        .foregroundStyle(Theme.Colors.accent.opacity(0.7))
 
                     MaeTag(
                         label: inferenceMode == .local ? localModelName : apiModelName,
@@ -546,8 +520,8 @@ struct ContentView: View {
 
                     Spacer()
 
-                    HStack(spacing: 4) {
-                        MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Análise") {
+                    HStack(spacing: 2) {
+                        MaeTooltipButton(icon: "macwindow.badge.plus", helpText: "Analise") {
                             AnalysisWindowManager.shared.showWindow()
                         }
                         MaeTooltipButton(icon: "square.and.arrow.up", helpText: "Exportar conversa") {
@@ -561,7 +535,8 @@ struct ContentView: View {
 
                         Rectangle()
                             .fill(Theme.Colors.border)
-                            .frame(width: 0.5, height: 16)
+                            .frame(width: 0.5, height: 14)
+                            .padding(.horizontal, 2)
 
                         MaeTooltipButton(icon: "circle.lefthalf.filled", helpText: "Opacidade") {
                             withAnimation(Theme.Animation.smooth) {
@@ -574,7 +549,7 @@ struct ContentView: View {
                                 .frame(width: 160)
                                 .padding(12)
                         }
-                        MaeTooltipButton(icon: "gearshape", helpText: "Configurações") {
+                        MaeTooltipButton(icon: "gearshape", helpText: "Configuracoes") {
                             withAnimation(Theme.Animation.smooth) {
                                 showSettings = true
                             }
@@ -584,7 +559,7 @@ struct ContentView: View {
                 .padding(.horizontal, Theme.Metrics.spacingLarge)
                 .padding(.vertical, 10)
 
-                MaeGradientDivider(tinted: true)
+                MaeDivider()
             }
             .background(Theme.Colors.surface)
             .zIndex(1)
@@ -594,78 +569,53 @@ struct ContentView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         if viewModel.messages.isEmpty {
-                            VStack(spacing: 20) {
-                                Spacer().frame(height: 40)
+                            VStack(spacing: 24) {
+                                Spacer().frame(height: 48)
 
-                                // Accent glow behind greeting
-                                ZStack {
-                                    // Subtle radial glow
-                                    RadialGradient(
-                                        gradient: Gradient(colors: [Theme.Colors.accentPrimary.opacity(0.08), Theme.Colors.accentSecondary.opacity(0.03), .clear]),
-                                        center: .center,
-                                        startRadius: 0,
-                                        endRadius: 140
-                                    )
-                                    .frame(width: 280, height: 280)
+                                VStack(spacing: 14) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Theme.Colors.accentPrimary.opacity(0.06))
+                                            .frame(width: 52, height: 52)
+                                        Image("hat-svgrepo-com")
+                                            .renderingMode(.template)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 22, height: 22)
+                                            .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
+                                    }
 
-                                    VStack(spacing: 16) {
-                                        // Icon with gradient ring
-                                        ZStack {
-                                            Circle()
-                                                .stroke(
-                                                    LinearGradient(
-                                                        colors: [Theme.Colors.gradientStart.opacity(0.15), Theme.Colors.gradientEnd.opacity(0.08)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
-                                                    lineWidth: 1.5
-                                                )
-                                                .frame(width: 64, height: 64)
-                                            Circle()
-                                                .fill(Theme.Colors.surfaceSecondary)
-                                                .frame(width: 56, height: 56)
-                                            Image("hat-svgrepo-com")
-                                                .renderingMode(.template)
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 24, height: 24)
-                                                .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
-                                        }
-                                        .maeFloating(amplitude: 3, duration: 4.0)
+                                    VStack(spacing: 4) {
+                                        Text(greetingText)
+                                            .font(Theme.Typography.title)
+                                            .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
 
-                                        VStack(spacing: 4) {
-                                            Text(greetingText)
-                                                .font(Theme.Typography.headingSerif)
-                                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-
-                                            Text("Como posso te ajudar?")
-                                                .font(Theme.Typography.bodySmall)
-                                                .foregroundStyle(Theme.Colors.textMuted)
-                                        }
+                                        Text("Como posso te ajudar?")
+                                            .font(Theme.Typography.bodySmall)
+                                            .foregroundStyle(Theme.Colors.textMuted)
                                     }
                                 }
 
                                 // Quick action suggestions
-                                VStack(spacing: 6) {
-                                    EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "⌘⇧X") {
+                                VStack(spacing: 4) {
+                                    EmptyStateSuggestion(icon: "doc.on.clipboard", label: "Analisar clipboard", shortcut: "Cmd+Shift+X") {
                                         Task { await viewModel.processarIA() }
                                     }
 
-                                    EmptyStateSuggestion(icon: "camera.viewfinder", label: "Analisar tela", shortcut: "⌘⇧Z") {
+                                    EmptyStateSuggestion(icon: "camera.viewfinder", label: "Analisar tela", shortcut: "Cmd+Shift+Z") {
                                         Task { await viewModel.processarScreen() }
                                     }
 
-                                    EmptyStateSuggestion(icon: "bolt.fill", label: "Entrada rápida", shortcut: "⌘⇧Space") {
+                                    EmptyStateSuggestion(icon: "bolt.fill", label: "Entrada rapida", shortcut: "Cmd+Shift+Space") {
                                         QuickInputWindowManager.shared.toggleWindow()
                                     }
                                 }
-                                .padding(.horizontal, 36)
+                                .padding(.horizontal, 40)
                             }
                             .frame(maxWidth: .infinity)
-                            .maeAppearAnimation(animation: Theme.Animation.expressive)
+                            .maeAppearAnimation(animation: Theme.Animation.smooth)
                         } else {
                             ForEach(viewModel.messages.indices, id: \.self) { index in
-                                // Date separator when day changes
                                 if index == 0 || !Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp) {
                                     MaeDateSeparator(date: viewModel.messages[index].timestamp)
                                         .transition(.opacity)
@@ -687,7 +637,7 @@ struct ContentView: View {
                 .overlay(alignment: .bottom) {
                     if !isAtBottom && !viewModel.messages.isEmpty {
                         MaeScrollToBottomButton {
-                            withAnimation(Theme.Animation.responsive) {
+                            withAnimation(Theme.Animation.smooth) {
                                 proxy.scrollTo(bottomID, anchor: .bottom)
                             }
                         }
@@ -696,7 +646,7 @@ struct ContentView: View {
                     }
                 }
                 .onChange(of: viewModel.messages.count) {
-                    withAnimation(Theme.Animation.responsive) {
+                    withAnimation(Theme.Animation.smooth) {
                         proxy.scrollTo(bottomID, anchor: .bottom)
                         isAtBottom = true
                     }
@@ -705,10 +655,10 @@ struct ContentView: View {
 
             // Footer / Input Area
             VStack(spacing: 0) {
-                // Attached Images and Files Preview
+                // Attached Files Preview
                 if !viewModel.pendingAttachments.isEmpty {
                     ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
+                        HStack(spacing: 10) {
                             ForEach(viewModel.pendingAttachments.indices, id: \.self) { index in
                                 let attachment = viewModel.pendingAttachments[index]
                                 ZStack(alignment: .topTrailing) {
@@ -716,47 +666,44 @@ struct ContentView: View {
                                         Image(nsImage: img)
                                             .resizable()
                                             .aspectRatio(contentMode: .fill)
-                                            .frame(width: 72, height: 72)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                            .frame(width: 64, height: 64)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                             .overlay(
-                                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                                RoundedRectangle(cornerRadius: 8, style: .continuous)
                                                     .stroke(Theme.Colors.border, lineWidth: 0.5)
                                             )
-                                            .maeSoftShadow()
                                     } else {
                                         VStack(spacing: 4) {
                                             Image(systemName: "doc.text.fill")
-                                                .font(.system(size: 24))
-                                                .foregroundStyle(Theme.Colors.accentPrimary)
-                                                .symbolEffect(.bounce, options: .nonRepeating)
+                                                .font(.system(size: 20))
+                                                .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                                             Text(attachment.name)
                                                 .font(.system(size: 9))
                                                 .lineLimit(1)
                                                 .truncationMode(.middle)
-                                                .frame(width: 60)
+                                                .frame(width: 52)
                                         }
-                                        .frame(width: 72, height: 72)
+                                        .frame(width: 64, height: 64)
                                         .background(Theme.Colors.surfaceSecondary)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            RoundedRectangle(cornerRadius: 8, style: .continuous)
                                                 .stroke(Theme.Colors.border, lineWidth: 0.5)
                                         )
                                     }
-                                    
+
                                     Button {
                                         withAnimation(Theme.Animation.snappy) {
                                             viewModel.pendingAttachments.removeAll { $0.id == attachment.id }
                                         }
                                     } label: {
                                         Image(systemName: "xmark.circle.fill")
-                                            .font(.system(size: 20))
+                                            .font(.system(size: 18))
                                             .foregroundStyle(Theme.Colors.textPrimary, Theme.Colors.background)
-                                            .symbolEffect(.bounce, options: .nonRepeating)
-                                            .frame(width: 28, height: 28)
+                                            .frame(width: 24, height: 24)
                                     }
                                     .buttonStyle(.plain)
-                                    .offset(x: 6, y: -6)
+                                    .offset(x: 5, y: -5)
                                 }
                                 .transition(.maeScaleFade)
                                 .maeStaggered(index: index, baseDelay: 0.06)
@@ -769,10 +716,10 @@ struct ContentView: View {
                     .transition(.maeSlideUp)
                 }
 
-                MaeGradientDivider()
+                MaeDivider()
 
                 HStack(alignment: .bottom, spacing: 8) {
-                    MaeTooltipButton(icon: "plus.circle.fill", size: 17, helpText: "Anexar arquivo/imagem") {
+                    MaeTooltipButton(icon: "plus.circle.fill", size: 16, helpText: "Anexar arquivo/imagem") {
                         let panel = NSOpenPanel()
                         panel.allowedContentTypes = [UTType.image, UTType.plainText, UTType.pdf, UTType.json, UTType.sourceCode, UTType.data]
                         panel.allowsMultipleSelection = true
@@ -789,16 +736,16 @@ struct ContentView: View {
                         }
                     }
 
-                    TextField(placeholders[placeholderIndex], text: $viewModel.inputText, axis: .vertical)
+                    TextField("Mensagem...", text: $viewModel.inputText, axis: .vertical)
                         .textFieldStyle(.plain)
                         .font(Theme.Typography.bodySmall)
                         .foregroundStyle(Theme.Colors.textPrimary)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
                         .background(Theme.Colors.inputBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .stroke(isInputFocusedForBorder ? Theme.Colors.borderFocused : Theme.Colors.border, lineWidth: isInputFocusedForBorder ? 1 : 0.5)
                         )
                         .lineLimit(1...6)
@@ -810,17 +757,10 @@ struct ContentView: View {
                         .onChange(of: isInputFocused) { _, focused in
                             withAnimation(Theme.Animation.quickSnap) { isInputFocusedForBorder = focused }
                         }
-                        .onReceive(Timer.publish(every: 3.5, on: .main, in: .common).autoconnect()) { _ in
-                            if viewModel.inputText.isEmpty {
-                                withAnimation(Theme.Animation.fade) {
-                                    placeholderIndex = (placeholderIndex + 1) % placeholders.count
-                                }
-                            }
-                        }
 
                     if viewModel.isProcessing {
                         MaeTypingDots()
-                            .frame(width: 32, height: 32)
+                            .frame(width: 28, height: 28)
                             .transition(.maeScaleFade)
                     } else {
                         let hasContent = !viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !viewModel.pendingAttachments.isEmpty
@@ -828,11 +768,9 @@ struct ContentView: View {
                             Task { await viewModel.sendManualMessage() }
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.3))
-                                .background(Theme.Colors.background.clipShape(Circle()))
-                                .frame(width: 32, height: 32)
-                                .shadow(color: hasContent ? Theme.Colors.accentPrimary.opacity(0.3) : .clear, radius: 6)
+                                .font(.system(size: 26))
+                                .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                                .frame(width: 28, height: 28)
                                 .animation(Theme.Animation.quickSnap, value: hasContent)
                         }
                         .buttonStyle(.plain)
@@ -908,7 +846,6 @@ struct ContentView: View {
 
         formatter.dateFormat = "HH:mm"
 
-        // Build markdown document
         var lines: [String] = [
             "# Conversa com Hat",
             "**Exportado em:** \(dateString)",
@@ -920,7 +857,7 @@ struct ContentView: View {
         for message in viewModel.messages {
             let time = formatter.string(from: message.timestamp)
             if message.isUser {
-                lines.append("**Você** · \(time)")
+                lines.append("**Voce** · \(time)")
             } else {
                 lines.append("**Hat** · \(time)")
             }
@@ -949,10 +886,10 @@ struct ContentView: View {
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12:  return "Bom dia!"
-        case 12..<18: return "Boa tarde!"
-        case 18..<23: return "Boa noite!"
-        default:      return "Olá!"
+        case 5..<12:  return "Bom dia"
+        case 12..<18: return "Boa tarde"
+        case 18..<23: return "Boa noite"
+        default:      return "Ola"
         }
     }
 
@@ -973,49 +910,31 @@ struct EmptyStateSuggestion: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 0) {
-                // Left accent bar
-                RoundedRectangle(cornerRadius: 1.5)
-                    .fill(
-                        LinearGradient(
-                            colors: [Theme.Colors.gradientStart.opacity(isHovered ? 0.6 : 0.2), Theme.Colors.gradientEnd.opacity(isHovered ? 0.4 : 0.1)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: 2.5)
-                    .padding(.vertical, 6)
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
+                    .frame(width: 20)
 
-                HStack(spacing: 10) {
-                    Image(systemName: icon)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(isHovered ? Theme.Colors.accentPrimary : Theme.Colors.accent.opacity(0.6))
-                        .frame(width: 20)
+                Text(label)
+                    .font(Theme.Typography.bodySmall)
+                    .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
 
-                    Text(label)
-                        .font(Theme.Typography.bodySmall)
-                        .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
+                Spacer()
 
-                    Spacer()
-
-                    Text(shortcut)
-                        .font(.system(size: 9, weight: .semibold, design: .rounded))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.8 : 0.45))
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 2)
-                        .background(Theme.Colors.surfaceTertiary)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
+                Text(shortcut)
+                    .font(.system(size: 9.5, weight: .medium))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(isHovered ? 0.7 : 0.4))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Theme.Colors.surfaceTertiary)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
             }
-            .background(isHovered ? Theme.Colors.surfaceElevated : .clear)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 9)
+            .background(isHovered ? Theme.Colors.surfaceHover : .clear)
             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                    .stroke(isHovered ? Theme.Colors.border : Color.clear, lineWidth: 0.5)
-            )
             .animation(Theme.Animation.hover, value: isHovered)
         }
         .buttonStyle(.plain)

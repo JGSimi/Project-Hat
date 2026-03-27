@@ -19,6 +19,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         if !hasSeenWelcome {
             WelcomeWindowManager.shared.showWindow()
             UserDefaults.standard.set(true, forKey: "hasSeenWelcome")
+        } else {
+            // Open main window on launch
+            MainWindowManager.shared.showWindow()
         }
 
         Task {
@@ -75,11 +78,65 @@ struct HatApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            ContentView()
+            Button("Abrir Hat") {
+                MainWindowManager.shared.showWindow()
+            }
+            .keyboardShortcut("o", modifiers: .command)
+
+            Divider()
+
+            Button("Sair") {
+                NSApp.terminate(nil)
+            }
+            .keyboardShortcut("q", modifiers: .command)
         } label: {
             MenuBarIconView(isProcessing: viewModel.isProcessing)
         }
-        .menuBarExtraStyle(.window)
+        .menuBarExtraStyle(.menu)
+    }
+}
+
+// MARK: - Main Window Manager
+class MainWindowManager {
+    static let shared = MainWindowManager()
+    private var window: NSWindow?
+
+    func showWindow() {
+        if let window = window {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let defaultWidth: CGFloat = 820
+        let defaultHeight: CGFloat = 650
+
+        let contentView = MainView()
+
+        let newWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: defaultWidth, height: defaultHeight),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+
+        newWindow.titlebarAppearsTransparent = true
+        newWindow.titleVisibility = .hidden
+        newWindow.isMovableByWindowBackground = true
+        newWindow.isReleasedWhenClosed = false
+        newWindow.minSize = NSSize(width: 600, height: 500)
+        newWindow.title = "Hat"
+        newWindow.center()
+
+        newWindow.contentView = NSHostingView(rootView: contentView)
+        self.window = newWindow
+        newWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func closeWindow() {
+        window?.close()
+        window = nil
     }
 }
 

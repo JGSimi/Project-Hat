@@ -79,7 +79,10 @@ class ConversationManager: ObservableObject {
     private let maxMessagesPerConversation = 200
 
     private var storageDirectory: URL {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        // Guard against empty URL array to prevent crash (was force unwrap)
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return FileManager.default.temporaryDirectory.appendingPathComponent("Hat/conversations")
+        }
         return appSupport.appendingPathComponent("Hat/conversations")
     }
 
@@ -198,8 +201,11 @@ class ConversationManager: ObservableObject {
         let calendar = Calendar.current
         let now = Date()
         let startOfToday = calendar.startOfDay(for: now)
-        let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday)!
-        let startOfLastWeek = calendar.date(byAdding: .day, value: -7, to: startOfToday)!
+        // Guard against nil calendar dates to prevent crash (was force unwrap)
+        guard let startOfYesterday = calendar.date(byAdding: .day, value: -1, to: startOfToday),
+              let startOfLastWeek = calendar.date(byAdding: .day, value: -7, to: startOfToday) else {
+            return conversations.isEmpty ? [] : [(.today, conversations)]
+        }
 
         var pinned: [Conversation] = []
         var today: [Conversation] = []

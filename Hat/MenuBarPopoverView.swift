@@ -199,7 +199,18 @@ struct MenuBarPopoverView: View {
                     .accessibilityLabel("Campo de mensagem")
                     .accessibilityHint("Enter para enviar")
 
-                if viewModel.isProcessing {
+                if viewModel.isStreaming {
+                    Button {
+                        viewModel.cancelStreaming()
+                    } label: {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Theme.Colors.accentPrimary)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.maeScaleFade)
+                    .accessibilityLabel("Parar geração")
+                } else if viewModel.isProcessing {
                     MaeTypingDots()
                         .frame(width: 24, height: 24)
                         .transition(.maeScaleFade)

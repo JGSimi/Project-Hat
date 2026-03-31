@@ -106,6 +106,13 @@ struct ChatBubble: View {
                     }
                 }
 
+                // Typing indicator while waiting for first token
+                if message.isStreaming && message.content.isEmpty {
+                    MaeTypingDots()
+                        .frame(height: 20)
+                        .padding(.vertical, 4)
+                }
+
                 // Message content
                 if !message.content.isEmpty {
                     VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
@@ -123,6 +130,13 @@ struct ChatBubble: View {
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                                         .stroke(Theme.Colors.accentPrimary.opacity(0.1), lineWidth: 0.5)
                                 )
+                        } else if message.isStreaming {
+                            // AI streaming: plain text to avoid markdown flickering
+                            Text(message.content)
+                                .font(Theme.Typography.bodySmall)
+                                .foregroundStyle(Theme.Colors.textPrimary)
+                                .textSelection(.enabled)
+                                .padding(.vertical, 4)
                         } else {
                             // AI: no bubble, direct markdown text (Claude.ai style)
                             HatMarkdownView(markdown: message.content)

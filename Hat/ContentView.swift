@@ -38,20 +38,35 @@ struct ChatAttachment: Identifiable {
 }
 
 struct ChatMessage: Identifiable {
-    let id = UUID()
+    let id: UUID
     let content: String
     var images: [NSImage]? = nil
     var attachments: [ChatAttachment]? = nil
     let isUser: Bool
     let source: MessageSource
-    let timestamp = Date()
+    let timestamp: Date
+    var isStreaming: Bool = false
 
     init(content: String, images: [NSImage]? = nil, attachments: [ChatAttachment]? = nil, isUser: Bool, source: MessageSource = .chat) {
+        self.id = UUID()
         self.content = content
         self.images = images
         self.attachments = attachments
         self.isUser = isUser
         self.source = source
+        self.timestamp = Date()
+    }
+
+    /// Creates a message with a specific ID (used to update streaming messages in-place)
+    init(id: UUID, content: String, images: [NSImage]? = nil, isUser: Bool, isStreaming: Bool = false, source: MessageSource = .chat) {
+        self.id = id
+        self.content = content
+        self.images = images
+        self.attachments = nil
+        self.isUser = isUser
+        self.source = source
+        self.timestamp = Date()
+        self.isStreaming = isStreaming
     }
 }
 
@@ -119,6 +134,10 @@ class AssistantViewModel: ObservableObject {
     @Published var conversationInputTokens: Int = 0
     @Published var conversationOutputTokens: Int = 0
     var conversationTotalTokens: Int { conversationInputTokens + conversationOutputTokens }
+
+    @Published var isStreaming = false
+    @Published var streamingText: String = ""
+    private var streamingTask: Task<Void, Never>?
 
     private let pasteboard: PasteboardClient
 
@@ -331,7 +350,6 @@ class AssistantViewModel: ObservableObject {
 
     private func executeRequest(prompt: String, rawImages: [NSImage]?, attachments: [ChatAttachment]?) async {
         isProcessing = true
-        defer { isProcessing = false }
 
         let systemPrompt = SettingsManager.systemPrompt
         let base64Images = rawImages?.compactMap { $0.resizedAndCompressedBase64() }
@@ -343,38 +361,94 @@ class AssistantViewModel: ObservableObject {
         let userMsg = ChatMessage(content: prompt, images: rawImages, attachments: attachments, isUser: true)
         messages.append(userMsg)
 
-        do {
-            let aiResponse = try await AIAPIService.shared.executeRequest(
-                prompt: prompt,
-                images: base64Images,
-                history: history,
-                systemPrompt: systemPrompt
-            )
+        // Add placeholder streaming message
+        var placeholderMsg = ChatMessage(content: "", images: nil, isUser: false)
+        placeholderMsg.isStreaming = true
+        let placeholderID = placeholderMsg.id
+        messages.append(placeholderMsg)
 
-            let finalResponse = aiResponse.text
+        isStreaming = true
+        streamingText = ""
 
-            if let usage = aiResponse.tokenUsage {
-                conversationInputTokens += usage.inputTokens
-                conversationOutputTokens += usage.outputTokens
-                SettingsManager.addGlobalTokens(input: usage.inputTokens, output: usage.outputTokens)
+        let task = Task {
+            var accumulatedText = ""
+            var finalTokenUsage: TokenUsage?
+
+            do {
+                let stream = AIAPIService.shared.executeStreamingRequest(
+                    prompt: prompt,
+                    images: base64Images,
+                    history: history,
+                    systemPrompt: systemPrompt
+                )
+
+                for try await chunk in stream {
+                    try Task.checkCancellation()
+                    accumulatedText += chunk.text
+                    streamingText = accumulatedText
+
+                    // Update the placeholder message content in-place
+                    if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                        messages[idx] = ChatMessage(id: placeholderID, content: accumulatedText, images: nil, isUser: false, isStreaming: true)
+                    }
+
+                    if let usage = chunk.tokenUsage {
+                        finalTokenUsage = usage
+                    }
+                }
+
+                if let usage = finalTokenUsage {
+                    conversationInputTokens += usage.inputTokens
+                    conversationOutputTokens += usage.outputTokens
+                    SettingsManager.addGlobalTokens(input: usage.inputTokens, output: usage.outputTokens)
+                }
+
+                // Finalize: ensure the message has the full text
+                let finalText = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                    messages[idx] = ChatMessage(id: placeholderID, content: finalText, images: nil, isUser: false)
+                }
+
+                if !finalText.isEmpty {
+                    pasteboard.clearContents()
+                    pasteboard.copyString(finalText, forType: .string)
+                }
+
+                if SettingsManager.playNotifications {
+                    await sendNotification(text: finalText)
+                    NSSound(named: "Glass")?.play()
+                }
+
+            } catch is CancellationError {
+                // User stopped — keep partial text
+                let partial = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if partial.isEmpty {
+                    messages.removeAll { $0.id == placeholderID }
+                } else {
+                    if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                        messages[idx] = ChatMessage(id: placeholderID, content: partial, images: nil, isUser: false)
+                    }
+                }
+            } catch {
+                let partial = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
+                let errorSuffix = "\n\n⚠ Resposta interrompida: \(error.localizedDescription)"
+                let finalContent = partial.isEmpty ? "Erro: \(error.localizedDescription)" : partial + errorSuffix
+                if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                    messages[idx] = ChatMessage(id: placeholderID, content: finalContent, images: nil, isUser: false)
+                }
+                print("Error processing AI: \(error)")
             }
 
-            let assistantMsg = ChatMessage(content: finalResponse, images: nil, isUser: false)
-            messages.append(assistantMsg)
-
-            pasteboard.clearContents()
-            pasteboard.copyString(finalResponse, forType: .string)
-
-            if SettingsManager.playNotifications {
-                await sendNotification(text: finalResponse)
-                NSSound(named: "Glass")?.play()
-            }
-
-        } catch {
-            let errorMsg = ChatMessage(content: "Erro: \(error.localizedDescription)", images: nil, isUser: false)
-            messages.append(errorMsg)
-            print("Error processing AI: \(error)")
+            isStreaming = false
+            streamingText = ""
+            isProcessing = false
         }
+        streamingTask = task
+    }
+
+    func cancelStreaming() {
+        streamingTask?.cancel()
+        streamingTask = nil
     }
 
     private func sendNotification(text: String) async {
@@ -485,8 +559,18 @@ struct ContentView: View {
             return true
         }
         .onChange(of: viewModel.messages.count) { _, _ in
-            // Save messages to conversation manager
-            if let lastMessage = viewModel.messages.last {
+            // Save messages to conversation manager (skip streaming placeholders)
+            if let lastMessage = viewModel.messages.last, !lastMessage.isStreaming {
+                conversationManager.addMessage(
+                    content: lastMessage.content,
+                    isUser: lastMessage.isUser,
+                    source: lastMessage.source
+                )
+            }
+        }
+        .onChange(of: viewModel.isStreaming) { _, isStreaming in
+            // Save the completed streaming message when streaming ends
+            if !isStreaming, let lastMessage = viewModel.messages.last, !lastMessage.isUser {
                 conversationManager.addMessage(
                     content: lastMessage.content,
                     isUser: lastMessage.isUser,
@@ -574,20 +658,20 @@ struct ContentView: View {
                         emptyStateView
                     } else {
                         // Centered chat content
-                        ForEach(viewModel.messages.indices, id: \.self) { index in
-                            if index == 0 || !Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp) {
-                                MaeDateSeparator(date: viewModel.messages[index].timestamp)
+                        ForEach(Array(viewModel.messages.enumerated()), id: \.element.id) { index, message in
+                            if index == 0 || !Calendar.current.isDate(message.timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp) {
+                                MaeDateSeparator(date: message.timestamp)
                                     .frame(maxWidth: 680)
                                     .frame(maxWidth: .infinity)
                                     .transition(.opacity)
                             }
                             let isGrouped = index > 0
-                                && viewModel.messages[index].isUser == viewModel.messages[index - 1].isUser
-                                && Calendar.current.isDate(viewModel.messages[index].timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp)
-                            ChatBubble(message: viewModel.messages[index], animationIndex: index, isGrouped: isGrouped)
+                                && message.isUser == viewModel.messages[index - 1].isUser
+                                && Calendar.current.isDate(message.timestamp, inSameDayAs: viewModel.messages[index - 1].timestamp)
+                            ChatBubble(message: message, animationIndex: index, isGrouped: isGrouped)
                                 .frame(maxWidth: 680)
                                 .frame(maxWidth: .infinity)
-                                .id(viewModel.messages[index].id)
+                                .id(message.id)
                                 .transition(.maePopIn)
                         }
                     }
@@ -612,6 +696,11 @@ struct ContentView: View {
                 withAnimation(Theme.Animation.smooth) {
                     proxy.scrollTo(bottomID, anchor: .bottom)
                     isAtBottom = true
+                }
+            }
+            .onChange(of: viewModel.streamingText) { _, _ in
+                if isAtBottom {
+                    proxy.scrollTo(bottomID, anchor: .bottom)
                 }
             }
         }
@@ -760,7 +849,20 @@ struct ContentView: View {
                         .accessibilityLabel("Campo de mensagem")
                         .accessibilityHint("Comando Enter para enviar")
 
-                    if viewModel.isProcessing {
+                    if viewModel.isStreaming {
+                        Button {
+                            viewModel.cancelStreaming()
+                        } label: {
+                            Image(systemName: "stop.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(Theme.Colors.accentPrimary)
+                                .frame(width: 28, height: 28)
+                        }
+                        .buttonStyle(.plain)
+                        .maePressEffect()
+                        .transition(.maeScaleFade)
+                        .accessibilityLabel("Parar geração")
+                    } else if viewModel.isProcessing {
                         MaeTypingDots()
                             .frame(width: 28, height: 28)
                             .transition(.maeScaleFade)

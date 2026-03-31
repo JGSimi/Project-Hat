@@ -210,6 +210,52 @@ struct AnthropicResponse: Decodable {
     }
 }
 
+// MARK: - Streaming Models
+
+struct StreamChunk {
+    let text: String
+    let tokenUsage: TokenUsage?
+    let isFinished: Bool
+}
+
+/// Streaming delta response for OpenAI-compatible APIs
+struct APIStreamDelta: Decodable {
+    let choices: [StreamChoice]?
+    let usage: APIResponse.Usage?
+
+    struct StreamChoice: Decodable {
+        let delta: Delta?
+        let finish_reason: String?
+
+        struct Delta: Decodable {
+            let content: String?
+        }
+    }
+}
+
+/// Streaming event for Anthropic SSE
+struct AnthropicStreamEvent: Decodable {
+    let type: String
+    let delta: Delta?
+    let usage: AnthropicResponse.Usage?
+
+    struct Delta: Decodable {
+        let type: String?
+        let text: String?
+    }
+}
+
+// MARK: - Anthropic Streaming Request
+
+struct AnthropicStreamRequest: Codable {
+    let model: String
+    let max_tokens: Int
+    let system: String?
+    let messages: [AnthropicMessage]
+    let temperature: Double
+    let stream: Bool
+}
+
 // MARK: - API Model Fetching
 struct APIModelListResponse: Decodable {
     let data: [APIModelItem]

@@ -9,7 +9,7 @@ import SwiftUI
 import AppKit
 
 @MainActor
-class AnalysisWindowManager {
+class AnalysisWindowManager: NSObject, NSWindowDelegate {
     static let shared = AnalysisWindowManager()
     private var window: NSWindow?
 
@@ -33,6 +33,7 @@ class AnalysisWindowManager {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.delegate = self
         newWindow.center()
 
         newWindow.contentView = NSHostingView(rootView: contentView)
@@ -43,6 +44,11 @@ class AnalysisWindowManager {
 
     func closeWindow() {
         window?.close()
+        window = nil
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentView = nil
         window = nil
     }
 }

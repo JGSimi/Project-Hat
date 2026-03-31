@@ -373,6 +373,8 @@ class AssistantViewModel: ObservableObject {
         let task = Task {
             var accumulatedText = ""
             var finalTokenUsage: TokenUsage?
+            // Cache the placeholder index for O(1) updates instead of O(n) firstIndex on every chunk
+            let placeholderIndex = messages.firstIndex(where: { $0.id == placeholderID })
 
             do {
                 let stream = AIAPIService.shared.executeStreamingRequest(
@@ -387,8 +389,8 @@ class AssistantViewModel: ObservableObject {
                     accumulatedText += chunk.text
                     streamingText = accumulatedText
 
-                    // Update the placeholder message content in-place
-                    if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                    // Update the placeholder message content in-place using cached index
+                    if let idx = placeholderIndex {
                         messages[idx] = ChatMessage(id: placeholderID, content: accumulatedText, images: nil, isUser: false, isStreaming: true)
                     }
 
@@ -405,7 +407,7 @@ class AssistantViewModel: ObservableObject {
 
                 // Finalize: ensure the message has the full text
                 let finalText = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
-                if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                if let idx = placeholderIndex {
                     messages[idx] = ChatMessage(id: placeholderID, content: finalText, images: nil, isUser: false)
                 }
 
@@ -424,16 +426,14 @@ class AssistantViewModel: ObservableObject {
                 let partial = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
                 if partial.isEmpty {
                     messages.removeAll { $0.id == placeholderID }
-                } else {
-                    if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
-                        messages[idx] = ChatMessage(id: placeholderID, content: partial, images: nil, isUser: false)
-                    }
+                } else if let idx = placeholderIndex {
+                    messages[idx] = ChatMessage(id: placeholderID, content: partial, images: nil, isUser: false)
                 }
             } catch {
                 let partial = accumulatedText.trimmingCharacters(in: .whitespacesAndNewlines)
                 let errorSuffix = "\n\n⚠ Resposta interrompida: \(error.localizedDescription)"
                 let finalContent = partial.isEmpty ? "Erro: \(error.localizedDescription)" : partial + errorSuffix
-                if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
+                if let idx = placeholderIndex {
                     messages[idx] = ChatMessage(id: placeholderID, content: finalContent, images: nil, isUser: false)
                 }
                 print("Error processing AI: \(error)")
@@ -559,21 +559,21 @@ struct ContentView: View {
             return true
         }
         .onChange(of: viewModel.messages.count) { _, _ in
-            // Save messages to conversation manager (skip streaming placeholders)
-            if let lastMessage = viewModel.messages.last, !lastMessage.isStreaming {
+            // Only save user messages here; assistant messages are saved when streaming ends
+            if let lastMessage = viewModel.messages.last, lastMessage.isUser {
                 conversationManager.addMessage(
                     content: lastMessage.content,
-                    isUser: lastMessage.isUser,
+                    isUser: true,
                     source: lastMessage.source
                 )
             }
         }
         .onChange(of: viewModel.isStreaming) { _, isStreaming in
-            // Save the completed streaming message when streaming ends
-            if !isStreaming, let lastMessage = viewModel.messages.last, !lastMessage.isUser {
+            // Save the completed assistant message only when streaming finishes
+            if !isStreaming, let lastMessage = viewModel.messages.last, !lastMessage.isUser, !lastMessage.content.isEmpty {
                 conversationManager.addMessage(
                     content: lastMessage.content,
-                    isUser: lastMessage.isUser,
+                    isUser: false,
                     source: lastMessage.source
                 )
             }
@@ -593,14 +593,6 @@ struct ContentView: View {
                 }
                 .keyboardShortcut("s", modifiers: .command)
 
-                Image("hat-svgrepo-com")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 14, height: 14)
-                    .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
-                    .accessibilityHidden(true)
-
                 MaeTag(
                     label: inferenceMode == .local ? localModelName : apiModelName,
                     icon: inferenceMode == .local ? "desktopcomputer" : "cloud.fill",
@@ -615,31 +607,20 @@ struct ContentView: View {
                         AnalysisWindowManager.shared.showWindow()
                     }
 
-                    MaeTooltipButton(icon: "square.and.arrow.up", helpText: "Exportar") {
-                        exportConversation()
-                    }
-                    .disabled(viewModel.messages.isEmpty)
-                    .opacity(viewModel.messages.isEmpty ? 0.35 : 1.0)
-
                     MaeTooltipButton(icon: "trash", helpText: "Limpar") {
                         withAnimation(Theme.Animation.smooth) {
                             viewModel.clearHistory()
                             conversationManager.clearActiveConversation()
                         }
                     }
-                }
 
-                Rectangle()
-                    .fill(Theme.Colors.border)
-                    .frame(width: 0.5, height: 14)
-                    .padding(.horizontal, 2)
-
-                MaeTooltipButton(icon: "gearshape", helpText: "Configuracoes") {
-                    AdvancedSettingsWindowManager.shared.showWindow()
+                    MaeTooltipButton(icon: "gearshape", helpText: "Configuracoes") {
+                        AdvancedSettingsWindowManager.shared.showWindow()
+                    }
                 }
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
-            .padding(.top, showSidebar ? 10 : 38) // Extra top padding when no sidebar (for traffic lights)
+            .padding(.top, showSidebar ? 10 : 38)
             .padding(.bottom, 10)
 
             MaeDivider()
@@ -706,11 +687,11 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Empty State (Grid 2x2)
+    // MARK: - Empty State
 
     private var emptyStateView: some View {
-        VStack(spacing: 32) {
-            Spacer().frame(height: 40)
+        VStack(spacing: 24) {
+            Spacer()
 
             // Logo + Greeting
             VStack(spacing: 14) {
@@ -725,43 +706,40 @@ struct ContentView: View {
                         .frame(width: 28, height: 28)
                         .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                 }
-                .maeStaggered(index: 0, baseDelay: 0.10)
 
                 VStack(spacing: 6) {
                     Text(greetingText)
                         .font(Theme.Typography.largeTitle)
                         .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                        .maeStaggered(index: 1, baseDelay: 0.10)
 
                     Text("Como posso te ajudar?")
                         .font(Theme.Typography.body)
                         .foregroundStyle(Theme.Colors.textMuted)
-                        .maeStaggered(index: 2, baseDelay: 0.10)
                 }
             }
 
-            // Grid 2x2 suggestions
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-                SuggestionCard(icon: "doc.on.clipboard", title: "Analisar clipboard", shortcut: "⌘⇧X", color: Theme.Colors.accentPrimary, index: 3) {
-                    Task { await viewModel.processarIA() }
-                }
-                SuggestionCard(icon: "camera.viewfinder", title: "Analisar tela", shortcut: "⌘⇧Z", color: Theme.Colors.success, index: 4) {
-                    Task { await viewModel.processarScreen() }
-                }
-                SuggestionCard(icon: "bolt.fill", title: "Entrada rapida", shortcut: "⌘⇧Space", color: Theme.Colors.warning, index: 5) {
-                    QuickInputWindowManager.shared.toggleWindow()
-                }
-                SuggestionCard(icon: "text.bubble", title: "Fazer uma pergunta", shortcut: nil, color: Theme.Colors.textSecondary, index: 6) {
-                    isInputFocused = true
-                }
+            // Shortcut hints
+            HStack(spacing: 16) {
+                shortcutHint("⌘⇧X", "Clipboard")
+                shortcutHint("⌘⇧Z", "Tela")
+                shortcutHint("⌘⇧Space", "Rapida")
             }
-            .frame(maxWidth: 480)
-            .padding(.horizontal, 40)
 
             Spacer()
         }
         .frame(maxWidth: .infinity)
         .maeAppearAnimation(animation: Theme.Animation.smooth)
+    }
+
+    private func shortcutHint(_ shortcut: String, _ label: String) -> some View {
+        HStack(spacing: 4) {
+            Text(shortcut)
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+            Text(label)
+                .font(.system(size: 10, weight: .regular))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+        }
     }
 
     // MARK: - Floating Input
@@ -1012,67 +990,6 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Suggestion Card (Grid 2x2)
-
-struct SuggestionCard: View {
-    let icon: String
-    let title: String
-    let shortcut: String?
-    var color: Color = Theme.Colors.textSecondary
-    var index: Int = 0
-    let action: () -> Void
-    @State private var isHovered = false
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 10) {
-                // Colored icon circle
-                ZStack {
-                    Circle()
-                        .fill(isHovered ? color.opacity(0.18) : color.opacity(0.1))
-                        .frame(width: 32, height: 32)
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(color)
-                }
-
-                Text(title)
-                    .font(Theme.Typography.bodySmall)
-                    .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-
-                if let shortcut {
-                    Spacer(minLength: 0)
-                    Text(shortcut)
-                        .font(.system(size: 9, weight: .medium, design: .monospaced))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Theme.Colors.surfaceSecondary)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Theme.Colors.border, lineWidth: 0.5))
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .frame(minHeight: 95)
-            .background(isHovered ? Theme.Colors.surfaceHover : Theme.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .stroke(isHovered ? color.opacity(0.25) : Theme.Colors.border, lineWidth: isHovered ? 1 : 0.5)
-            )
-            .animation(Theme.Animation.hover, value: isHovered)
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering in isHovered = hovering }
-        .maePressEffect()
-        .maeStaggered(index: index, baseDelay: 0.08)
-        .accessibilityLabel(title)
-        .accessibilityHint(shortcut != nil ? "Atalho: \(shortcut!)" : "")
-    }
-}
 
 #Preview {
     ContentView()

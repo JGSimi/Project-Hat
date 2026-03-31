@@ -120,10 +120,10 @@ struct MenuBarPopoverView: View {
     // MARK: - Empty State
 
     private var popoverEmptyState: some View {
-        VStack(spacing: 18) {
-            Spacer().frame(height: 28)
+        VStack(spacing: 14) {
+            Spacer()
 
-            // Single clean circle with hat icon
+            // Hat icon
             ZStack {
                 Circle()
                     .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 1)
@@ -135,44 +135,28 @@ struct MenuBarPopoverView: View {
                     .frame(width: 22, height: 22)
                     .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
             }
-            .maeStaggered(index: 0, baseDelay: 0.10)
             .accessibilityHidden(true)
 
             VStack(spacing: 4) {
                 Text(greetingText)
                     .font(Theme.Typography.title)
                     .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
-                    .maeStaggered(index: 1, baseDelay: 0.10)
 
                 Text("Como posso ajudar?")
                     .font(Theme.Typography.bodySmall)
                     .foregroundStyle(Theme.Colors.textMuted)
-                    .maeStaggered(index: 2, baseDelay: 0.10)
             }
             .accessibilityElement(children: .combine)
 
-            // Quick actions with color
-            HStack(spacing: 10) {
-                PopoverQuickAction(
-                    icon: "doc.on.clipboard",
-                    label: "Analisar clipboard",
-                    shortcut: "⌘⇧X",
-                    color: Theme.Colors.accentPrimary,
-                    index: 3
-                ) {
-                    Task { await viewModel.processarIA() }
-                }
-                PopoverQuickAction(
-                    icon: "camera.viewfinder",
-                    label: "Analisar tela",
-                    shortcut: "⌘⇧Z",
-                    color: Theme.Colors.success,
-                    index: 4
-                ) {
-                    Task { await viewModel.processarScreen() }
-                }
+            // Shortcut hints
+            HStack(spacing: 12) {
+                Text("⌘⇧X Clipboard")
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                Text("⌘⇧Z Tela")
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
             }
-            .padding(.horizontal, 20)
 
             Spacer()
         }
@@ -248,57 +232,3 @@ struct MenuBarPopoverView: View {
     }
 }
 
-// MARK: - Quick Action Button
-
-private struct PopoverQuickAction: View {
-    let icon: String
-    let label: String
-    let shortcut: String
-    let color: Color
-    var index: Int = 0
-    let action: () -> Void
-    @State private var isHovered = false
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(isHovered ? color.opacity(0.18) : color.opacity(0.1))
-                        .frame(width: 40, height: 40)
-                    Image(systemName: icon)
-                        .font(.system(size: 17, weight: .medium))
-                        .foregroundStyle(color)
-                }
-
-                VStack(spacing: 2) {
-                    Text(label)
-                        .font(Theme.Typography.caption)
-                        .foregroundStyle(isHovered ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)
-
-                    Text(shortcut)
-                        .font(.system(size: 9, weight: .medium, design: .rounded))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(
-                RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .fill(isHovered ? Theme.Colors.surfaceHover : Theme.Colors.surface)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                    .stroke(isHovered ? color.opacity(0.3) : Theme.Colors.border, lineWidth: isHovered ? 1 : 0.5)
-            )
-            .scaleEffect(isHovered ? 1.02 : 1.0)
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering in
-            withAnimation(Theme.Animation.hover) { isHovered = hovering }
-        }
-        .maeStaggered(index: index, baseDelay: 0.10)
-        .accessibilityLabel(label)
-        .accessibilityHint("Atalho: \(shortcut)")
-    }
-}

@@ -8,6 +8,27 @@ class AIAPIService {
         self.session = session
     }
 
+    /// Maps raw API HTTP errors to user-friendly messages in Portuguese
+    private func friendlyError(statusCode: Int, rawBody: String?) -> NSError {
+        let message: String
+        switch statusCode {
+        case 401:
+            message = "Chave de API invalida ou expirada. Verifique suas configuracoes."
+        case 403:
+            message = "Acesso negado. Sua chave de API nao tem permissao para este modelo."
+        case 404:
+            message = "Modelo nao encontrado. Verifique o nome do modelo nas configuracoes."
+        case 429:
+            message = "Limite de requisicoes atingido. Aguarde alguns segundos e tente novamente."
+        case 500...599:
+            message = "Erro no servidor do provedor de IA. Tente novamente em instantes."
+        default:
+            message = "Erro de conexao (HTTP \(statusCode)). Verifique sua internet e configuracoes."
+        }
+        return NSError(domain: "HatAPIError", code: statusCode,
+                       userInfo: [NSLocalizedDescriptionKey: message])
+    }
+
     /// Truncates history to fit within an approximate token budget.
     /// Keeps the most recent messages, dropping oldest first.
     private func truncateHistory(_ history: [ConversationTurn], maxChars: Int) -> [ConversationTurn] {
@@ -82,8 +103,7 @@ class AIAPIService {
 
         let (bytes, response) = try await session.bytes(for: request)
         if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-            throw NSError(domain: "AssistantLocalAPIError", code: httpRes.statusCode,
-                          userInfo: [NSLocalizedDescriptionKey: "Local API Error: HTTP \(httpRes.statusCode)"])
+            throw friendlyError(statusCode: httpRes.statusCode, rawBody: nil)
         }
 
         let decoder = JSONDecoder()
@@ -167,10 +187,7 @@ class AIAPIService {
         let (bytes, response) = try await session.bytes(for: request)
         if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
             // Read error body from the stream
-            var errorData = Data()
-            for try await byte in bytes { errorData.append(byte) }
-            let errorStr = String(data: errorData, encoding: .utf8) ?? "HTTP \(httpRes.statusCode)"
-            throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
+            throw friendlyError(statusCode: httpRes.statusCode, rawBody: nil)
         }
 
         let decoder = JSONDecoder()
@@ -225,10 +242,7 @@ class AIAPIService {
 
         let (bytes, response) = try await session.bytes(for: request)
         if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-            var errorData = Data()
-            for try await byte in bytes { errorData.append(byte) }
-            let errorStr = String(data: errorData, encoding: .utf8) ?? "HTTP \(httpRes.statusCode)"
-            throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
+            throw friendlyError(statusCode: httpRes.statusCode, rawBody: nil)
         }
 
         let decoder = JSONDecoder()
@@ -293,9 +307,7 @@ class AIAPIService {
 
         let (data, response) = try await session.data(for: request)
         if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-            let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-            throw NSError(domain: "AssistantLocalAPIError", code: httpRes.statusCode,
-                          userInfo: [NSLocalizedDescriptionKey: "Local API Error: \(errorStr)"])
+            throw friendlyError(statusCode: httpRes.statusCode, rawBody: String(data: data, encoding: .utf8))
         }
         let result = try JSONDecoder().decode(OllamaChatResponse.self, from: data)
         return AIResponse(
@@ -369,8 +381,7 @@ class AIAPIService {
 
             let (data, response) = try await session.data(for: request)
             if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-                let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-                throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
+                throw friendlyError(statusCode: httpRes.statusCode, rawBody: String(data: data, encoding: .utf8))
             }
 
             let result = try JSONDecoder().decode(AnthropicResponse.self, from: data)
@@ -421,8 +432,7 @@ class AIAPIService {
 
             let (data, response) = try await session.data(for: request)
             if let httpRes = response as? HTTPURLResponse, !(200...299).contains(httpRes.statusCode) {
-                let errorStr = String(data: data, encoding: .utf8) ?? "Unknown HTTP ERROR"
-                throw NSError(domain: "AssistantAPIError", code: httpRes.statusCode, userInfo: [NSLocalizedDescriptionKey: "API Error: \(errorStr)"])
+                throw friendlyError(statusCode: httpRes.statusCode, rawBody: String(data: data, encoding: .utf8))
             }
 
             let result = try JSONDecoder().decode(APIResponse.self, from: data)

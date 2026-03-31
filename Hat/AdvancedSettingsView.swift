@@ -4,7 +4,7 @@ import ServiceManagement
 
 // MARK: - Advanced Settings Window Manager
 
-class AdvancedSettingsWindowManager {
+class AdvancedSettingsWindowManager: NSObject, NSWindowDelegate {
     static let shared = AdvancedSettingsWindowManager()
     private var window: NSWindow?
 
@@ -29,12 +29,18 @@ class AdvancedSettingsWindowManager {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.delegate = self
         newWindow.center()
 
         newWindow.contentView = NSHostingView(rootView: contentView)
         self.window = newWindow
         newWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentView = nil
+        window = nil
     }
 }
 

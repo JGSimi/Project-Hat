@@ -12,18 +12,19 @@ struct SidebarView: View {
     @ObservedObject var conversationManager: ConversationManager
     @Binding var showSidebar: Bool
     @State private var searchText = ""
+    @State private var debouncedSearchText = ""
     @State private var hoveredConversationId: UUID?
     @State private var conversationToDelete: UUID?
     @State private var settingsHovered = false
 
     private var filteredGroups: [(group: ConversationManager.ConversationGroup, items: [Conversation])] {
         let groups = conversationManager.groupedConversations
-        if searchText.isEmpty { return groups }
+        if debouncedSearchText.isEmpty { return groups }
 
         return groups.compactMap { group in
             let filtered = group.items.filter {
-                $0.title.localizedCaseInsensitiveContains(searchText) ||
-                $0.preview.localizedCaseInsensitiveContains(searchText)
+                $0.title.localizedCaseInsensitiveContains(debouncedSearchText) ||
+                $0.preview.localizedCaseInsensitiveContains(debouncedSearchText)
             }
             return filtered.isEmpty ? nil : (group.group, filtered)
         }
@@ -93,12 +94,10 @@ struct SidebarView: View {
                             Image(systemName: "bubble.left.and.bubble.right")
                                 .font(.system(size: 28, weight: .light))
                                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.3))
-                                .maeStaggered(index: 0, baseDelay: 0.10)
 
                             Text("Nenhuma conversa")
                                 .font(Theme.Typography.caption)
                                 .foregroundStyle(Theme.Colors.textMuted)
-                                .maeStaggered(index: 1, baseDelay: 0.10)
 
                             Button {
                                 withAnimation(Theme.Animation.smooth) {
@@ -110,7 +109,6 @@ struct SidebarView: View {
                                     .foregroundStyle(Theme.Colors.accentPrimary)
                             }
                             .buttonStyle(.plain)
-                            .maeStaggered(index: 2, baseDelay: 0.10)
                             .accessibilityLabel("Criar primeira conversa")
                         }
                         .frame(maxWidth: .infinity)
@@ -198,6 +196,16 @@ struct SidebarView: View {
         }
         .background {
             (Theme.Colors.surface.opacity(0.5) as Color)
+        }
+        .onChange(of: searchText) { _, newValue in
+            // Debounce search: wait 300ms before filtering
+            let text = newValue
+            Task {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                if searchText == text {
+                    debouncedSearchText = text
+                }
+            }
         }
         .alert("Apagar conversa?", isPresented: Binding(
             get: { conversationToDelete != nil },

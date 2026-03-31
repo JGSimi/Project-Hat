@@ -87,7 +87,7 @@ struct HatApp: App {
 }
 
 // MARK: - Main Window Manager
-class MainWindowManager {
+class MainWindowManager: NSObject, NSWindowDelegate {
     static let shared = MainWindowManager()
     private var window: NSWindow?
 
@@ -116,6 +116,7 @@ class MainWindowManager {
         newWindow.isReleasedWhenClosed = false
         newWindow.minSize = NSSize(width: 600, height: 500)
         newWindow.title = "Hat"
+        newWindow.delegate = self
         newWindow.center()
 
         newWindow.contentView = NSHostingView(rootView: contentView)
@@ -126,6 +127,11 @@ class MainWindowManager {
 
     func closeWindow() {
         window?.close()
+        window = nil
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentView = nil
         window = nil
     }
 }
@@ -188,7 +194,7 @@ private struct MenuBarIconView: View {
 }
 
 // MARK: - Permissions Window
-class PermissionsWindowManager {
+class PermissionsWindowManager: NSObject, NSWindowDelegate {
     static let shared = PermissionsWindowManager()
     private var window: NSWindow?
 
@@ -216,6 +222,7 @@ class PermissionsWindowManager {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.delegate = self
         newWindow.center()
 
         newWindow.contentView = NSHostingView(rootView: contentView)
@@ -228,10 +235,15 @@ class PermissionsWindowManager {
         window?.close()
         window = nil
     }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentView = nil
+        window = nil
+    }
 }
 
 // MARK: - Welcome Window
-class WelcomeWindowManager {
+class WelcomeWindowManager: NSObject, NSWindowDelegate {
     static let shared = WelcomeWindowManager()
     private var window: NSWindow?
 
@@ -259,6 +271,7 @@ class WelcomeWindowManager {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.delegate = self
         newWindow.center()
 
         newWindow.contentView = NSHostingView(rootView: contentView)
@@ -269,6 +282,11 @@ class WelcomeWindowManager {
 
     func closeWindow() {
         window?.close()
+        window = nil
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        window?.contentView = nil
         window = nil
     }
 }

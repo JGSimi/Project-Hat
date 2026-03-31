@@ -293,36 +293,6 @@ struct MaeButtonPressEffect: ViewModifier {
     }
 }
 
-struct MaeShimmerEffect: ViewModifier {
-    @State private var phase: CGFloat = -1.0
-
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                LinearGradient(
-                    colors: [
-                        .clear,
-                        Theme.Colors.accentPrimary.opacity(0.04),
-                        Theme.Colors.accentPrimary.opacity(0.08),
-                        Theme.Colors.accentPrimary.opacity(0.04),
-                        .clear
-                    ],
-                    startPoint: .init(x: phase - 0.5, y: 0.5),
-                    endPoint: .init(x: phase + 0.5, y: 0.5)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-            )
-            .onAppear {
-                withAnimation(
-                    .linear(duration: 1.8)
-                    .repeatForever(autoreverses: false)
-                ) {
-                    phase = 2.0
-                }
-            }
-    }
-}
-
 struct MaePulseEffect: ViewModifier {
     var minScale: CGFloat = 0.95
     var maxOpacity: Double = 1.0
@@ -340,25 +310,6 @@ struct MaePulseEffect: ViewModifier {
                     .repeatForever(autoreverses: true)
                 ) {
                     isPulsing = true
-                }
-            }
-    }
-}
-
-struct MaeFloatingEffect: ViewModifier {
-    var amplitude: CGFloat = 4
-    var duration: Double = 3.0
-    @State private var isFloating = false
-
-    func body(content: Content) -> some View {
-        content
-            .offset(y: isFloating ? -amplitude : amplitude)
-            .onAppear {
-                withAnimation(
-                    .easeInOut(duration: duration)
-                    .repeatForever(autoreverses: true)
-                ) {
-                    isFloating = true
                 }
             }
     }
@@ -491,16 +442,8 @@ extension View {
         self.modifier(MaeButtonPressEffect())
     }
 
-    func maeShimmer() -> some View {
-        self.modifier(MaeShimmerEffect())
-    }
-
     func maePulse(duration: Double = 1.6) -> some View {
         self.modifier(MaePulseEffect(duration: duration))
-    }
-
-    func maeFloating(amplitude: CGFloat = 4, duration: Double = 3.0) -> some View {
-        self.modifier(MaeFloatingEffect(amplitude: amplitude, duration: duration))
     }
 
     func maeGlowHover(color: Color = Theme.Colors.accentPrimary) -> some View {
@@ -914,4 +857,5 @@ extension View {
                 .stroke(Theme.Colors.accentPrimary.opacity(0.2), lineWidth: lineWidth)
         )
     }
+
 }

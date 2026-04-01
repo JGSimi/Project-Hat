@@ -244,10 +244,13 @@ class ConversationManager: ObservableObject {
 
     private func saveConversation(_ conversation: Conversation) {
         let fileURL = storageDirectory.appendingPathComponent("\(conversation.id.uuidString).json")
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(conversation) {
-            try? data.write(to: fileURL, options: .atomic)
+        let conversation = conversation
+        Task.detached(priority: .utility) {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            if let data = try? encoder.encode(conversation) {
+                try? data.write(to: fileURL, options: .atomic)
+            }
         }
     }
 
@@ -260,12 +263,14 @@ class ConversationManager: ObservableObject {
     }
 
     private func saveIndex() {
-        let indexURL = storageDirectory.appendingPathComponent("index.json")
         let entries = conversations.map { IndexEntry(id: $0.id, title: $0.title, isPinned: $0.isPinned, createdAt: $0.createdAt, updatedAt: $0.updatedAt) }
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        if let data = try? encoder.encode(entries) {
-            try? data.write(to: indexURL, options: .atomic)
+        let indexURL = storageDirectory.appendingPathComponent("index.json")
+        Task.detached(priority: .utility) {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            if let data = try? encoder.encode(entries) {
+                try? data.write(to: indexURL, options: .atomic)
+            }
         }
     }
 

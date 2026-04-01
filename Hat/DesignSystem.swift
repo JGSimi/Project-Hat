@@ -222,45 +222,19 @@ extension AnyTransition {
         )
     }
 
-    // Enhanced transitions with blur and scale effects
+    // Lightweight transitions — no blur (GPU-expensive)
     static var maeBlurIn: AnyTransition {
-        .modifier(
-            active: MaeBlurTransitionModifier(isActive: true),
-            identity: MaeBlurTransitionModifier(isActive: false)
+        .asymmetric(
+            insertion: .scale(scale: 0.97).combined(with: .opacity),
+            removal: .opacity
         )
     }
 
     static var maeIrisIn: AnyTransition {
         .asymmetric(
-            insertion: .modifier(
-                active: MaeIrisTransitionModifier(isActive: true),
-                identity: MaeIrisTransitionModifier(isActive: false)
-            ),
+            insertion: .scale(scale: 0.95).combined(with: .opacity),
             removal: .scale(scale: 0.98).combined(with: .opacity)
         )
-    }
-}
-
-private struct MaeBlurTransitionModifier: ViewModifier {
-    let isActive: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .blur(radius: isActive ? 8 : 0)
-            .opacity(isActive ? 0 : 1)
-            .scaleEffect(isActive ? 0.95 : 1.0)
-    }
-}
-
-private struct MaeIrisTransitionModifier: ViewModifier {
-    let isActive: Bool
-
-    func body(content: Content) -> some View {
-        content
-            .blur(radius: isActive ? 12 : 0)
-            .opacity(isActive ? 0 : 1)
-            .scaleEffect(isActive ? 0.9 : 1.0)
-            .clipShape(Circle().scale(isActive ? 0.01 : 1.5))
     }
 }
 
@@ -352,6 +326,9 @@ struct MaePulseEffect: ViewModifier {
                 ) {
                     isPulsing = true
                 }
+            }
+            .onDisappear {
+                isPulsing = false
             }
     }
 }

@@ -167,4 +167,14 @@ struct SettingsManager {
         get { UserDefaults.standard.object(forKey: "popoverVibrancy") as? Bool ?? false }
         set { UserDefaults.standard.set(newValue, forKey: "popoverVibrancy") }
     }
+
+    static var popoverStealthMode: Bool {
+        get { UserDefaults.standard.object(forKey: "popoverStealthMode") as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverStealthMode") }
+    }
+
+    static var popoverStealthHoverOpacity: Double {
+        get { UserDefaults.standard.object(forKey: "popoverStealthHoverOpacity") as? Double ?? 0.4 }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverStealthHoverOpacity") }
+    }
 }

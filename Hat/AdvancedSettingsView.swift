@@ -82,6 +82,8 @@ struct AdvancedSettingsView: View {
     @AppStorage("popoverWidth") var popoverWidth: Double = 380.0
     @AppStorage("popoverHeight") var popoverHeight: Double = 480.0
     @AppStorage("popoverVibrancy") var popoverVibrancy: Bool = false
+    @AppStorage("popoverStealthMode") var popoverStealthMode: Bool = false
+    @AppStorage("popoverStealthHoverOpacity") var stealthHoverOpacity: Double = 0.4
 
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
@@ -279,6 +281,55 @@ struct AdvancedSettingsView: View {
 
     private var appearanceSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Stealth mode section
+            MaeSectionHeader(title: "Modo Discreto")
+
+            GroupBox {
+                VStack(spacing: 0) {
+                    HStack {
+                        MaeActionRow(title: "Modo Discreto", subtitle: "Monocromatico e quase invisivel (2%)", icon: "eye.slash.fill", iconColor: Theme.Colors.warning)
+                        Toggle("", isOn: $popoverStealthMode)
+                            .toggleStyle(.switch)
+                    }
+                    .padding(Theme.Metrics.spacingLarge)
+
+                    if popoverStealthMode {
+                        MaeDivider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                MaeActionRow(title: "Visibilidade ao Hover", subtitle: "Opacidade ao passar o mouse", icon: "eye.fill", iconColor: Theme.Colors.textSecondary)
+                                Text("\(Int(stealthHoverOpacity * 100))%")
+                                    .font(Theme.Typography.caption)
+                                    .foregroundStyle(Theme.Colors.textMuted)
+                                    .frame(width: 36, alignment: .trailing)
+                            }
+                            Slider(value: $stealthHoverOpacity, in: 0.2...0.8, step: 0.05)
+                                .tint(Theme.Colors.warning)
+                        }
+                        .padding(Theme.Metrics.spacingLarge)
+                        .transition(.maeSlideUp)
+
+                        MaeDivider()
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                            Text("Visual monocromatico com 2% de visibilidade. Ao passar o mouse, aparece com a opacidade configurada acima.")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textMuted)
+                        }
+                        .padding(Theme.Metrics.spacingLarge)
+                        .transition(.maeSlideUp)
+                    }
+                }
+            }
+            .groupBoxStyle(MaeCardStyle())
+            .animation(Theme.Animation.smooth, value: popoverStealthMode)
+
+            Spacer().frame(height: 24)
+
             // Transparency section
             MaeSectionHeader(title: "Transparencia")
 

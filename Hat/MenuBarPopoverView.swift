@@ -13,6 +13,7 @@ struct MenuBarPopoverView: View {
     @FocusState private var isInputFocused: Bool
     @State private var sendHovered = false
     @State private var isVisible = false
+    @State private var isHovering = false
     @Namespace private var bottomAnchor
     @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
     @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
@@ -21,6 +22,11 @@ struct MenuBarPopoverView: View {
     @AppStorage("popoverWidth") private var popoverWidth: Double = 380.0
     @AppStorage("popoverHeight") private var popoverHeight: Double = 480.0
     @AppStorage("popoverVibrancy") private var popoverVibrancy: Bool = false
+    @AppStorage("popoverStealthMode") private var popoverStealthMode: Bool = false
+    @AppStorage("popoverStealthHoverOpacity") private var stealthHoverOpacity: Double = 0.4
+
+    /// Stealth: 2% idle, user-defined on hover (default 40%)
+    private var stealthOpacity: Double { isHovering ? stealthHoverOpacity : 0.02 }
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -42,23 +48,33 @@ struct MenuBarPopoverView: View {
         .frame(width: CGFloat(popoverWidth), height: CGFloat(popoverHeight))
         .background {
             Group {
-                if popoverVibrancy {
+                if popoverStealthMode || popoverVibrancy {
                     VisualEffectView(
-                        material: .hudWindow,
+                        material: popoverStealthMode ? .underWindowBackground : .hudWindow,
                         blendingMode: .behindWindow
                     )
-                    .overlay(Theme.Colors.background.opacity(popoverOpacity))
+                    .overlay(
+                        Theme.Colors.background
+                            .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : popoverOpacity)
+                    )
                 } else {
                     Theme.Colors.background
                 }
             }
         }
+        // Stealth mode: monochrome + near-invisible until hover
+        .saturation(popoverStealthMode ? (isHovering ? 0.3 : 0.0) : 1.0)
+        .opacity(popoverStealthMode ? stealthOpacity : 1.0)
+        .animation(.easeInOut(duration: 0.3), value: isHovering)
+        .onHover { hovering in
+            isHovering = hovering
+            configureWindowTransparency()
+        }
         // Opening animation
         .scaleEffect(isVisible ? 1.0 : 0.92)
-        .opacity(isVisible ? 1.0 : 0)
+        .opacity(isVisible ? (popoverStealthMode ? stealthOpacity : 1.0) : 0)
         .onAppear {
             isInputFocused = true
-            // Configure the window for transparency
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
                 configureWindowTransparency()
             }
@@ -68,6 +84,7 @@ struct MenuBarPopoverView: View {
         }
         .onDisappear {
             isVisible = false
+            isHovering = false
         }
         .onChange(of: popoverVibrancy) { _, _ in
             configureWindowTransparency()
@@ -75,21 +92,29 @@ struct MenuBarPopoverView: View {
         .onChange(of: popoverOpacity) { _, _ in
             configureWindowTransparency()
         }
+        .onChange(of: popoverStealthMode) { _, _ in
+            configureWindowTransparency()
+        }
     }
 
     /// Finds the MenuBarExtra NSWindow and configures transparency
     private func configureWindowTransparency() {
-        // MenuBarExtra windows are NSPanel instances managed by the system
-        // We find them by looking at all app windows
+        let needsTransparency = popoverVibrancy || popoverStealthMode
         for window in NSApp.windows {
             guard let contentView = window.contentView,
                   String(describing: type(of: contentView)).contains("Hosting") else { continue }
-            // Skip main window and other known windows
             if window.title == "Hat" { continue }
             if window.styleMask.contains(.resizable) { continue }
 
-            window.isOpaque = !popoverVibrancy
-            window.backgroundColor = popoverVibrancy ? .clear : NSColor(Theme.Colors.background)
+            window.isOpaque = !needsTransparency
+            window.backgroundColor = needsTransparency ? .clear : NSColor(Theme.Colors.background)
+
+            // In stealth mode, window alpha matches content for true invisibility
+            if popoverStealthMode {
+                window.alphaValue = isHovering ? CGFloat(stealthHoverOpacity) : 0.02
+            } else {
+                window.alphaValue = 1.0
+            }
             break
         }
     }
@@ -135,7 +160,15 @@ struct MenuBarPopoverView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(popoverVibrancy ? Theme.Colors.surface.opacity(max(popoverOpacity, 0.15)) : Theme.Colors.surface)
+        .background {
+            if popoverStealthMode {
+                Theme.Colors.surface.opacity(isHovering ? stealthHoverOpacity : 0.0)
+            } else if popoverVibrancy {
+                Theme.Colors.surface.opacity(max(popoverOpacity, 0.15))
+            } else {
+                Theme.Colors.surface
+            }
+        }
     }
 
     // MARK: - Chat Area
@@ -276,7 +309,15 @@ struct MenuBarPopoverView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(popoverVibrancy ? Theme.Colors.surfaceSecondary.opacity(max(popoverOpacity, 0.15)) : Theme.Colors.surfaceSecondary)
+            .background {
+                if popoverStealthMode {
+                    Theme.Colors.surfaceSecondary.opacity(isHovering ? stealthHoverOpacity : 0.0)
+                } else if popoverVibrancy {
+                    Theme.Colors.surfaceSecondary.opacity(max(popoverOpacity, 0.15))
+                } else {
+                    Theme.Colors.surfaceSecondary
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)

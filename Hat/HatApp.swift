@@ -78,11 +78,110 @@ struct HatApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuBarPopoverView()
+            Button {
+                MenuBarPopoverManager.shared.togglePopover()
+            } label: {
+                Text("Abrir Hat")
+            }
+            .keyboardShortcut("h", modifiers: [.command, .shift])
         } label: {
             MenuBarIconView(isProcessing: viewModel.isProcessing)
         }
-        .menuBarExtraStyle(.window)
+        .menuBarExtraStyle(.menu)
+    }
+}
+
+// MARK: - Persistent Menu Bar Popover Panel
+
+final class MenuBarPopoverPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { false }
+
+    override func resignKey() {
+        // Do NOT close — this keeps the popover pinned open
+        super.resignKey()
+    }
+}
+
+// MARK: - Menu Bar Popover Manager
+
+@MainActor
+class MenuBarPopoverManager {
+    static let shared = MenuBarPopoverManager()
+    private var panel: MenuBarPopoverPanel?
+
+    var isOpen: Bool { panel != nil }
+
+    func togglePopover() {
+        if panel != nil {
+            closePopover()
+        } else {
+            showPopover()
+        }
+    }
+
+    func showPopover() {
+        guard panel == nil else {
+            panel?.makeKeyAndOrderFront(nil)
+            return
+        }
+
+        let newPanel = MenuBarPopoverPanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .nonactivatingPanel, .titled, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+
+        newPanel.isFloatingPanel = true
+        newPanel.level = .floating
+        newPanel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        newPanel.titleVisibility = .hidden
+        newPanel.titlebarAppearsTransparent = true
+        newPanel.isMovableByWindowBackground = true
+        newPanel.isOpaque = false
+        newPanel.backgroundColor = .clear
+        newPanel.hasShadow = true
+        newPanel.animationBehavior = .utilityWindow
+
+        newPanel.standardWindowButton(.closeButton)?.isHidden = true
+        newPanel.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        newPanel.standardWindowButton(.zoomButton)?.isHidden = true
+
+        newPanel.contentView = NSHostingView(rootView: MenuBarPopoverView().ignoresSafeArea())
+
+        // Position below the menu bar icon
+        positionPanel(newPanel)
+
+        self.panel = newPanel
+        NSApp.activate(ignoringOtherApps: true)
+        newPanel.makeKeyAndOrderFront(nil)
+    }
+
+    func closePopover() {
+        panel?.close()
+        panel?.contentView = nil
+        panel = nil
+    }
+
+    private func positionPanel(_ panel: NSPanel) {
+        guard let screen = NSScreen.main else { return }
+        let screenFrame = screen.frame
+        let visibleFrame = screen.visibleFrame
+
+        // Size will be set by the SwiftUI content frame
+        // Position at the top-right area of the screen, below the menu bar
+        let menuBarHeight = screenFrame.height - visibleFrame.height - visibleFrame.origin.y
+        let panelWidth = CGFloat(SettingsManager.popoverWidth)
+        let panelHeight = CGFloat(SettingsManager.popoverHeight)
+
+        panel.setContentSize(NSSize(width: panelWidth, height: panelHeight))
+
+        // Place near the right side of the screen, just below the menu bar
+        let x = screenFrame.maxX - panelWidth - 8
+        let y = screenFrame.maxY - menuBarHeight - panelHeight - 4
+
+        panel.setFrameOrigin(NSPoint(x: x, y: y))
     }
 }
 

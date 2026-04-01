@@ -653,7 +653,7 @@ struct ContentView: View {
                                 .frame(maxWidth: 680)
                                 .frame(maxWidth: .infinity)
                                 .id(message.id)
-                                .transition(.maePopIn)
+                                .transition(.maeBlurIn)
                         }
                     }
                     Color.clear.frame(height: 10).id(bottomID)

@@ -145,4 +145,26 @@ struct SettingsManager {
         globalInputTokens = 0
         globalOutputTokens = 0
     }
+
+    // MARK: - Appearance
+
+    static var popoverOpacity: Double {
+        get { UserDefaults.standard.object(forKey: "popoverOpacity") as? Double ?? 1.0 }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverOpacity") }
+    }
+
+    static var popoverWidth: Double {
+        get { UserDefaults.standard.object(forKey: "popoverWidth") as? Double ?? 380.0 }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverWidth") }
+    }
+
+    static var popoverHeight: Double {
+        get { UserDefaults.standard.object(forKey: "popoverHeight") as? Double ?? 480.0 }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverHeight") }
+    }
+
+    static var popoverVibrancy: Bool {
+        get { UserDefaults.standard.object(forKey: "popoverVibrancy") as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: "popoverVibrancy") }
+    }
 }

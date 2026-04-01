@@ -23,11 +23,10 @@ struct MenuBarPopoverView: View {
     @AppStorage("popoverHeight") private var popoverHeight: Double = 480.0
     @AppStorage("popoverVibrancy") private var popoverVibrancy: Bool = false
     @AppStorage("popoverStealthMode") private var popoverStealthMode: Bool = false
+    @AppStorage("popoverStealthHoverOpacity") private var stealthHoverOpacity: Double = 0.4
 
-    /// Effective opacity: stealth mode overrides everything
-    private var isStealthActive: Bool { popoverStealthMode && !isHovering }
-    private var stealthContentOpacity: Double { isStealthActive ? 0.04 : 1.0 }
-    private var stealthWindowAlpha: CGFloat { isStealthActive ? 0.08 : 1.0 }
+    /// Stealth: 2% idle, user-defined on hover (default 40%)
+    private var stealthOpacity: Double { isHovering ? stealthHoverOpacity : 0.02 }
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -56,15 +55,16 @@ struct MenuBarPopoverView: View {
                     )
                     .overlay(
                         Theme.Colors.background
-                            .opacity(popoverStealthMode ? (isHovering ? 0.7 : 0.0) : popoverOpacity)
+                            .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : popoverOpacity)
                     )
                 } else {
                     Theme.Colors.background
                 }
             }
         }
-        // Stealth mode: nearly invisible until hover
-        .opacity(popoverStealthMode ? stealthContentOpacity : 1.0)
+        // Stealth mode: monochrome + near-invisible until hover
+        .saturation(popoverStealthMode ? (isHovering ? 0.3 : 0.0) : 1.0)
+        .opacity(popoverStealthMode ? stealthOpacity : 1.0)
         .animation(.easeInOut(duration: 0.3), value: isHovering)
         .onHover { hovering in
             isHovering = hovering
@@ -72,7 +72,7 @@ struct MenuBarPopoverView: View {
         }
         // Opening animation
         .scaleEffect(isVisible ? 1.0 : 0.92)
-        .opacity(isVisible ? (popoverStealthMode ? stealthContentOpacity : 1.0) : 0)
+        .opacity(isVisible ? (popoverStealthMode ? stealthOpacity : 1.0) : 0)
         .onAppear {
             isInputFocused = true
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
@@ -109,9 +109,9 @@ struct MenuBarPopoverView: View {
             window.isOpaque = !needsTransparency
             window.backgroundColor = needsTransparency ? .clear : NSColor(Theme.Colors.background)
 
-            // In stealth mode, control window-level alpha for true invisibility
+            // In stealth mode, window alpha matches content for true invisibility
             if popoverStealthMode {
-                window.alphaValue = isHovering ? 1.0 : stealthWindowAlpha
+                window.alphaValue = isHovering ? CGFloat(stealthHoverOpacity) : 0.02
             } else {
                 window.alphaValue = 1.0
             }
@@ -162,7 +162,7 @@ struct MenuBarPopoverView: View {
         .padding(.vertical, 10)
         .background {
             if popoverStealthMode {
-                Theme.Colors.surface.opacity(isHovering ? 0.7 : 0.0)
+                Theme.Colors.surface.opacity(isHovering ? stealthHoverOpacity : 0.0)
             } else if popoverVibrancy {
                 Theme.Colors.surface.opacity(max(popoverOpacity, 0.15))
             } else {
@@ -311,7 +311,7 @@ struct MenuBarPopoverView: View {
             .padding(.vertical, 10)
             .background {
                 if popoverStealthMode {
-                    Theme.Colors.surfaceSecondary.opacity(isHovering ? 0.7 : 0.0)
+                    Theme.Colors.surfaceSecondary.opacity(isHovering ? stealthHoverOpacity : 0.0)
                 } else if popoverVibrancy {
                     Theme.Colors.surfaceSecondary.opacity(max(popoverOpacity, 0.15))
                 } else {

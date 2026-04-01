@@ -256,7 +256,79 @@ struct MenuBarPopoverView: View {
         VStack(spacing: 0) {
             MaeDivider()
 
+            // Attachment preview
+            if !viewModel.pendingAttachments.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(viewModel.pendingAttachments) { attachment in
+                            ZStack(alignment: .topTrailing) {
+                                if attachment.isImage, let img = attachment.image {
+                                    Image(nsImage: img)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 44, height: 44)
+                                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                                .stroke(Theme.Colors.border, lineWidth: 0.5)
+                                        )
+                                }
+
+                                Button {
+                                    withAnimation(Theme.Animation.snappy) {
+                                        viewModel.pendingAttachments.removeAll { $0.id == attachment.id }
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundStyle(Theme.Colors.textPrimary, Theme.Colors.background)
+                                }
+                                .buttonStyle(.plain)
+                                .offset(x: 4, y: -4)
+                            }
+                            .transition(.maeScaleFade)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    .padding(.bottom, 4)
+                }
+            }
+
             HStack(alignment: .bottom, spacing: 8) {
+                Button {
+                    Task {
+                        // Hide popover briefly so it doesn't appear in the screenshot
+                        let panel = NSApp.windows.first(where: { $0 is MenuBarPopoverPanel })
+                        panel?.orderOut(nil)
+
+                        // Small delay for the panel to hide
+                        try? await Task.sleep(nanoseconds: 200_000_000)
+
+                        if let screenshot = await viewModel.captureScreen() {
+                            let attachment = ChatAttachment(
+                                name: "Captura de Tela",
+                                data: nil,
+                                content: nil,
+                                image: screenshot,
+                                isImage: true
+                            )
+                            viewModel.pendingAttachments.append(attachment)
+                        }
+
+                        // Show popover again
+                        panel?.makeKeyAndOrderFront(nil)
+                    }
+                } label: {
+                    Image(systemName: "camera.viewfinder")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.Colors.textMuted)
+                }
+                .buttonStyle(.plain)
+                .help("Capturar tela")
+                .accessibilityLabel("Capturar tela")
+                .disabled(viewModel.isProcessing)
+
                 TextField("Mensagem...", text: $viewModel.inputText, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(Theme.Typography.bodySmall)

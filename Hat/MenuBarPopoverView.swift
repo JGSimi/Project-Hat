@@ -12,6 +12,7 @@ struct MenuBarPopoverView: View {
     @ObservedObject private var viewModel = AssistantViewModel.shared
     @FocusState private var isInputFocused: Bool
     @State private var sendHovered = false
+    @State private var isVisible = false
     @Namespace private var bottomAnchor
     @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
     @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
@@ -40,25 +41,57 @@ struct MenuBarPopoverView: View {
         }
         .frame(width: CGFloat(popoverWidth), height: CGFloat(popoverHeight))
         .background {
-            if popoverVibrancy {
-                ZStack {
+            Group {
+                if popoverVibrancy {
                     VisualEffectView(
                         material: .hudWindow,
                         blendingMode: .behindWindow
                     )
-                    Theme.Colors.background.opacity(popoverOpacity)
+                    .overlay(Theme.Colors.background.opacity(popoverOpacity))
+                } else {
+                    Theme.Colors.background
                 }
-            } else {
-                Theme.Colors.background
             }
         }
-        .background(WindowAccessor { window in
-            if let window {
-                window.isOpaque = !popoverVibrancy
-                window.backgroundColor = popoverVibrancy ? .clear : NSColor(Theme.Colors.background)
+        // Opening animation
+        .scaleEffect(isVisible ? 1.0 : 0.92)
+        .opacity(isVisible ? 1.0 : 0)
+        .onAppear {
+            isInputFocused = true
+            // Configure the window for transparency
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                configureWindowTransparency()
             }
-        })
-        .onAppear { isInputFocused = true }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                isVisible = true
+            }
+        }
+        .onDisappear {
+            isVisible = false
+        }
+        .onChange(of: popoverVibrancy) { _, _ in
+            configureWindowTransparency()
+        }
+        .onChange(of: popoverOpacity) { _, _ in
+            configureWindowTransparency()
+        }
+    }
+
+    /// Finds the MenuBarExtra NSWindow and configures transparency
+    private func configureWindowTransparency() {
+        // MenuBarExtra windows are NSPanel instances managed by the system
+        // We find them by looking at all app windows
+        for window in NSApp.windows {
+            guard let contentView = window.contentView,
+                  String(describing: type(of: contentView)).contains("Hosting") else { continue }
+            // Skip main window and other known windows
+            if window.title == "Hat" { continue }
+            if window.styleMask.contains(.resizable) { continue }
+
+            window.isOpaque = !popoverVibrancy
+            window.backgroundColor = popoverVibrancy ? .clear : NSColor(Theme.Colors.background)
+            break
+        }
     }
 
     // MARK: - Header
@@ -102,7 +135,7 @@ struct MenuBarPopoverView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(popoverVibrancy ? Theme.Colors.surface.opacity(popoverOpacity * 0.9) : Theme.Colors.surface)
+        .background(popoverVibrancy ? Theme.Colors.surface.opacity(max(popoverOpacity, 0.15)) : Theme.Colors.surface)
     }
 
     // MARK: - Chat Area
@@ -243,7 +276,7 @@ struct MenuBarPopoverView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(popoverVibrancy ? Theme.Colors.surfaceSecondary.opacity(popoverOpacity * 0.85) : Theme.Colors.surfaceSecondary)
+            .background(popoverVibrancy ? Theme.Colors.surfaceSecondary.opacity(max(popoverOpacity, 0.15)) : Theme.Colors.surfaceSecondary)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)

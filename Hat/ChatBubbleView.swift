@@ -7,10 +7,14 @@ struct ChatBubble: View {
     @State private var isHovered = false
     @State private var showCopied = false
 
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
     private var timeString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: message.timestamp)
+        Self.timeFormatter.string(from: message.timestamp)
     }
 
     var body: some View {
@@ -44,7 +48,6 @@ struct ChatBubble: View {
                     HStack(spacing: 4) {
                         Image(systemName: "camera.viewfinder")
                             .font(.system(size: 10))
-                            .symbolEffect(.pulse)
                         Text("Analise de Tela")
                             .font(.system(size: 10, weight: .medium))
                     }
@@ -190,7 +193,6 @@ struct ChatBubble: View {
         .onHover { hovering in
             withAnimation(Theme.Animation.hover) { isHovered = hovering }
         }
-        .maeStaggered(index: animationIndex, baseDelay: 0.05)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(message.isUser ? "Voce" : "Hat"): \(message.content)")
     }

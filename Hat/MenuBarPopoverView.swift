@@ -68,7 +68,10 @@ struct MenuBarPopoverView: View {
         .animation(.easeInOut(duration: 0.3), value: isHovering)
         .onHover { hovering in
             isHovering = hovering
-            configureWindowTransparency()
+            // Only reconfigure window in stealth mode (avoid per-frame work)
+            if popoverStealthMode {
+                configureWindowTransparency()
+            }
         }
         // Opening animation
         .scaleEffect(isVisible ? 1.0 : 0.92)

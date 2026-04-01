@@ -37,7 +37,11 @@ struct ChatAttachment: Identifiable {
     let isImage: Bool
 }
 
-struct ChatMessage: Identifiable {
+struct ChatMessage: Identifiable, Equatable {
+    static func == (lhs: ChatMessage, rhs: ChatMessage) -> Bool {
+        lhs.id == rhs.id && lhs.content == rhs.content && lhs.isStreaming == rhs.isStreaming
+    }
+
     let id: UUID
     let content: String
     var images: [NSImage]? = nil

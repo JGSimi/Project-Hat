@@ -33,17 +33,15 @@ class AIAPIService {
     /// Keeps the most recent messages, dropping oldest first.
     private func truncateHistory(_ history: [ConversationTurn], maxChars: Int) -> [ConversationTurn] {
         var totalChars = 0
-        var result: [ConversationTurn] = []
+        var startIndex = history.count
 
-        for turn in history.reversed() {
-            let turnChars = turn.textContent.count
-            if totalChars + turnChars > maxChars {
-                break
-            }
+        for i in stride(from: history.count - 1, through: 0, by: -1) {
+            let turnChars = history[i].textContent.count
+            if totalChars + turnChars > maxChars { break }
             totalChars += turnChars
-            result.insert(turn, at: 0)
+            startIndex = i
         }
-        return result
+        return Array(history[startIndex...])
     }
 
     func executeRequest(prompt: String, images: [String]?, history: [ConversationTurn], systemPrompt: String) async throws -> AIResponse {

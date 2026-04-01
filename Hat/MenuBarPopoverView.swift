@@ -16,6 +16,10 @@ struct MenuBarPopoverView: View {
     @AppStorage("inferenceMode") private var inferenceMode: InferenceMode = .local
     @AppStorage("apiModelName") private var apiModelName: String = "gpt-5.2"
     @AppStorage("localModelName") private var localModelName: String = "gemma3:4b"
+    @AppStorage("popoverOpacity") private var popoverOpacity: Double = 1.0
+    @AppStorage("popoverWidth") private var popoverWidth: Double = 380.0
+    @AppStorage("popoverHeight") private var popoverHeight: Double = 480.0
+    @AppStorage("popoverVibrancy") private var popoverVibrancy: Bool = false
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -34,8 +38,26 @@ struct MenuBarPopoverView: View {
             popoverChatArea
             popoverInput
         }
-        .frame(width: 380, height: 480)
-        .background(Theme.Colors.background)
+        .frame(width: CGFloat(popoverWidth), height: CGFloat(popoverHeight))
+        .background {
+            if popoverVibrancy {
+                ZStack {
+                    VisualEffectView(
+                        material: .hudWindow,
+                        blendingMode: .behindWindow
+                    )
+                    Theme.Colors.background.opacity(popoverOpacity)
+                }
+            } else {
+                Theme.Colors.background
+            }
+        }
+        .background(WindowAccessor { window in
+            if let window {
+                window.isOpaque = !popoverVibrancy
+                window.backgroundColor = popoverVibrancy ? .clear : NSColor(Theme.Colors.background)
+            }
+        })
         .onAppear { isInputFocused = true }
     }
 
@@ -80,7 +102,7 @@ struct MenuBarPopoverView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(Theme.Colors.surface)
+        .background(popoverVibrancy ? Theme.Colors.surface.opacity(popoverOpacity * 0.9) : Theme.Colors.surface)
     }
 
     // MARK: - Chat Area
@@ -101,7 +123,7 @@ struct MenuBarPopoverView: View {
                                 isGrouped: isGrouped
                             )
                             .id(viewModel.messages[index].id)
-                            .transition(.maePopIn)
+                            .transition(.maeBlurIn)
                         }
                     }
                     Color.clear.frame(height: 6).id(bottomAnchor)
@@ -160,6 +182,7 @@ struct MenuBarPopoverView: View {
 
             Spacer()
         }
+        .transition(.maeIrisIn)
         .maeAppearAnimation(animation: Theme.Animation.smooth)
     }
 
@@ -220,7 +243,7 @@ struct MenuBarPopoverView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(Theme.Colors.surfaceSecondary)
+            .background(popoverVibrancy ? Theme.Colors.surfaceSecondary.opacity(popoverOpacity * 0.85) : Theme.Colors.surfaceSecondary)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)

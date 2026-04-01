@@ -48,6 +48,7 @@ class AdvancedSettingsWindowManager: NSObject, NSWindowDelegate {
 
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general = "Geral"
+    case appearance = "Aparencia"
     case models = "Modelos & IA"
     case prompt = "Comportamento"
     case shortcuts = "Atalhos"
@@ -56,10 +57,11 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
     var icon: String {
         switch self {
-        case .general:   return "slider.horizontal.3"
-        case .models:    return "cpu.fill"
-        case .prompt:    return "text.bubble.fill"
-        case .shortcuts: return "command"
+        case .general:    return "slider.horizontal.3"
+        case .appearance: return "paintbrush.fill"
+        case .models:     return "cpu.fill"
+        case .prompt:     return "text.bubble.fill"
+        case .shortcuts:  return "command"
         }
     }
 }
@@ -76,6 +78,10 @@ struct AdvancedSettingsView: View {
     @AppStorage("apiEndpoint") var apiEndpoint: String = "https://api.openai.com/v1/chat/completions"
     @AppStorage("apiModelName") var apiModelName: String = "gpt-4o-mini"
     @AppStorage("playNotifications") var playNotifications: Bool = true
+    @AppStorage("popoverOpacity") var popoverOpacity: Double = 1.0
+    @AppStorage("popoverWidth") var popoverWidth: Double = 380.0
+    @AppStorage("popoverHeight") var popoverHeight: Double = 480.0
+    @AppStorage("popoverVibrancy") var popoverVibrancy: Bool = false
 
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
@@ -172,10 +178,11 @@ struct AdvancedSettingsView: View {
                             .padding(.bottom, 8)
 
                         switch selectedTab {
-                        case .general:   generalSettings.maeStaggered(index: 0)
-                        case .models:    modelSettings.maeStaggered(index: 0)
-                        case .prompt:    promptSettings.maeStaggered(index: 0)
-                        case .shortcuts: shortcutSettings.maeStaggered(index: 0)
+                        case .general:    generalSettings.maeStaggered(index: 0)
+                        case .appearance: appearanceSettings.maeStaggered(index: 0)
+                        case .models:     modelSettings.maeStaggered(index: 0)
+                        case .prompt:     promptSettings.maeStaggered(index: 0)
+                        case .shortcuts:  shortcutSettings.maeStaggered(index: 0)
                         case .none:
                             Text("Selecione uma categoria")
                                 .foregroundStyle(Theme.Colors.textSecondary)
@@ -262,6 +269,103 @@ struct AdvancedSettingsView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(Theme.Metrics.spacingLarge)
+                }
+            }
+            .groupBoxStyle(MaeCardStyle())
+        }
+    }
+
+    // MARK: - Appearance
+
+    private var appearanceSettings: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Transparency section
+            MaeSectionHeader(title: "Transparencia")
+
+            GroupBox {
+                VStack(spacing: 0) {
+                    HStack {
+                        MaeActionRow(title: "Fundo Vibrante", subtitle: "Ativar efeito de transparencia e desfoque", icon: "drop.halffull", iconColor: Theme.Colors.accentPrimary)
+                        Toggle("", isOn: $popoverVibrancy)
+                            .toggleStyle(.switch)
+                    }
+                    .padding(Theme.Metrics.spacingLarge)
+
+                    if popoverVibrancy {
+                        MaeDivider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                MaeActionRow(title: "Opacidade", subtitle: "Controle a transparencia do fundo", icon: "circle.lefthalf.filled", iconColor: Theme.Colors.textSecondary)
+                                Text("\(Int(popoverOpacity * 100))%")
+                                    .font(Theme.Typography.caption)
+                                    .foregroundStyle(Theme.Colors.textMuted)
+                                    .frame(width: 36, alignment: .trailing)
+                            }
+                            Slider(value: $popoverOpacity, in: 0.3...1.0, step: 0.05)
+                                .tint(Theme.Colors.accentPrimary)
+                        }
+                        .padding(Theme.Metrics.spacingLarge)
+                        .transition(.maeSlideUp)
+                    }
+                }
+            }
+            .groupBoxStyle(MaeCardStyle())
+            .animation(Theme.Animation.smooth, value: popoverVibrancy)
+
+            Spacer().frame(height: 24)
+
+            // Size section
+            MaeSectionHeader(title: "Tamanho do Popover")
+
+            GroupBox {
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            MaeActionRow(title: "Largura", subtitle: nil, icon: "arrow.left.and.right", iconColor: Theme.Colors.textSecondary)
+                            Text("\(Int(popoverWidth))px")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textMuted)
+                                .frame(width: 48, alignment: .trailing)
+                        }
+                        Slider(value: $popoverWidth, in: 320...600, step: 10)
+                            .tint(Theme.Colors.accentPrimary)
+                    }
+                    .padding(Theme.Metrics.spacingLarge)
+
+                    MaeDivider()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            MaeActionRow(title: "Altura", subtitle: nil, icon: "arrow.up.and.down", iconColor: Theme.Colors.textSecondary)
+                            Text("\(Int(popoverHeight))px")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textMuted)
+                                .frame(width: 48, alignment: .trailing)
+                        }
+                        Slider(value: $popoverHeight, in: 360...720, step: 10)
+                            .tint(Theme.Colors.accentPrimary)
+                    }
+                    .padding(Theme.Metrics.spacingLarge)
+
+                    MaeDivider()
+
+                    Button {
+                        withAnimation(Theme.Animation.smooth) {
+                            popoverWidth = 380
+                            popoverHeight = 480
+                        }
+                    } label: {
+                        HStack {
+                            MaeActionRow(title: "Restaurar Padrao", subtitle: "Voltar para 380 x 480", icon: "arrow.counterclockwise", iconColor: Theme.Colors.textSecondary)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .padding(Theme.Metrics.spacingLarge)
+                    .disabled(popoverWidth == 380 && popoverHeight == 480)
+                    .opacity(popoverWidth == 380 && popoverHeight == 480 ? 0.5 : 1.0)
                 }
             }
             .groupBoxStyle(MaeCardStyle())

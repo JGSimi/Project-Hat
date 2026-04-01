@@ -82,6 +82,7 @@ struct AdvancedSettingsView: View {
     @AppStorage("popoverWidth") var popoverWidth: Double = 380.0
     @AppStorage("popoverHeight") var popoverHeight: Double = 480.0
     @AppStorage("popoverVibrancy") var popoverVibrancy: Bool = false
+    @AppStorage("popoverStealthMode") var popoverStealthMode: Bool = false
 
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
@@ -279,6 +280,39 @@ struct AdvancedSettingsView: View {
 
     private var appearanceSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Stealth mode section
+            MaeSectionHeader(title: "Modo Discreto")
+
+            GroupBox {
+                VStack(spacing: 0) {
+                    HStack {
+                        MaeActionRow(title: "Modo Discreto", subtitle: "Popover quase invisivel, aparece ao passar o mouse", icon: "eye.slash.fill", iconColor: Theme.Colors.warning)
+                        Toggle("", isOn: $popoverStealthMode)
+                            .toggleStyle(.switch)
+                    }
+                    .padding(Theme.Metrics.spacingLarge)
+
+                    if popoverStealthMode {
+                        MaeDivider()
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Theme.Colors.textMuted)
+                            Text("O popover fica praticamente invisivel ate voce passar o mouse por cima. Util para manter privacidade.")
+                                .font(Theme.Typography.caption)
+                                .foregroundStyle(Theme.Colors.textMuted)
+                        }
+                        .padding(Theme.Metrics.spacingLarge)
+                        .transition(.maeSlideUp)
+                    }
+                }
+            }
+            .groupBoxStyle(MaeCardStyle())
+            .animation(Theme.Animation.smooth, value: popoverStealthMode)
+
+            Spacer().frame(height: 24)
+
             // Transparency section
             MaeSectionHeader(title: "Transparencia")
 

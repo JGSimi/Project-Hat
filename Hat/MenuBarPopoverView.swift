@@ -97,25 +97,19 @@ struct MenuBarPopoverView: View {
         }
     }
 
-    /// Finds the MenuBarExtra NSWindow and configures transparency
+    /// Configures the popover panel transparency
     private func configureWindowTransparency() {
+        // Find our panel — it's the MenuBarPopoverPanel instance
+        guard let window = NSApp.windows.first(where: { $0 is MenuBarPopoverPanel }) else { return }
+
         let needsTransparency = popoverVibrancy || popoverStealthMode
-        for window in NSApp.windows {
-            guard let contentView = window.contentView,
-                  String(describing: type(of: contentView)).contains("Hosting") else { continue }
-            if window.title == "Hat" { continue }
-            if window.styleMask.contains(.resizable) { continue }
+        window.isOpaque = !needsTransparency
+        window.backgroundColor = needsTransparency ? .clear : NSColor(Theme.Colors.background)
 
-            window.isOpaque = !needsTransparency
-            window.backgroundColor = needsTransparency ? .clear : NSColor(Theme.Colors.background)
-
-            // In stealth mode, window alpha matches content for true invisibility
-            if popoverStealthMode {
-                window.alphaValue = isHovering ? CGFloat(stealthHoverOpacity) : 0.02
-            } else {
-                window.alphaValue = 1.0
-            }
-            break
+        if popoverStealthMode {
+            window.alphaValue = isHovering ? CGFloat(stealthHoverOpacity) : 0.02
+        } else {
+            window.alphaValue = 1.0
         }
     }
 
@@ -156,6 +150,10 @@ struct MenuBarPopoverView: View {
 
             MaeTooltipButton(icon: "arrow.up.left.and.arrow.down.right", helpText: "Abrir janela completa") {
                 MainWindowManager.shared.showWindow()
+            }
+
+            MaeTooltipButton(icon: "xmark", helpText: "Fechar popover") {
+                MenuBarPopoverManager.shared.closePopover()
             }
         }
         .padding(.horizontal, 14)

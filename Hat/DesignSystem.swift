@@ -68,7 +68,7 @@ enum Theme {
             light: Color.black.opacity(0.12),
             dark:  Color.white.opacity(0.10)
         )
-        static let borderFocused = Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.50)) // indigo @ 50%
+        static var borderFocused: Color { accentPrimary.opacity(0.50) }
 
         // Text — clean hierarchy
         static let textPrimary = Color.adaptive(
@@ -89,13 +89,19 @@ enum Theme {
             light: Color(NSColor(red: 0.106, green: 0.106, blue: 0.118, alpha: 1.0)),    // #1B1B1E
             dark:  Color(NSColor(red: 0.933, green: 0.933, blue: 0.941, alpha: 1.0))     // #EEEEF0
         )
-        static let accentSubtle = Color.adaptive(
-            light: Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.08)),
-            dark:  Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 0.12))
-        )
-        // Indigo — refined primary accent
-        static let accentPrimary = Color(NSColor(red: 0.388, green: 0.400, blue: 0.945, alpha: 1.0))      // #6366F1
-        static let accentPrimaryHover = Color(NSColor(red: 0.506, green: 0.518, blue: 0.957, alpha: 1.0)) // #8184F4
+        static var accentSubtle: Color {
+            Color.adaptive(
+                light: accentPrimary.opacity(0.08),
+                dark:  accentPrimary.opacity(0.12)
+            )
+        }
+        // Primary accent — user-customizable via AppTheme preset
+        static var accentPrimary: Color {
+            AppTheme.current.color
+        }
+        static var accentPrimaryHover: Color {
+            AppTheme.current.hoverColor
+        }
 
         // Input — dedicated input background
         static let inputBackground = Color.adaptive(

@@ -84,6 +84,7 @@ struct AdvancedSettingsView: View {
     @AppStorage("popoverVibrancy") var popoverVibrancy: Bool = false
     @AppStorage("popoverStealthMode") var popoverStealthMode: Bool = false
     @AppStorage("popoverStealthHoverOpacity") var stealthHoverOpacity: Double = 0.4
+    @AppStorage("appTheme") var appTheme: String = AppTheme.indigo.rawValue
 
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var apiKey: String = KeychainManager.shared.loadKey(for: SettingsManager.selectedProvider) ?? ""
@@ -279,8 +280,58 @@ struct AdvancedSettingsView: View {
 
     // MARK: - Appearance
 
+    private var selectedTheme: AppTheme {
+        AppTheme(rawValue: appTheme) ?? .indigo
+    }
+
     private var appearanceSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Theme section
+            MaeSectionHeader(title: "Tema")
+
+            GroupBox {
+                VStack(spacing: 12) {
+                    // Theme color grid
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
+                        ForEach(AppTheme.allCases) { theme in
+                            Button {
+                                withAnimation(Theme.Animation.smooth) {
+                                    appTheme = theme.rawValue
+                                }
+                            } label: {
+                                VStack(spacing: 6) {
+                                    Circle()
+                                        .fill(theme.color)
+                                        .frame(width: 28, height: 28)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                        )
+                                        .overlay {
+                                            if selectedTheme == theme {
+                                                Image(systemName: "checkmark")
+                                                    .font(.system(size: 12, weight: .bold))
+                                                    .foregroundStyle(.white)
+                                            }
+                                        }
+                                        .shadow(color: theme.color.opacity(selectedTheme == theme ? 0.4 : 0), radius: 6)
+
+                                    Text(theme.rawValue)
+                                        .font(.system(size: 9, weight: selectedTheme == theme ? .semibold : .regular))
+                                        .foregroundStyle(selectedTheme == theme ? Theme.Colors.textPrimary : Theme.Colors.textMuted)
+                                        .lineLimit(1)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                .padding(Theme.Metrics.spacingLarge)
+            }
+            .groupBoxStyle(MaeCardStyle())
+
+            Spacer().frame(height: 24)
+
             // Stealth mode section
             MaeSectionHeader(title: "Modo Discreto")
 

@@ -1,4 +1,54 @@
 import Foundation
+import SwiftUI
+
+// MARK: - App Theme Presets
+
+enum AppTheme: String, CaseIterable, Identifiable {
+    case indigo = "Indigo"
+    case blue = "Azul"
+    case purple = "Roxo"
+    case pink = "Rosa"
+    case red = "Vermelho"
+    case orange = "Laranja"
+    case green = "Verde"
+    case teal = "Azul Piscina"
+    case mono = "Monocromatico"
+
+    var id: String { rawValue }
+
+    var color: Color {
+        switch self {
+        case .indigo:  return Color(red: 0.388, green: 0.400, blue: 0.945)   // #6366F1
+        case .blue:    return Color(red: 0.231, green: 0.510, blue: 0.965)   // #3B82F6
+        case .purple:  return Color(red: 0.576, green: 0.369, blue: 0.933)   // #935EEE
+        case .pink:    return Color(red: 0.925, green: 0.282, blue: 0.600)   // #EC4899
+        case .red:     return Color(red: 0.937, green: 0.267, blue: 0.267)   // #EF4444
+        case .orange:  return Color(red: 0.961, green: 0.522, blue: 0.133)   // #F58522
+        case .green:   return Color(red: 0.133, green: 0.773, blue: 0.369)   // #22C55E
+        case .teal:    return Color(red: 0.078, green: 0.714, blue: 0.651)   // #14B8A6
+        case .mono:    return Color(red: 0.600, green: 0.600, blue: 0.624)   // #99999F
+        }
+    }
+
+    var hoverColor: Color {
+        switch self {
+        case .indigo:  return Color(red: 0.506, green: 0.518, blue: 0.957)
+        case .blue:    return Color(red: 0.376, green: 0.612, blue: 0.976)
+        case .purple:  return Color(red: 0.678, green: 0.494, blue: 0.953)
+        case .pink:    return Color(red: 0.945, green: 0.424, blue: 0.694)
+        case .red:     return Color(red: 0.957, green: 0.420, blue: 0.420)
+        case .orange:  return Color(red: 0.976, green: 0.635, blue: 0.318)
+        case .green:   return Color(red: 0.306, green: 0.843, blue: 0.502)
+        case .teal:    return Color(red: 0.243, green: 0.800, blue: 0.745)
+        case .mono:    return Color(red: 0.700, green: 0.700, blue: 0.720)
+        }
+    }
+
+    static var current: AppTheme {
+        let raw = UserDefaults.standard.string(forKey: "appTheme") ?? AppTheme.indigo.rawValue
+        return AppTheme(rawValue: raw) ?? .indigo
+    }
+}
 
 enum InferenceMode: String, CaseIterable, Identifiable {
     case local = "Modelos Locais (Ollama)"

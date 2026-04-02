@@ -549,6 +549,7 @@ struct MaeActionRow: View {
                     .frame(width: 28, height: 28)
                     .background { (iconColor.opacity(0.08) as Color) }
                     .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .maeGlow(color: iconColor)
                     .accessibilityHidden(true)
                     .onAppear { appeared = true }
             }
@@ -882,4 +883,8 @@ extension View {
         )
     }
 
+    /// Neon glow effect — colored shadow behind the view
+    func maeGlow(color: Color = Theme.Colors.accentPrimary, radius: CGFloat = 6, opacity: Double = 0.4) -> some View {
+        self.shadow(color: color.opacity(opacity), radius: radius)
+    }
 }

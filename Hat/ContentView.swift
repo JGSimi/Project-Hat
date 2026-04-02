@@ -710,6 +710,7 @@ struct ContentView: View {
                         .frame(width: 28, height: 28)
                         .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                 }
+                .maeGlow(color: Theme.Colors.accentPrimary, radius: 12, opacity: 0.3)
 
                 VStack(spacing: 6) {
                     Text(greetingText)
@@ -857,6 +858,7 @@ struct ContentView: View {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 24))
                                 .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                                .maeGlow(color: hasContent ? Theme.Colors.accentPrimary : .clear)
                                 .frame(width: 28, height: 28)
                                 .animation(Theme.Animation.quickSnap, value: hasContent)
                         }

@@ -224,6 +224,7 @@ struct MenuBarPopoverView: View {
                     .frame(width: 22, height: 22)
                     .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
             }
+            .maeGlow(color: Theme.Colors.accentPrimary, radius: 10, opacity: 0.3)
             .accessibilityHidden(true)
 
             VStack(spacing: 4) {
@@ -369,6 +370,7 @@ struct MenuBarPopoverView: View {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 22))
                             .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                            .maeGlow(color: hasContent ? Theme.Colors.accentPrimary : .clear)
                             .scaleEffect(sendHovered && hasContent ? 1.1 : 1.0)
                             .animation(Theme.Animation.quickSnap, value: sendHovered)
                     }

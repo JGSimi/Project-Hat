@@ -83,8 +83,6 @@ struct SidebarView: View {
             .padding(.top, 38) // Space for traffic lights
             .padding(.bottom, 8)
 
-            MaeDivider()
-
             // Conversation list
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0, pinnedViews: []) {
@@ -161,8 +159,6 @@ struct SidebarView: View {
                 .padding(.vertical, 4)
             }
 
-            MaeDivider()
-
             // Footer
             HStack(spacing: 8) {
                 Button {
@@ -194,16 +190,7 @@ struct SidebarView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
         }
-        .background {
-            GlassBackground(
-                material: .sidebar,
-                blendingMode: .withinWindow,
-                overlayColor: Theme.Colors.glassSurfaceSecondary,
-                cornerRadius: 0,
-                borderColor: .clear,
-                borderWidth: 0
-            )
-        }
+        .background(Theme.Colors.glassSurfaceSecondary)
         .onChange(of: searchText) { _, newValue in
             // Debounce search: wait 300ms before filtering
             let text = newValue

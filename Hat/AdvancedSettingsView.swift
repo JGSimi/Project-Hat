@@ -167,12 +167,7 @@ struct AdvancedSettingsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 12)
             }
-            .background(
-                ZStack {
-                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                    Theme.Colors.glassSurfaceSecondary
-                }
-            )
+            .background(Theme.Colors.glassSurfaceSecondary)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
 
         } detail: {

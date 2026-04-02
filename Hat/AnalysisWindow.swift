@@ -165,7 +165,7 @@ struct AnalysisView: View {
                                 VStack(spacing: 6) {
                                     Text("Analisando...")
                                         .font(Theme.Typography.subheading)
-                                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.8))
+                                        .foregroundStyle(Theme.Colors.textPrimary)
                                     Text("Processando captura de tela com IA")
                                         .font(Theme.Typography.caption)
                                         .foregroundStyle(Theme.Colors.textMuted)

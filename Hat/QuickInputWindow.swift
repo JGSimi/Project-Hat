@@ -194,7 +194,7 @@ struct QuickInputView: View {
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 24))
-                            .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted.opacity(0.3))
+                            .foregroundStyle(hasContent ? Theme.Colors.accent : Theme.Colors.textMuted.opacity(0.5))
                     }
                     .buttonStyle(.plain)
                     .disabled(!hasContent)
@@ -242,7 +242,7 @@ struct QuickInputView: View {
         HStack(spacing: 4) {
             Text(key)
                 .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.75))
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
                 .background(Theme.Colors.glassSurfaceSecondary)
@@ -250,7 +250,7 @@ struct QuickInputView: View {
                 .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
             Text(label)
                 .font(.system(size: 9, weight: .regular))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
         }
     }
 

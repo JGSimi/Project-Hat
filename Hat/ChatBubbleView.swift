@@ -159,7 +159,7 @@ struct ChatBubble: View {
                             HStack(spacing: 6) {
                                 Text(timeString)
                                     .font(.system(size: 9, weight: .regular))
-                                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.8))
 
                                 Button {
                                     NSPasteboard.general.clearContents()

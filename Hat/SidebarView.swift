@@ -91,7 +91,7 @@ struct SidebarView: View {
                         VStack(spacing: 14) {
                             Image(systemName: "bubble.left.and.bubble.right")
                                 .font(.system(size: 28, weight: .light))
-                                .foregroundStyle(Theme.Colors.textMuted.opacity(0.3))
+                                .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
 
                             Text("Nenhuma conversa")
                                 .font(Theme.Typography.caption)
@@ -184,7 +184,7 @@ struct SidebarView: View {
 
                 Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                     .font(Theme.Typography.micro)
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                     .accessibilityLabel("Versao do app")
             }
             .padding(.horizontal, 14)
@@ -255,7 +255,7 @@ private struct ConversationRow: View {
                         }
                         Text(conversation.title)
                             .font(isActive ? Theme.Typography.captionBold : Theme.Typography.bodySmall)
-                            .foregroundStyle(isActive ? Theme.Colors.textPrimary : Theme.Colors.textPrimary.opacity(0.85))
+                            .foregroundStyle(isActive ? Theme.Colors.textPrimary : Theme.Colors.textPrimary)
                             .lineLimit(1)
                     }
 
@@ -299,7 +299,7 @@ private struct ConversationRow: View {
                 } else {
                     Text(relativeTime)
                         .font(.system(size: 9, weight: .regular))
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.8))
                 }
             }
             .padding(.horizontal, 12)

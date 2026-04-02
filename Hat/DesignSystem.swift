@@ -77,11 +77,11 @@ enum Theme {
         )
         static let textSecondary = Color.adaptive(
             light: Color(NSColor(red: 0.376, green: 0.376, blue: 0.400, alpha: 1.0)),    // #606066
-            dark:  Color(NSColor(red: 0.600, green: 0.600, blue: 0.624, alpha: 1.0))     // #99999F
+            dark:  Color(NSColor(red: 0.780, green: 0.780, blue: 0.800, alpha: 1.0))     // #C7C7CC
         )
         static let textMuted = Color.adaptive(
             light: Color(NSColor(red: 0.502, green: 0.502, blue: 0.522, alpha: 1.0)),    // #808085
-            dark:  Color(NSColor(red: 0.400, green: 0.400, blue: 0.420, alpha: 1.0))     // #66666B
+            dark:  Color(NSColor(red: 0.620, green: 0.620, blue: 0.645, alpha: 1.0))     // #9E9EA5
         )
 
         // Accent — adaptive for buttons (dark text on light, light text on dark)
@@ -756,7 +756,7 @@ struct MaeChip: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(isSelected ? .white : Theme.Colors.textPrimary.opacity(0.85))
+                .foregroundStyle(isSelected ? .white : Theme.Colors.textPrimary)
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
@@ -801,7 +801,7 @@ struct MaeEmptyState: View {
             VStack(spacing: 4) {
                 Text(title)
                     .font(Theme.Typography.heading)
-                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.85))
+                    .foregroundStyle(Theme.Colors.textPrimary)
 
                 if let subtitle {
                     Text(subtitle)

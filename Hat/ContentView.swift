@@ -713,7 +713,7 @@ struct ContentView: View {
                 VStack(spacing: 6) {
                     Text(greetingText)
                         .font(Theme.Typography.largeTitle)
-                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                        .foregroundStyle(Theme.Colors.textPrimary)
 
                     Text("Como posso te ajudar?")
                         .font(Theme.Typography.body)
@@ -738,10 +738,10 @@ struct ContentView: View {
         HStack(spacing: 4) {
             Text(shortcut)
                 .font(.system(size: 10, weight: .medium, design: .monospaced))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.6))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.8))
             Text(label)
                 .font(.system(size: 10, weight: .regular))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.75))
         }
     }
 
@@ -855,7 +855,7 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.system(size: 24))
-                                .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                                .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.5))
                                 .maeGlow(color: hasContent ? Theme.Colors.accentPrimary : .clear)
                                 .frame(width: 28, height: 28)
                                 .animation(Theme.Animation.quickSnap, value: hasContent)
@@ -888,7 +888,7 @@ struct ContentView: View {
             // Hint text
             Text("⌘+Enter para enviar · Arraste arquivos para anexar")
                 .font(.system(size: 10, weight: .regular))
-                .foregroundStyle(Theme.Colors.textMuted.opacity(0.4))
+                .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 16)

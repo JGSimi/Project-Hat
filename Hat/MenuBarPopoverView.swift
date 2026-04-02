@@ -47,19 +47,13 @@ struct MenuBarPopoverView: View {
         }
         .frame(width: CGFloat(popoverWidth), height: CGFloat(popoverHeight))
         .background {
-            Group {
-                if popoverStealthMode || popoverVibrancy {
-                    VisualEffectView(
-                        material: popoverStealthMode ? .underWindowBackground : .hudWindow,
-                        blendingMode: .behindWindow
-                    )
-                    .overlay(
-                        Theme.Colors.background
-                            .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : popoverOpacity)
-                    )
-                } else {
-                    Theme.Colors.background
-                }
+            ZStack {
+                VisualEffectView(
+                    material: popoverStealthMode ? .underWindowBackground : .hudWindow,
+                    blendingMode: .behindWindow
+                )
+                Theme.Colors.background
+                    .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 0.6)
             }
         }
         // Stealth mode: monochrome + near-invisible until hover
@@ -105,9 +99,9 @@ struct MenuBarPopoverView: View {
         // Find our panel — it's the MenuBarPopoverPanel instance
         guard let window = NSApp.windows.first(where: { $0 is MenuBarPopoverPanel }) else { return }
 
-        let needsTransparency = popoverVibrancy || popoverStealthMode
-        window.isOpaque = !needsTransparency
-        window.backgroundColor = needsTransparency ? .clear : NSColor(Theme.Colors.background)
+        // Glass is always on — window must always be transparent
+        window.isOpaque = false
+        window.backgroundColor = .clear
 
         if popoverStealthMode {
             window.alphaValue = isHovering ? CGFloat(stealthHoverOpacity) : 0.02
@@ -162,12 +156,10 @@ struct MenuBarPopoverView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background {
-            if popoverStealthMode {
-                Theme.Colors.surface.opacity(isHovering ? stealthHoverOpacity : 0.0)
-            } else if popoverVibrancy {
-                Theme.Colors.surface.opacity(max(popoverOpacity, 0.15))
-            } else {
-                Theme.Colors.surface
+            ZStack {
+                VisualEffectView(material: .headerView, blendingMode: .withinWindow)
+                Theme.Colors.glassSurfaceElevated
+                    .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
             }
         }
     }
@@ -385,12 +377,10 @@ struct MenuBarPopoverView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background {
-                if popoverStealthMode {
-                    Theme.Colors.surfaceSecondary.opacity(isHovering ? stealthHoverOpacity : 0.0)
-                } else if popoverVibrancy {
-                    Theme.Colors.surfaceSecondary.opacity(max(popoverOpacity, 0.15))
-                } else {
-                    Theme.Colors.surfaceSecondary
+                ZStack {
+                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    Theme.Colors.glassSurfaceSecondary
+                        .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))

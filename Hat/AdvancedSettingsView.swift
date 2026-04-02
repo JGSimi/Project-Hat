@@ -29,6 +29,8 @@ class AdvancedSettingsWindowManager: NSObject, NSWindowDelegate {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
         newWindow.delegate = self
         newWindow.center()
 
@@ -165,12 +167,17 @@ struct AdvancedSettingsView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 12)
             }
-            .background(Theme.Colors.background)
+            .background(
+                ZStack {
+                    VisualEffectView(material: .sidebar, blendingMode: .withinWindow)
+                    Theme.Colors.glassSurfaceSecondary
+                }
+            )
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 250)
 
         } detail: {
             ZStack {
-                Theme.Colors.backgroundSecondary.ignoresSafeArea()
+                MaePageBackground()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Theme.Metrics.spacingXLarge) {

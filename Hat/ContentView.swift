@@ -554,7 +554,7 @@ struct ContentView: View {
             // MARK: Floating Input
             floatingInputView
         }
-        .background(Theme.Colors.background)
+        .background(Color.clear)
         .onAppear {
             isInputFocused = true
         }
@@ -629,7 +629,9 @@ struct ContentView: View {
 
             MaeDivider()
         }
-        .background(Theme.Colors.surface)
+        .background {
+            GlassBackground(material: .headerView, blendingMode: .withinWindow, overlayColor: Theme.Colors.glassSurfaceElevated, cornerRadius: 0, borderColor: .clear, borderWidth: 0)
+        }
         .zIndex(1)
     }
 
@@ -665,7 +667,7 @@ struct ContentView: View {
                 .padding(.vertical, Theme.Metrics.spacingDefault)
             }
             .scrollContentBackground(.hidden)
-            .background(Theme.Colors.background)
+            .background(Color.clear)
             .overlay(alignment: .bottom) {
                 if !isAtBottom && !viewModel.messages.isEmpty {
                     MaeScrollToBottomButton {
@@ -782,7 +784,7 @@ struct ContentView: View {
                                                 .frame(width: 46)
                                         }
                                         .frame(width: 56, height: 56)
-                                        .background(Theme.Colors.surfaceSecondary)
+                                        .background(Theme.Colors.glassSurfaceSecondary)
                                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -873,7 +875,12 @@ struct ContentView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
             }
-            .background(Theme.Colors.surface)
+            .background {
+                ZStack {
+                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    Theme.Colors.glassSurfaceElevated
+                }
+            }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)

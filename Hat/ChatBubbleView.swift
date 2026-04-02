@@ -28,7 +28,8 @@ struct ChatBubble: View {
                 } else {
                     ZStack {
                         Circle()
-                            .fill(Theme.Colors.surfaceSecondary)
+                            .fill(.ultraThinMaterial)
+                            .overlay(Circle().fill(Theme.Colors.glassSurface))
                             .frame(width: 30, height: 30)
                         Image("hat-svgrepo-com")
                             .renderingMode(.template)
@@ -85,7 +86,7 @@ struct ChatBubble: View {
                             }
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(Theme.Colors.surfaceSecondary)
+                            .background(Theme.Colors.glassSurfaceSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
                             .overlay(
                                 RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
@@ -128,11 +129,16 @@ struct ChatBubble: View {
                                 .padding(.vertical, 10)
                                 .foregroundStyle(Theme.Colors.textPrimary)
                                 .textSelection(.enabled)
-                                .background { (Theme.Colors.accentPrimary.opacity(0.08) as Color) }
-                                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .background {
+                                    ZStack {
+                                        VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                                        Theme.Colors.accentPrimary.opacity(0.10)
+                                    }
+                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                }
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                        .stroke(Theme.Colors.accentPrimary.opacity(0.1), lineWidth: 0.5)
+                                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 0.5)
                                 )
                         } else if message.isStreaming {
                             // AI streaming: plain text to avoid markdown flickering
@@ -174,7 +180,7 @@ struct ChatBubble: View {
                                     .foregroundStyle(showCopied ? Theme.Colors.success : Theme.Colors.textMuted)
                                     .padding(.horizontal, 6)
                                     .padding(.vertical, 3)
-                                    .background(Theme.Colors.surfaceSecondary)
+                                    .background(Theme.Colors.glassSurfaceSecondary)
                                     .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
                                     .overlay(RoundedRectangle(cornerRadius: 5, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
                                 }

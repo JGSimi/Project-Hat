@@ -152,9 +152,14 @@ struct QuickInputView: View {
             inputBar
         }
         .fixedSize(horizontal: false, vertical: true)
-        .background(Theme.Colors.surface)
+        .background {
+            ZStack {
+                VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
+                Theme.Colors.glassSurfaceElevated
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: Theme.Metrics.radiusLarge, style: .continuous).stroke(Theme.Colors.glassBorder, lineWidth: 0.5))
         .maeElevatedShadow()
         .frame(width: 680)
         .onAppear {
@@ -240,7 +245,7 @@ struct QuickInputView: View {
                 .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
-                .background(Theme.Colors.surfaceTertiary)
+                .background(Theme.Colors.glassSurfaceSecondary)
                 .clipShape(Capsule())
                 .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
             Text(label)
@@ -265,9 +270,9 @@ struct QuickInputView: View {
                 QuickInputWindowManager.shared.captureAndReopen()
             }
         }
-        .background(Theme.Colors.surfaceSecondary)
+        .background(Theme.Colors.glassSurfaceSecondary)
         .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Theme.Colors.border, lineWidth: 0.5))
+        .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Theme.Colors.glassBorderSubtle, lineWidth: 0.5))
     }
 
     // MARK: - Attachments Preview
@@ -305,7 +310,7 @@ struct QuickInputView: View {
                                     .frame(width: 52)
                             }
                             .frame(width: 64, height: 64)
-                            .background(Theme.Colors.surfaceSecondary)
+                            .background(Theme.Colors.glassSurfaceSecondary)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8, style: .continuous)

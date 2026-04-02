@@ -113,6 +113,30 @@ enum Theme {
         static let success = Color(NSColor(red: 0.204, green: 0.780, blue: 0.549, alpha: 1.0)) // #34C78C
         static let error   = Color(NSColor(red: 0.937, green: 0.388, blue: 0.388, alpha: 1.0)) // #EF6363
         static let warning = Color(NSColor(red: 0.949, green: 0.694, blue: 0.251, alpha: 1.0)) // #F2B140
+
+        // Glass surfaces — semi-transparent overlays on blur
+        static let glassSurface = Color.adaptive(
+            light: Color.white.opacity(0.45),
+            dark:  Color.white.opacity(0.06)
+        )
+        static let glassSurfaceSecondary = Color.adaptive(
+            light: Color.white.opacity(0.30),
+            dark:  Color.white.opacity(0.04)
+        )
+        static let glassSurfaceElevated = Color.adaptive(
+            light: Color.white.opacity(0.55),
+            dark:  Color.white.opacity(0.08)
+        )
+
+        // Glass borders — light highlight strokes on frosted surfaces
+        static let glassBorder = Color.adaptive(
+            light: Color.white.opacity(0.60),
+            dark:  Color.white.opacity(0.12)
+        )
+        static let glassBorderSubtle = Color.adaptive(
+            light: Color.white.opacity(0.35),
+            dark:  Color.white.opacity(0.07)
+        )
     }
 
     // MARK: Typography — SF Pro (default system)
@@ -157,6 +181,7 @@ enum Theme {
         static let soft     = (color: Color.black.opacity(0.06), radius: CGFloat(4), x: CGFloat(0), y: CGFloat(2))
         static let medium   = (color: Color.black.opacity(0.10), radius: CGFloat(8), x: CGFloat(0), y: CGFloat(3))
         static let elevated = (color: Color.black.opacity(0.14), radius: CGFloat(16), x: CGFloat(0), y: CGFloat(6))
+        static let glass    = (color: Color.black.opacity(0.20), radius: CGFloat(20), x: CGFloat(0), y: CGFloat(8))
     }
 
     // MARK: Animation — refined, professional
@@ -358,52 +383,109 @@ struct MaeTypingDots: View {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MARK: - 1.7. Glass Primitives
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
+    }
+
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = material
+        nsView.blendingMode = blendingMode
+    }
+}
+
+struct GlassBackground: View {
+    var material: NSVisualEffectView.Material = .hudWindow
+    var blendingMode: NSVisualEffectView.BlendingMode = .withinWindow
+    var overlayColor: Color = Theme.Colors.glassSurface
+    var cornerRadius: CGFloat = Theme.Metrics.radiusMedium
+    var borderColor: Color = Theme.Colors.glassBorder
+    var borderWidth: CGFloat = 0.5
+
+    var body: some View {
+        ZStack {
+            VisualEffectView(material: material, blendingMode: blendingMode)
+            overlayColor
+        }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(borderColor, lineWidth: borderWidth)
+        )
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MARK: - 2. View Modifiers
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 extension View {
 
-    /// Clean surface background with subtle border
+    /// Frosted glass background with blur + semi-transparent overlay + border
     func maeGlassBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(Theme.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
-            )
+            .background {
+                GlassBackground(
+                    material: .popover,
+                    blendingMode: .withinWindow,
+                    overlayColor: Theme.Colors.glassSurface,
+                    cornerRadius: cornerRadius,
+                    borderColor: Theme.Colors.glassBorder
+                )
+            }
     }
 
-    /// Neutral surface with border
+    /// Glass surface for headers/toolbars — slightly more opaque
     func maeSurfaceBackground(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(Theme.Colors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
-            )
+            .background {
+                GlassBackground(
+                    material: .headerView,
+                    blendingMode: .withinWindow,
+                    overlayColor: Theme.Colors.glassSurfaceElevated,
+                    cornerRadius: cornerRadius,
+                    borderColor: Theme.Colors.glassBorderSubtle
+                )
+            }
     }
 
-    /// Standard card shape: surfaceSecondary + border
+    /// Glass card: lighter blur for content cards
     func maeCardStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(Theme.Colors.surfaceSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
-            )
+            .background {
+                GlassBackground(
+                    material: .popover,
+                    blendingMode: .withinWindow,
+                    overlayColor: Theme.Colors.glassSurfaceSecondary,
+                    cornerRadius: cornerRadius,
+                    borderColor: Theme.Colors.glassBorderSubtle
+                )
+            }
     }
 
-    /// Clean card: background + rounded corners, no border stroke
-    func maeCleanCard(color: Color = Theme.Colors.surfaceSecondary, cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
+    /// Clean glass card: no border stroke
+    func maeCleanCard(color: Color = Theme.Colors.glassSurfaceSecondary, cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
-            .background(color)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background {
+                ZStack {
+                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    color
+                }
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            }
     }
 
-    /// Text input style
+    /// Glass text input style
     func maeInputStyle(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -411,15 +493,18 @@ extension View {
             .foregroundStyle(Theme.Colors.textPrimary)
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
-            .background(Theme.Colors.inputBackground)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
-            )
+            .background {
+                GlassBackground(
+                    material: .popover,
+                    blendingMode: .withinWindow,
+                    overlayColor: Theme.Colors.glassSurfaceElevated,
+                    cornerRadius: cornerRadius,
+                    borderColor: Theme.Colors.glassBorderSubtle
+                )
+            }
     }
 
-    /// Opaque text input style
+    /// Opaque text input style — keeps solid background for text readability
     func maeInputStyleOpaque(cornerRadius: CGFloat = Theme.Metrics.radiusMedium) -> some View {
         self
             .textFieldStyle(.plain)
@@ -433,6 +518,27 @@ extension View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(Theme.Colors.border, lineWidth: 0.5)
             )
+    }
+
+    /// Accent-tinted glass — for user chat bubbles, highlighted badges
+    func maeAccentGlass(cornerRadius: CGFloat = 14) -> some View {
+        self
+            .background {
+                ZStack {
+                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    Theme.Colors.accentPrimary.opacity(0.10)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 0.5)
+                )
+            }
+    }
+
+    func maeGlassShadow() -> some View {
+        let s = Theme.Shadows.glass
+        return self.shadow(color: s.color, radius: s.radius, x: s.x, y: s.y)
     }
 
     func maeSoftShadow() -> some View {
@@ -470,17 +576,6 @@ extension View {
         self.modifier(MaePulseEffect(duration: duration))
     }
 
-    func maeGlowHover(color: Color = Theme.Colors.accentPrimary) -> some View {
-        self.modifier(MaeHoverEffect(scale: 1.01))
-    }
-
-    func maeAccentGlow() -> some View {
-        self
-    }
-
-    func maeSubtleGlow() -> some View {
-        self
-    }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -495,27 +590,20 @@ struct MaeDivider: View {
     }
 }
 
-struct MaeGradientDivider: View {
-    var tinted: Bool = false
-
-    var body: some View {
-        Rectangle()
-            .fill(Theme.Colors.border)
-            .frame(height: 0.5)
-    }
-}
-
 struct MaeCardStyle: GroupBoxStyle {
     func makeBody(configuration: Configuration) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             configuration.content
         }
-        .background(Theme.Colors.surfaceSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.Metrics.radiusMedium, style: .continuous)
-                .stroke(Theme.Colors.border, lineWidth: 0.5)
-        )
+        .background {
+            GlassBackground(
+                material: .popover,
+                blendingMode: .withinWindow,
+                overlayColor: Theme.Colors.glassSurfaceSecondary,
+                cornerRadius: Theme.Metrics.radiusMedium,
+                borderColor: Theme.Colors.glassBorderSubtle
+            )
+        }
     }
 }
 
@@ -605,7 +693,14 @@ struct MaePageBackground: View {
     var showGlow: Bool = false
 
     var body: some View {
-        Theme.Colors.background.ignoresSafeArea()
+        ZStack {
+            VisualEffectView(
+                material: .underWindowBackground,
+                blendingMode: .behindWindow
+            )
+            Theme.Colors.background.opacity(0.7)
+        }
+        .ignoresSafeArea()
     }
 }
 
@@ -641,9 +736,9 @@ struct MaeStatusBadge: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Theme.Colors.surfaceSecondary)
+        .background(.ultraThinMaterial)
         .clipShape(Capsule())
-        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+        .overlay(Capsule().stroke(Theme.Colors.glassBorderSubtle, lineWidth: 0.5))
     }
 }
 
@@ -660,11 +755,21 @@ struct MaeChip: View {
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(isSelected ? Theme.Colors.accentPrimary : Theme.Colors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .background {
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(Theme.Colors.accentPrimary)
+                    } else {
+                        ZStack {
+                            VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                            Theme.Colors.glassSurfaceSecondary
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    }
+                }
                 .overlay(
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .stroke(isSelected ? Color.clear : Theme.Colors.border, lineWidth: 0.5)
+                        .stroke(isSelected ? Color.clear : Theme.Colors.glassBorderSubtle, lineWidth: 0.5)
                 )
         }
         .buttonStyle(.plain)
@@ -680,7 +785,8 @@ struct MaeEmptyState: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Theme.Colors.accentPrimary.opacity(0.06))
+                    .fill(.ultraThinMaterial)
+                    .overlay(Circle().fill(Theme.Colors.accentPrimary.opacity(0.04)))
                     .frame(width: 56, height: 56)
                 Image(systemName: icon)
                     .font(.system(size: 22, weight: .light))
@@ -792,7 +898,7 @@ struct MaeTooltipButton: View {
                 .contentShape(Rectangle())
                 .background(
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(isHovered ? Theme.Colors.surfaceHover : Color.clear)
+                        .fill(isHovered ? Theme.Colors.glassSurface : Color.clear)
                 )
         }
         .buttonStyle(.plain)
@@ -845,7 +951,8 @@ struct MaeTag: View {
         .foregroundStyle(color)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .background { (color.opacity(0.08) as Color) }
+        .background(.ultraThinMaterial)
+        .background(color.opacity(0.06))
         .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
     }
 }
@@ -860,9 +967,9 @@ struct MaeScrollToBottomButton: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Theme.Colors.textSecondary)
                 .frame(width: 28, height: 28)
-                .background(Theme.Colors.surface)
+                .background(.thinMaterial)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Theme.Colors.border, lineWidth: 0.5))
+                .overlay(Circle().stroke(Theme.Colors.glassBorderSubtle, lineWidth: 0.5))
                 .scaleEffect(isHovered ? 1.03 : 1.0)
                 .maeSoftShadow()
         }
@@ -873,16 +980,7 @@ struct MaeScrollToBottomButton: View {
     }
 }
 
-// MARK: - Backward Compatibility (kept as no-ops or simplified)
-
 extension View {
-    func maeGradientBorder(cornerRadius: CGFloat = Theme.Metrics.radiusMedium, lineWidth: CGFloat = 1.0) -> some View {
-        self.overlay(
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .stroke(Theme.Colors.accentPrimary.opacity(0.2), lineWidth: lineWidth)
-        )
-    }
-
     /// Neon glow effect — colored shadow behind the view
     func maeGlow(color: Color = Theme.Colors.accentPrimary, radius: CGFloat = 6, opacity: Double = 0.4) -> some View {
         self.shadow(color: color.opacity(opacity), radius: radius)

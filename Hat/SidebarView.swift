@@ -49,11 +49,11 @@ struct SidebarView: View {
                     .foregroundStyle(Theme.Colors.textPrimary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
-                    .background(Theme.Colors.surfaceSecondary)
+                    .background(Theme.Colors.glassSurface)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous))
                     .overlay(
                         RoundedRectangle(cornerRadius: Theme.Metrics.radiusSmall, style: .continuous)
-                            .stroke(Theme.Colors.border, lineWidth: 0.5)
+                            .stroke(Theme.Colors.glassBorderSubtle, lineWidth: 0.5)
                     )
                 }
                 .buttonStyle(.plain)
@@ -75,7 +75,7 @@ struct SidebarView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Theme.Colors.inputBackground)
+                    .background(Theme.Colors.glassSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                 }
             }
@@ -174,7 +174,7 @@ struct SidebarView: View {
                         .frame(width: 24, height: 24)
                         .background(
                             RoundedRectangle(cornerRadius: 5, style: .continuous)
-                                .fill(settingsHovered ? Theme.Colors.surfaceHover : Color.clear)
+                                .fill(settingsHovered ? Theme.Colors.glassSurface : Color.clear)
                         )
                 }
                 .buttonStyle(.plain)
@@ -195,7 +195,14 @@ struct SidebarView: View {
             .padding(.vertical, 10)
         }
         .background {
-            (Theme.Colors.surface.opacity(0.5) as Color)
+            GlassBackground(
+                material: .sidebar,
+                blendingMode: .withinWindow,
+                overlayColor: Theme.Colors.glassSurfaceSecondary,
+                cornerRadius: 0,
+                borderColor: .clear,
+                borderWidth: 0
+            )
         }
         .onChange(of: searchText) { _, newValue in
             // Debounce search: wait 300ms before filtering
@@ -282,7 +289,7 @@ private struct ConversationRow: View {
                                 .frame(width: 20, height: 20)
                                 .background(
                                     RoundedRectangle(cornerRadius: 4, style: .continuous)
-                                        .fill(Theme.Colors.surfaceHover)
+                                        .fill(Theme.Colors.glassSurface)
                                 )
                         }
                         .buttonStyle(.plain)
@@ -312,7 +319,7 @@ private struct ConversationRow: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(isActive ? Theme.Colors.accentPrimary.opacity(0.12) : (isHovered ? Theme.Colors.surfaceHover : Color.clear))
+                    .fill(isActive ? Theme.Colors.accentPrimary.opacity(0.12) : (isHovered ? Theme.Colors.glassSurface : Color.clear))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6, style: .continuous)

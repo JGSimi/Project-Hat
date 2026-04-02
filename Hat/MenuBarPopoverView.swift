@@ -41,7 +41,6 @@ struct MenuBarPopoverView: View {
     var body: some View {
         VStack(spacing: 0) {
             popoverHeader
-            MaeDivider()
             popoverChatArea
             popoverInput
         }
@@ -53,9 +52,14 @@ struct MenuBarPopoverView: View {
                     blendingMode: .behindWindow
                 )
                 Theme.Colors.background
-                    .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 0.6)
+                    .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 0.35)
             }
         }
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Theme.Colors.glassBorder, lineWidth: 1.0)
+        )
         // Stealth mode: monochrome + near-invisible until hover
         .saturation(popoverStealthMode ? (isHovering ? 0.3 : 0.0) : 1.0)
         .opacity(popoverStealthMode ? stealthOpacity : 1.0)
@@ -155,13 +159,6 @@ struct MenuBarPopoverView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background {
-            ZStack {
-                VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                Theme.Colors.glassSurfaceElevated
-                    .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
-            }
-        }
     }
 
     // MARK: - Chat Area
@@ -250,8 +247,6 @@ struct MenuBarPopoverView: View {
 
     private var popoverInput: some View {
         VStack(spacing: 0) {
-            MaeDivider()
-
             // Attachment preview
             if !viewModel.pendingAttachments.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -375,21 +370,18 @@ struct MenuBarPopoverView: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 10)
+            .padding(.vertical, 8)
             .background {
-                ZStack {
-                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                    Theme.Colors.glassSurfaceSecondary
-                        .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
-                }
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Theme.Colors.glassSurfaceSecondary)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Theme.Colors.border, lineWidth: 0.5)
+                    .stroke(Theme.Colors.glassBorderSubtle, lineWidth: 0.5)
             )
             .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.bottom, 10)
+            .padding(.top, 4)
         }
     }
 }

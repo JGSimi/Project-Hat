@@ -139,6 +139,7 @@ struct AdvancedSettingsView: View {
                                         .foregroundStyle(selectedTab == tab ? Theme.Colors.accentPrimary : Theme.Colors.textSecondary)
                                         .symbolEffect(.bounce, value: selectedTab == tab)
                                 }
+                                .maeGlow(color: selectedTab == tab ? Theme.Colors.accentPrimary : .clear)
                                 Text(tab.rawValue)
                                     .font(Theme.Typography.bodySmall)
                                     .foregroundStyle(selectedTab == tab ? Theme.Colors.textPrimary : Theme.Colors.textSecondary)

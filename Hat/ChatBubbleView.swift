@@ -37,6 +37,7 @@ struct ChatBubble: View {
                             .frame(width: 16, height: 16)
                             .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.7))
                     }
+                    .maeGlow(color: Theme.Colors.accentPrimary, radius: 5, opacity: 0.3)
                     .padding(.top, 2)
                     .accessibilityHidden(true)
                 }

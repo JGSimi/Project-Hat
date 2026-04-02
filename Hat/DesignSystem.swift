@@ -117,25 +117,25 @@ enum Theme {
         // Glass surfaces — semi-transparent overlays on blur
         static let glassSurface = Color.adaptive(
             light: Color.white.opacity(0.45),
-            dark:  Color.white.opacity(0.06)
+            dark:  Color.white.opacity(0.15)
         )
         static let glassSurfaceSecondary = Color.adaptive(
             light: Color.white.opacity(0.30),
-            dark:  Color.white.opacity(0.04)
+            dark:  Color.white.opacity(0.10)
         )
         static let glassSurfaceElevated = Color.adaptive(
             light: Color.white.opacity(0.55),
-            dark:  Color.white.opacity(0.08)
+            dark:  Color.white.opacity(0.18)
         )
 
         // Glass borders — light highlight strokes on frosted surfaces
         static let glassBorder = Color.adaptive(
             light: Color.white.opacity(0.60),
-            dark:  Color.white.opacity(0.12)
+            dark:  Color.white.opacity(0.25)
         )
         static let glassBorderSubtle = Color.adaptive(
             light: Color.white.opacity(0.35),
-            dark:  Color.white.opacity(0.07)
+            dark:  Color.white.opacity(0.15)
         )
     }
 
@@ -436,11 +436,12 @@ extension View {
         self
             .background {
                 GlassBackground(
-                    material: .popover,
+                    material: .hudWindow,
                     blendingMode: .withinWindow,
                     overlayColor: Theme.Colors.glassSurface,
                     cornerRadius: cornerRadius,
-                    borderColor: Theme.Colors.glassBorder
+                    borderColor: Theme.Colors.glassBorder,
+                    borderWidth: 1.0
                 )
             }
     }
@@ -450,11 +451,12 @@ extension View {
         self
             .background {
                 GlassBackground(
-                    material: .headerView,
+                    material: .hudWindow,
                     blendingMode: .withinWindow,
                     overlayColor: Theme.Colors.glassSurfaceElevated,
                     cornerRadius: cornerRadius,
-                    borderColor: Theme.Colors.glassBorderSubtle
+                    borderColor: Theme.Colors.glassBorderSubtle,
+                    borderWidth: 0.5
                 )
             }
     }
@@ -464,11 +466,12 @@ extension View {
         self
             .background {
                 GlassBackground(
-                    material: .popover,
+                    material: .hudWindow,
                     blendingMode: .withinWindow,
                     overlayColor: Theme.Colors.glassSurfaceSecondary,
                     cornerRadius: cornerRadius,
-                    borderColor: Theme.Colors.glassBorderSubtle
+                    borderColor: Theme.Colors.glassBorderSubtle,
+                    borderWidth: 1.0
                 )
             }
     }
@@ -478,7 +481,7 @@ extension View {
         self
             .background {
                 ZStack {
-                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                     color
                 }
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -495,11 +498,12 @@ extension View {
             .padding(.vertical, 9)
             .background {
                 GlassBackground(
-                    material: .popover,
+                    material: .hudWindow,
                     blendingMode: .withinWindow,
                     overlayColor: Theme.Colors.glassSurfaceElevated,
                     cornerRadius: cornerRadius,
-                    borderColor: Theme.Colors.glassBorderSubtle
+                    borderColor: Theme.Colors.glassBorderSubtle,
+                    borderWidth: 0.5
                 )
             }
     }
@@ -525,13 +529,13 @@ extension View {
         self
             .background {
                 ZStack {
-                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
-                    Theme.Colors.accentPrimary.opacity(0.10)
+                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
+                    Theme.Colors.accentPrimary.opacity(0.15)
                 }
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(Theme.Colors.accentPrimary.opacity(0.15), lineWidth: 0.5)
+                        .stroke(Theme.Colors.accentPrimary.opacity(0.25), lineWidth: 1.0)
                 )
             }
     }
@@ -597,11 +601,12 @@ struct MaeCardStyle: GroupBoxStyle {
         }
         .background {
             GlassBackground(
-                material: .popover,
+                material: .hudWindow,
                 blendingMode: .withinWindow,
                 overlayColor: Theme.Colors.glassSurfaceSecondary,
                 cornerRadius: Theme.Metrics.radiusMedium,
-                borderColor: Theme.Colors.glassBorderSubtle
+                borderColor: Theme.Colors.glassBorderSubtle,
+                borderWidth: 1.0
             )
         }
     }
@@ -695,10 +700,10 @@ struct MaePageBackground: View {
     var body: some View {
         ZStack {
             VisualEffectView(
-                material: .underWindowBackground,
+                material: .hudWindow,
                 blendingMode: .behindWindow
             )
-            Theme.Colors.background.opacity(0.7)
+            Theme.Colors.background.opacity(0.35)
         }
         .ignoresSafeArea()
     }
@@ -761,7 +766,7 @@ struct MaeChip: View {
                             .fill(Theme.Colors.accentPrimary)
                     } else {
                         ZStack {
-                            VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                            VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                             Theme.Colors.glassSurfaceSecondary
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))

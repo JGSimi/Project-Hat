@@ -157,7 +157,7 @@ struct MenuBarPopoverView: View {
         .padding(.vertical, 10)
         .background {
             ZStack {
-                VisualEffectView(material: .headerView, blendingMode: .withinWindow)
+                VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                 Theme.Colors.glassSurfaceElevated
                     .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
             }
@@ -378,7 +378,7 @@ struct MenuBarPopoverView: View {
             .padding(.vertical, 10)
             .background {
                 ZStack {
-                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                     Theme.Colors.glassSurfaceSecondary
                         .opacity(popoverStealthMode ? (isHovering ? stealthHoverOpacity : 0.0) : 1.0)
                 }

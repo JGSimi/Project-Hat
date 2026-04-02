@@ -169,7 +169,7 @@ struct AdvancedSettingsView: View {
             }
             .background(
                 ZStack {
-                    VisualEffectView(material: .sidebar, blendingMode: .withinWindow)
+                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                     Theme.Colors.glassSurfaceSecondary
                 }
             )

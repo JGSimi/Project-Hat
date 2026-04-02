@@ -630,7 +630,7 @@ struct ContentView: View {
             MaeDivider()
         }
         .background {
-            GlassBackground(material: .headerView, blendingMode: .withinWindow, overlayColor: Theme.Colors.glassSurfaceElevated, cornerRadius: 0, borderColor: .clear, borderWidth: 0)
+            GlassBackground(material: .hudWindow, blendingMode: .withinWindow, overlayColor: Theme.Colors.glassSurfaceElevated, cornerRadius: 0, borderColor: .clear, borderWidth: 0)
         }
         .zIndex(1)
     }
@@ -877,7 +877,7 @@ struct ContentView: View {
             }
             .background {
                 ZStack {
-                    VisualEffectView(material: .popover, blendingMode: .withinWindow)
+                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
                     Theme.Colors.glassSurfaceElevated
                 }
             }

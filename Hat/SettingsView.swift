@@ -34,7 +34,7 @@ struct SettingsView: View {
                     .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
                 Text("Configuracoes")
                     .font(Theme.Typography.heading)
-                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                    .foregroundStyle(Theme.Colors.textPrimary)
                 Spacer()
             }
             .padding(.horizontal, Theme.Metrics.spacingLarge)
@@ -89,7 +89,7 @@ struct SettingsView: View {
                                                 .foregroundStyle(
                                                     selectedProvider == provider
                                                         ? .white
-                                                        : Theme.Colors.textPrimary.opacity(0.85)
+                                                        : Theme.Colors.textPrimary
                                                 )
                                                 .padding(.horizontal, 10)
                                                 .padding(.vertical, 6)
@@ -143,7 +143,7 @@ struct SettingsView: View {
                                                         .foregroundStyle(
                                                             apiModelName == model
                                                                 ? .white
-                                                                : Theme.Colors.textPrimary.opacity(0.85)
+                                                                : Theme.Colors.textPrimary
                                                         )
                                                         .lineLimit(1)
                                                         .padding(.horizontal, 8)
@@ -242,7 +242,7 @@ struct SettingsView: View {
                                 .foregroundStyle(Theme.Colors.textSecondary)
                             Text("Atualizacoes")
                                 .font(Theme.Typography.bodySmall)
-                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                                .foregroundStyle(Theme.Colors.textPrimary)
                             Spacer(minLength: 0)
                         }
                         .padding(.horizontal, 14)
@@ -266,7 +266,7 @@ struct SettingsView: View {
                                 .foregroundStyle(Theme.Colors.textSecondary)
                             Text("Avancado")
                                 .font(Theme.Typography.bodySmall)
-                                .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                                .foregroundStyle(Theme.Colors.textPrimary)
                             Spacer(minLength: 0)
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 10, weight: .medium))

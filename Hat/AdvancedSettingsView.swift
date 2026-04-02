@@ -115,7 +115,7 @@ struct AdvancedSettingsView: View {
                         .foregroundStyle(Theme.Colors.accentPrimary.opacity(0.6))
                     Text("Configuracoes")
                         .font(Theme.Typography.heading)
-                        .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                        .foregroundStyle(Theme.Colors.textPrimary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
@@ -159,10 +159,10 @@ struct AdvancedSettingsView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 10, height: 10)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                     Text("Hat v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
                         .font(Theme.Typography.micro)
-                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.35))
+                        .foregroundStyle(Theme.Colors.textMuted.opacity(0.7))
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 12)

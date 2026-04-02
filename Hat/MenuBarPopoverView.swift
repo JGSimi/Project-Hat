@@ -219,7 +219,7 @@ struct MenuBarPopoverView: View {
             VStack(spacing: 4) {
                 Text(greetingText)
                     .font(Theme.Typography.title)
-                    .foregroundStyle(Theme.Colors.textPrimary.opacity(0.9))
+                    .foregroundStyle(Theme.Colors.textPrimary)
 
                 Text("Como posso ajudar?")
                     .font(Theme.Typography.bodySmall)
@@ -231,10 +231,10 @@ struct MenuBarPopoverView: View {
             HStack(spacing: 12) {
                 Text("⌘⇧X Clipboard")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.75))
                 Text("⌘⇧Z Tela")
                     .font(.system(size: 9, weight: .medium, design: .monospaced))
-                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.5))
+                    .foregroundStyle(Theme.Colors.textMuted.opacity(0.75))
             }
 
             Spacer()
@@ -356,7 +356,7 @@ struct MenuBarPopoverView: View {
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 22))
-                            .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.25))
+                            .foregroundStyle(hasContent ? Theme.Colors.accentPrimary : Theme.Colors.textMuted.opacity(0.5))
                             .maeGlow(color: hasContent ? Theme.Colors.accentPrimary : .clear)
                             .scaleEffect(sendHovered && hasContent ? 1.1 : 1.0)
                             .animation(Theme.Animation.quickSnap, value: sendHovered)

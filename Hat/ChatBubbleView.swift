@@ -131,8 +131,8 @@ struct ChatBubble: View {
                                 .textSelection(.enabled)
                                 .background {
                                     ZStack {
-                                        VisualEffectView(material: .popover, blendingMode: .withinWindow)
-                                        Theme.Colors.accentPrimary.opacity(0.10)
+                                        VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
+                                        Theme.Colors.accentPrimary.opacity(0.18)
                                     }
                                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 }

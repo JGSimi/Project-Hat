@@ -25,7 +25,7 @@ struct MainView: View {
 
                 // Subtle divider
                 Rectangle()
-                    .fill(Theme.Colors.border)
+                    .fill(Theme.Colors.glassBorder)
                     .frame(width: 0.5)
             }
 
@@ -36,7 +36,7 @@ struct MainView: View {
             )
             .frame(minWidth: 380, maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Theme.Colors.background)
+        .background { MaePageBackground() }
         .animation(Theme.Animation.smooth, value: showSidebar)
     }
 }

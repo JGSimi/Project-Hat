@@ -33,6 +33,8 @@ class AnalysisWindowManager: NSObject, NSWindowDelegate {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
         newWindow.delegate = self
         newWindow.center()
 
@@ -230,7 +232,7 @@ struct AnalysisView: View {
                                     .padding(.horizontal, Theme.Metrics.spacingXLarge)
                                     .padding(.vertical, Theme.Metrics.spacingLarge)
                             }
-                            .background(Theme.Colors.backgroundSecondary)
+                            .background(Color.clear)
                             .transition(.maeFadeScale)
                         }
 
@@ -274,7 +276,12 @@ struct AnalysisView: View {
                         }
                     }
                     .frame(width: min(max(380, geo.size.width * 0.45), geo.size.width * 0.55))
-                    .background(Theme.Colors.backgroundSecondary)
+                    .background {
+                        ZStack {
+                            VisualEffectView(material: .sidebar, blendingMode: .withinWindow)
+                            Theme.Colors.glassSurfaceSecondary
+                        }
+                    }
 
                     Divider()
 
@@ -302,7 +309,7 @@ struct AnalysisView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Theme.Colors.background)
+                    .background(Color.clear)
                 }
 
                 // Confirmation Toast Overlay
@@ -319,9 +326,15 @@ struct AnalysisView: View {
                         }
                         .padding(.horizontal, Theme.Metrics.spacingXLarge)
                         .padding(.vertical, 12)
-                        .background(Theme.Colors.surface)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(Theme.Colors.border, lineWidth: 0.5))
+                        .background {
+                            GlassBackground(
+                                material: .popover,
+                                blendingMode: .withinWindow,
+                                overlayColor: Theme.Colors.glassSurfaceElevated,
+                                cornerRadius: 20,
+                                borderColor: Theme.Colors.glassBorderSubtle
+                            )
+                        }
                         .maeSoftShadow()
                         .padding(.bottom, 40)
                     }
@@ -360,20 +373,3 @@ struct AnalysisView: View {
     }
 }
 
-struct VisualEffectView: NSViewRepresentable {
-    let material: NSVisualEffectView.Material
-    let blendingMode: NSVisualEffectView.BlendingMode
-
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = material
-        view.blendingMode = blendingMode
-        view.state = .active
-        return view
-    }
-
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        nsView.material = material
-        nsView.blendingMode = blendingMode
-    }
-}

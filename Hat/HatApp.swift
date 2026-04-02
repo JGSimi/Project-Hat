@@ -213,6 +213,8 @@ class MainWindowManager: NSObject, NSWindowDelegate {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
         newWindow.minSize = NSSize(width: 600, height: 500)
         newWindow.title = "Hat"
         newWindow.delegate = self
@@ -321,6 +323,8 @@ class PermissionsWindowManager: NSObject, NSWindowDelegate {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
         newWindow.delegate = self
         newWindow.center()
 
@@ -370,6 +374,8 @@ class WelcomeWindowManager: NSObject, NSWindowDelegate {
         newWindow.titleVisibility = .hidden
         newWindow.isMovableByWindowBackground = true
         newWindow.isReleasedWhenClosed = false
+        newWindow.isOpaque = false
+        newWindow.backgroundColor = .clear
         newWindow.delegate = self
         newWindow.center()
 

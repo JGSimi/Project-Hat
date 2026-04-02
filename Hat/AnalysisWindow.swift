@@ -276,12 +276,7 @@ struct AnalysisView: View {
                         }
                     }
                     .frame(width: min(max(380, geo.size.width * 0.45), geo.size.width * 0.55))
-                    .background {
-                        ZStack {
-                            VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                            Theme.Colors.glassSurfaceSecondary
-                        }
-                    }
+                    .background(Theme.Colors.glassSurfaceSecondary)
 
                     Divider()
 

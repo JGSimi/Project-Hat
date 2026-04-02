@@ -627,10 +627,6 @@ struct ContentView: View {
             .padding(.top, showSidebar ? 10 : 38)
             .padding(.bottom, 10)
 
-            MaeDivider()
-        }
-        .background {
-            GlassBackground(material: .hudWindow, blendingMode: .withinWindow, overlayColor: Theme.Colors.glassSurfaceElevated, cornerRadius: 0, borderColor: .clear, borderWidth: 0)
         }
         .zIndex(1)
     }
@@ -876,17 +872,14 @@ struct ContentView: View {
                 .padding(.vertical, 10)
             }
             .background {
-                ZStack {
-                    VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                    Theme.Colors.glassSurfaceElevated
-                }
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Theme.Colors.glassSurfaceSecondary)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(isInputFocusedForBorder ? Theme.Colors.borderFocused : Theme.Colors.border, lineWidth: isInputFocusedForBorder ? 1 : 0.5)
+                    .stroke(isInputFocusedForBorder ? Theme.Colors.borderFocused : Theme.Colors.glassBorderSubtle, lineWidth: isInputFocusedForBorder ? 1 : 0.5)
             )
-            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 3)
             .frame(maxWidth: 680)
             .onChange(of: isInputFocused) { _, focused in
                 withAnimation(Theme.Animation.quickSnap) { isInputFocusedForBorder = focused }

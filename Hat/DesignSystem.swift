@@ -661,7 +661,7 @@ struct MaeActionRow: View {
             Spacer()
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(subtitle != nil ? "\(title), \(subtitle!)" : title)
+        .accessibilityLabel(subtitle.map { "\(title), \($0)" } ?? title)
     }
 }
 
